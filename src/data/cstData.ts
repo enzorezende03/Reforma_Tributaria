@@ -1,0 +1,328 @@
+export interface CSTRecord {
+  cstCode: string;
+  cstDescription: string;
+  cClassTrib: string;
+  cClassTribName: string;
+  cClassTribDescription: string;
+  lcArticle: string;
+  aliquotaType: string;
+  pRedIBS: number;
+  pRedCBS: number;
+  dIniVig: string;
+  link: string;
+}
+
+export const cstData: CSTRecord[] = [
+  {
+    cstCode: "000",
+    cstDescription: "Tributação integral",
+    cClassTrib: "000001",
+    cClassTribName: "Situações tributadas integralmente pelo IBS e CBS",
+    cClassTribDescription: "Situações tributadas integralmente pelo IBS e CBS.",
+    lcArticle: "Art. 4",
+    aliquotaType: "Padrão",
+    pRedIBS: 0,
+    pRedCBS: 0,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art4"
+  },
+  {
+    cstCode: "000",
+    cstDescription: "Tributação integral",
+    cClassTrib: "000002",
+    cClassTribName: "Exploração de via",
+    cClassTribDescription: "Exploração de via, observado o art. 11 da Lei Complementar nº 214, de 2025.",
+    lcArticle: "Art. 11, VIII",
+    aliquotaType: "Padrão",
+    pRedIBS: 0,
+    pRedCBS: 0,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art11"
+  },
+  {
+    cstCode: "000",
+    cstDescription: "Tributação integral",
+    cClassTrib: "000003",
+    cClassTribName: "Regime automotivo - projetos incentivados (art. 311)",
+    cClassTribDescription: "Regime automotivo - projetos incentivados, observado o art. 311 da Lei Complementar nº 214, de 2025.",
+    lcArticle: "Art. 311",
+    aliquotaType: "Padrão",
+    pRedIBS: 0,
+    pRedCBS: 0,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art311"
+  },
+  {
+    cstCode: "010",
+    cstDescription: "Tributação com alíquotas uniformes",
+    cClassTrib: "010001",
+    cClassTribName: "Operações do FGTS não realizadas pela Caixa Econômica Federal",
+    cClassTribDescription: "Operações do FGTS não realizadas pela Caixa Econômica Federal, observado o art. 212 da Lei Complementar nº 214, de 2025.",
+    lcArticle: "Art. 212",
+    aliquotaType: "Uniforme setorial",
+    pRedIBS: 0,
+    pRedCBS: 0,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art212"
+  },
+  {
+    cstCode: "010",
+    cstDescription: "Tributação com alíquotas uniformes",
+    cClassTrib: "010002",
+    cClassTribName: "Operações do serviço financeiro",
+    cClassTribDescription: "Operações do serviço financeiro",
+    lcArticle: "Art. 233",
+    aliquotaType: "Uniforme setorial",
+    pRedIBS: 0,
+    pRedCBS: 0,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art233"
+  },
+  {
+    cstCode: "011",
+    cstDescription: "Tributação com alíquotas uniformes reduzidas",
+    cClassTrib: "011001",
+    cClassTribName: "Planos de assistência funerária",
+    cClassTribDescription: "Planos de assistência funerária, observado o art. 236 da Lei Complementar nº 214, de 2025.",
+    lcArticle: "Art. 236",
+    aliquotaType: "Uniforme nacional (referência)",
+    pRedIBS: 60,
+    pRedCBS: 60,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art236"
+  },
+  {
+    cstCode: "011",
+    cstDescription: "Tributação com alíquotas uniformes reduzidas",
+    cClassTrib: "011002",
+    cClassTribName: "Planos de assistência à saúde",
+    cClassTribDescription: "Planos de assistência à saúde, observado o art. 237 da Lei Complementar nº 214, de 2025.",
+    lcArticle: "Art. 237",
+    aliquotaType: "Uniforme nacional (referência)",
+    pRedIBS: 60,
+    pRedCBS: 60,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art237"
+  },
+  {
+    cstCode: "200",
+    cstDescription: "Alíquota reduzida",
+    cClassTrib: "200001",
+    cClassTribName: "Aquisições em zonas de processamento de exportação",
+    cClassTribDescription: "Aquisições de máquinas, aparelhos, instrumentos, equipamentos, matérias-primas realizadas entre empresas autorizadas a operar em zonas de processamento de exportação.",
+    lcArticle: "Art. 103",
+    aliquotaType: "Padrão",
+    pRedIBS: 100,
+    pRedCBS: 100,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art103"
+  },
+  {
+    cstCode: "200",
+    cstDescription: "Alíquota reduzida",
+    cClassTrib: "200002",
+    cClassTribName: "Fornecimento para produtor rural não contribuinte",
+    cClassTribDescription: "Fornecimento ou importação de tratores, máquinas e implementos agrícolas, destinados a produtor rural não contribuinte.",
+    lcArticle: "Art. 110",
+    aliquotaType: "Padrão",
+    pRedIBS: 100,
+    pRedCBS: 100,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art110"
+  },
+  {
+    cstCode: "200",
+    cstDescription: "Alíquota reduzida",
+    cClassTrib: "200003",
+    cClassTribName: "Cesta Básica Nacional de Alimentos (Anexo I)",
+    cClassTribDescription: "Vendas de produtos destinados à alimentação humana relacionados no Anexo I da Lei Complementar nº 214, que compõem a Cesta Básica Nacional de Alimentos.",
+    lcArticle: "Art. 125",
+    aliquotaType: "Padrão",
+    pRedIBS: 100,
+    pRedCBS: 100,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art125"
+  },
+  {
+    cstCode: "200",
+    cstDescription: "Alíquota reduzida",
+    cClassTrib: "200004",
+    cClassTribName: "Dispositivos médicos (Anexo XII)",
+    cClassTribDescription: "Venda de dispositivos médicos com a especificação das respectivas classificações da NCM/SH previstas no Anexo XII.",
+    lcArticle: "Art. 144, I",
+    aliquotaType: "Padrão",
+    pRedIBS: 100,
+    pRedCBS: 100,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art144"
+  },
+  {
+    cstCode: "200",
+    cstDescription: "Alíquota reduzida",
+    cClassTrib: "200028",
+    cClassTribName: "Serviços de educação (Anexo II)",
+    cClassTribDescription: "Fornecimento dos serviços de educação relacionados no Anexo II da Lei Complementar nº 214.",
+    lcArticle: "Art. 129",
+    aliquotaType: "Padrão",
+    pRedIBS: 60,
+    pRedCBS: 60,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art129"
+  },
+  {
+    cstCode: "200",
+    cstDescription: "Alíquota reduzida",
+    cClassTrib: "200029",
+    cClassTribName: "Serviços de saúde humana (Anexo III)",
+    cClassTribDescription: "Fornecimento dos serviços de saúde humana relacionados no Anexo III da Lei Complementar nº 214.",
+    lcArticle: "Art. 130",
+    aliquotaType: "Padrão",
+    pRedIBS: 60,
+    pRedCBS: 60,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art130"
+  },
+  {
+    cstCode: "200",
+    cstDescription: "Alíquota reduzida",
+    cClassTrib: "200046",
+    cClassTribName: "Operações com bens imóveis",
+    cClassTribDescription: "Operações com bens imóveis, observado o art. 261 da Lei Complementar nº 214.",
+    lcArticle: "Art. 261",
+    aliquotaType: "Padrão",
+    pRedIBS: 50,
+    pRedCBS: 50,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art261"
+  },
+  {
+    cstCode: "200",
+    cstDescription: "Alíquota reduzida",
+    cClassTrib: "200047",
+    cClassTribName: "Bares e Restaurantes",
+    cClassTribDescription: "Bares e Restaurantes, observado o art. 275 da Lei Complementar nº 214.",
+    lcArticle: "Art. 275",
+    aliquotaType: "Padrão",
+    pRedIBS: 40,
+    pRedCBS: 40,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art275"
+  },
+  {
+    cstCode: "200",
+    cstDescription: "Alíquota reduzida",
+    cClassTrib: "200048",
+    cClassTribName: "Hotelaria, Parques de Diversão e Parques Temáticos",
+    cClassTribDescription: "Hotelaria, Parques de Diversão e Parques Temáticos, observado o art. 281.",
+    lcArticle: "Art. 281",
+    aliquotaType: "Padrão",
+    pRedIBS: 40,
+    pRedCBS: 40,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art281"
+  },
+  {
+    cstCode: "200",
+    cstDescription: "Alíquota reduzida",
+    cClassTrib: "200052",
+    cClassTribName: "Prestação de serviços de profissões intelectuais",
+    cClassTribDescription: "Prestação de serviços das profissões intelectuais de natureza científica, literária ou artística, submetidas à fiscalização por conselho profissional.",
+    lcArticle: "Art. 127",
+    aliquotaType: "Padrão",
+    pRedIBS: 30,
+    pRedCBS: 30,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art127"
+  },
+  {
+    cstCode: "400",
+    cstDescription: "Isenção",
+    cClassTrib: "400001",
+    cClassTribName: "Operações isentas",
+    cClassTribDescription: "Operações com isenção do IBS e CBS conforme legislação específica.",
+    lcArticle: "Art. 400",
+    aliquotaType: "Isenção",
+    pRedIBS: 100,
+    pRedCBS: 100,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm"
+  },
+  {
+    cstCode: "410",
+    cstDescription: "Imunidade e não incidência",
+    cClassTrib: "410001",
+    cClassTribName: "Imunidades constitucionais",
+    cClassTribDescription: "Operações abrangidas por imunidades constitucionais e casos de não incidência.",
+    lcArticle: "Art. 410",
+    aliquotaType: "Imunidade",
+    pRedIBS: 100,
+    pRedCBS: 100,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm"
+  },
+  {
+    cstCode: "510",
+    cstDescription: "Diferimento",
+    cClassTrib: "510001",
+    cClassTribName: "Diferimento de pagamento",
+    cClassTribDescription: "Operações com diferimento do pagamento do IBS e CBS para etapa posterior.",
+    lcArticle: "Art. 510",
+    aliquotaType: "Diferimento",
+    pRedIBS: 0,
+    pRedCBS: 0,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm"
+  },
+  {
+    cstCode: "550",
+    cstDescription: "Suspensão",
+    cClassTrib: "550001",
+    cClassTribName: "Suspensão do tributo",
+    cClassTribDescription: "Operações com suspensão da exigibilidade do IBS e CBS.",
+    lcArticle: "Art. 550",
+    aliquotaType: "Suspensão",
+    pRedIBS: 0,
+    pRedCBS: 0,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm"
+  },
+  {
+    cstCode: "620",
+    cstDescription: "Tributação monofásica",
+    cClassTrib: "620001",
+    cClassTribName: "Tributação monofásica",
+    cClassTribDescription: "Operações sujeitas à tributação monofásica do IBS e CBS.",
+    lcArticle: "Art. 620",
+    aliquotaType: "Monofásica",
+    pRedIBS: 0,
+    pRedCBS: 0,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm"
+  },
+  {
+    cstCode: "800",
+    cstDescription: "Transferência de crédito",
+    cClassTrib: "800001",
+    cClassTribName: "Transferência de créditos acumulados",
+    cClassTribDescription: "Operações de transferência de créditos acumulados de IBS e CBS.",
+    lcArticle: "Art. 800",
+    aliquotaType: "Transferência",
+    pRedIBS: 0,
+    pRedCBS: 0,
+    dIniVig: "01/01/2026",
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm"
+  }
+];
+
+export const cstCodes = [
+  { code: "000", description: "Tributação integral" },
+  { code: "010", description: "Tributação com alíquotas uniformes" },
+  { code: "011", description: "Tributação com alíquotas uniformes reduzidas" },
+  { code: "200", description: "Alíquota reduzida" },
+  { code: "400", description: "Isenção" },
+  { code: "410", description: "Imunidade e não incidência" },
+  { code: "510", description: "Diferimento" },
+  { code: "550", description: "Suspensão" },
+  { code: "620", description: "Tributação monofásica" },
+  { code: "800", description: "Transferência de crédito" },
+];
