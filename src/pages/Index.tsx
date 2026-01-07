@@ -6,12 +6,14 @@ import { FilterChips } from "@/components/FilterChips";
 import { StatsCards } from "@/components/StatsCards";
 import { CSTCard } from "@/components/CSTCard";
 import { AnexoModal } from "@/components/AnexoModal";
+import { NewsTab } from "@/components/NewsTab";
 import { cstData } from "@/data/cstData";
 import { getAnexoById, type Anexo } from "@/data/anexosData";
 import { fuzzyMatch } from "@/lib/fuzzySearch";
-import { SearchX, AlertCircle, FileSpreadsheet } from "lucide-react";
+import { SearchX, AlertCircle, FileSpreadsheet, Search, Newspaper } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Registro padrão CST 000 / cClassTrib 000001 para quando não encontrar resultados
 const defaultRecord = cstData.find(r => r.cstCode === "000" && r.cClassTrib === "000001");
@@ -23,6 +25,7 @@ const Index = () => {
   const [selectedAnexo, setSelectedAnexo] = useState<Anexo | null>(null);
   const [isAnexoModalOpen, setIsAnexoModalOpen] = useState(false);
   const [useSimilarSearch, setUseSimilarSearch] = useState(true);
+  const [activeTab, setActiveTab] = useState("consulta");
 
   const { filteredRecords, showingDefault } = useMemo(() => {
     const results = cstData.filter((record) => {
@@ -70,78 +73,102 @@ const Index = () => {
       <Header />
       
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
-        {/* Search Section */}
-        <section className="-mt-20 relative z-10">
-          <SearchBar 
-            value={searchQuery} 
-            onChange={setSearchQuery}
-            useSimilar={useSimilarSearch}
-            onToggleSimilar={() => setUseSimilarSearch(prev => !prev)}
-          />
-        </section>
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="-mt-16 relative z-10">
+          <div className="flex justify-center mb-6">
+            <TabsList className="bg-white shadow-lg">
+              <TabsTrigger value="consulta" className="gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <Search className="h-4 w-4" />
+                Consulta CST
+              </TabsTrigger>
+              <TabsTrigger value="noticias" className="gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <Newspaper className="h-4 w-4" />
+                Notícias
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-        {/* Stats */}
-        <section className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <StatsCards 
-            totalRecords={cstData.length} 
-            filteredRecords={filteredRecords.length} 
-          />
-          <Button 
-            onClick={() => navigate('/importar')}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            Importar Planilha
-          </Button>
-        </section>
+          {/* Aba Consulta */}
+          <TabsContent value="consulta" className="space-y-8 mt-0">
+            {/* Search Section */}
+            <section>
+              <SearchBar 
+                value={searchQuery} 
+                onChange={setSearchQuery}
+                useSimilar={useSimilarSearch}
+                onToggleSimilar={() => setUseSimilarSearch(prev => !prev)}
+              />
+            </section>
 
-        {/* Filters */}
-        <section className="py-4">
-          <h2 className="text-sm font-medium text-muted-foreground text-center mb-4">
-            Filtrar por CST:
-          </h2>
-          <FilterChips 
-            selectedFilter={selectedFilter} 
-            onFilterChange={setSelectedFilter} 
-          />
-        </section>
+            {/* Stats */}
+            <section className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <StatsCards 
+                totalRecords={cstData.length} 
+                filteredRecords={filteredRecords.length} 
+              />
+              <Button 
+                onClick={() => navigate('/importar')}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                Importar Planilha
+              </Button>
+            </section>
 
-        {/* Results */}
-        <section>
-          {showingDefault && (
-            <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
-              <AlertCircle className="h-4 w-4 text-amber-500" />
-              <AlertDescription className="text-amber-700 dark:text-amber-400">
-                <strong>"{searchQuery}"</strong> não possui classificação específica. Sugerimos o CST 000 - Tributação integral (cClassTrib 000001).
-              </AlertDescription>
-            </Alert>
-          )}
-          
-          {filteredRecords.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2">
-              {filteredRecords.map((record, index) => (
-                <CSTCard 
-                  key={`${record.cClassTrib}-${index}`} 
-                  record={record} 
-                  index={index}
-                  onOpenAnexo={handleOpenAnexo}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 animate-fade-in">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
-                <SearchX className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-medium text-foreground mb-2">
-                Nenhum resultado encontrado
-              </h3>
-              <p className="text-muted-foreground">
-                Tente ajustar sua busca ou remover os filtros aplicados.
-              </p>
-            </div>
-          )}
-        </section>
+            {/* Filters */}
+            <section className="py-4">
+              <h2 className="text-sm font-medium text-muted-foreground text-center mb-4">
+                Filtrar por CST:
+              </h2>
+              <FilterChips 
+                selectedFilter={selectedFilter} 
+                onFilterChange={setSelectedFilter} 
+              />
+            </section>
+
+            {/* Results */}
+            <section>
+              {showingDefault && (
+                <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
+                  <AlertCircle className="h-4 w-4 text-amber-500" />
+                  <AlertDescription className="text-amber-700 dark:text-amber-400">
+                    <strong>"{searchQuery}"</strong> não possui classificação específica. Sugerimos o CST 000 - Tributação integral (cClassTrib 000001).
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {filteredRecords.length > 0 ? (
+                <div className="grid gap-6 md:grid-cols-2">
+                  {filteredRecords.map((record, index) => (
+                    <CSTCard 
+                      key={`${record.cClassTrib}-${index}`} 
+                      record={record} 
+                      index={index}
+                      onOpenAnexo={handleOpenAnexo}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16 animate-fade-in">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+                    <SearchX className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    Nenhum resultado encontrado
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Tente ajustar sua busca ou remover os filtros aplicados.
+                  </p>
+                </div>
+              )}
+            </section>
+          </TabsContent>
+
+          {/* Aba Notícias */}
+          <TabsContent value="noticias" className="mt-0">
+            <NewsTab />
+          </TabsContent>
+        </Tabs>
 
         {/* Footer */}
         <footer className="text-center pt-8 pb-6 border-t border-border">
