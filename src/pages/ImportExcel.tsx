@@ -133,88 +133,191 @@ const ImportExcel = () => {
     link: ''
   };
 
+  // Palavras-chave PRIMÁRIAS - definem a categoria principal do produto
+  const primaryKeywords: Record<string, { cClassTrib: string; weight: number }> = {
+    // Massas e derivados - Cesta Básica (200003)
+    'macarrao': { cClassTrib: '200003', weight: 100 },
+    'espaguete': { cClassTrib: '200003', weight: 100 },
+    'talharim': { cClassTrib: '200003', weight: 100 },
+    'lasanha': { cClassTrib: '200003', weight: 100 },
+    'penne': { cClassTrib: '200003', weight: 100 },
+    'fusilli': { cClassTrib: '200003', weight: 100 },
+    'rigatoni': { cClassTrib: '200003', weight: 100 },
+    'ravioli': { cClassTrib: '200003', weight: 100 },
+    'capeletti': { cClassTrib: '200003', weight: 100 },
+    'nhoque': { cClassTrib: '200003', weight: 100 },
+    'miojo': { cClassTrib: '200003', weight: 100 },
+    'instantaneo': { cClassTrib: '200003', weight: 80 },
+    // Grãos e cereais - Cesta Básica
+    'arroz': { cClassTrib: '200003', weight: 100 },
+    'feijao': { cClassTrib: '200003', weight: 100 },
+    'lentilha': { cClassTrib: '200003', weight: 100 },
+    'grao': { cClassTrib: '200003', weight: 80 },
+    'graos': { cClassTrib: '200003', weight: 80 },
+    'aveia': { cClassTrib: '200003', weight: 100 },
+    'trigo': { cClassTrib: '200003', weight: 90 },
+    'milho': { cClassTrib: '200003', weight: 90 },
+    'fuba': { cClassTrib: '200003', weight: 100 },
+    'farinha': { cClassTrib: '200003', weight: 100 },
+    'farinhas': { cClassTrib: '200003', weight: 100 },
+    // Carnes - Cesta Básica
+    'carne': { cClassTrib: '200003', weight: 100 },
+    'carnes': { cClassTrib: '200003', weight: 100 },
+    'frango': { cClassTrib: '200003', weight: 100 },
+    'boi': { cClassTrib: '200003', weight: 100 },
+    'bovino': { cClassTrib: '200003', weight: 100 },
+    'suino': { cClassTrib: '200003', weight: 100 },
+    'porco': { cClassTrib: '200003', weight: 100 },
+    'peixe': { cClassTrib: '200003', weight: 100 },
+    'pescado': { cClassTrib: '200003', weight: 100 },
+    'linguica': { cClassTrib: '200003', weight: 100 },
+    'salsicha': { cClassTrib: '200003', weight: 100 },
+    'presunto': { cClassTrib: '200003', weight: 100 },
+    'mortadela': { cClassTrib: '200003', weight: 100 },
+    // Laticínios - Cesta Básica
+    'leite': { cClassTrib: '200003', weight: 100 },
+    'queijo': { cClassTrib: '200003', weight: 100 },
+    'iogurte': { cClassTrib: '200003', weight: 100 },
+    'manteiga': { cClassTrib: '200003', weight: 100 },
+    'margarina': { cClassTrib: '200003', weight: 100 },
+    'requeijao': { cClassTrib: '200003', weight: 100 },
+    // Óleos e gorduras - Cesta Básica
+    'oleo': { cClassTrib: '200003', weight: 100 },
+    'oleos': { cClassTrib: '200003', weight: 100 },
+    'azeite': { cClassTrib: '200003', weight: 100 },
+    // Outros alimentos básicos - Cesta Básica
+    'acucar': { cClassTrib: '200003', weight: 100 },
+    'cafe': { cClassTrib: '200003', weight: 100 },
+    'sal': { cClassTrib: '200003', weight: 90 },
+    'pao': { cClassTrib: '200003', weight: 100 },
+    'paes': { cClassTrib: '200003', weight: 100 },
+    'biscoito': { cClassTrib: '200003', weight: 100 },
+    'bolacha': { cClassTrib: '200003', weight: 100 },
+    'bolachas': { cClassTrib: '200003', weight: 100 },
+    'sardinha': { cClassTrib: '200003', weight: 100 },
+    'atum': { cClassTrib: '200003', weight: 100 },
+    'enlatado': { cClassTrib: '200003', weight: 90 },
+    'conserva': { cClassTrib: '200003', weight: 90 },
+    // Hortícolas, frutas e ovos - (200015) - peso menor que alimentos processados
+    'ovo': { cClassTrib: '200015', weight: 70 },
+    'ovos': { cClassTrib: '200015', weight: 70 },
+    'tomate': { cClassTrib: '200015', weight: 100 },
+    'batata': { cClassTrib: '200015', weight: 100 },
+    'cebola': { cClassTrib: '200015', weight: 100 },
+    'alface': { cClassTrib: '200015', weight: 100 },
+    'cenoura': { cClassTrib: '200015', weight: 100 },
+    'banana': { cClassTrib: '200015', weight: 100 },
+    'laranja': { cClassTrib: '200015', weight: 100 },
+    'maca': { cClassTrib: '200015', weight: 100 },
+    'uva': { cClassTrib: '200015', weight: 100 },
+    'morango': { cClassTrib: '200015', weight: 100 },
+    'melancia': { cClassTrib: '200015', weight: 100 },
+    'abacaxi': { cClassTrib: '200015', weight: 100 },
+    'horticola': { cClassTrib: '200015', weight: 100 },
+    'fruta': { cClassTrib: '200015', weight: 100 },
+    'frutas': { cClassTrib: '200015', weight: 100 },
+    'verdura': { cClassTrib: '200015', weight: 100 },
+    'verduras': { cClassTrib: '200015', weight: 100 },
+    'legume': { cClassTrib: '200015', weight: 100 },
+    'legumes': { cClassTrib: '200015', weight: 100 },
+    // Medicamentos - (200009)
+    'medicamento': { cClassTrib: '200009', weight: 100 },
+    'medicamentos': { cClassTrib: '200009', weight: 100 },
+    'remedio': { cClassTrib: '200009', weight: 100 },
+    'remedios': { cClassTrib: '200009', weight: 100 },
+    'farmaceutico': { cClassTrib: '200009', weight: 100 },
+  };
+
+  // Palavras que são SECUNDÁRIAS (ingredientes, sabores, etc.) e não definem a categoria
+  const secondaryKeywords = [
+    'ovos', 'ovo', 'queijo', 'carne', 'frango', 'bacon', 'chocolate',
+    'morango', 'baunilha', 'limao', 'laranja', 'cebola', 'alho', 'tomate',
+    'calabresa', 'presunto', 'mussarela', 'cheddar', 'leite'
+  ];
+
   const searchCSTCodes = () => {
     setIsProcessing(true);
     
     const resultsWithCST: ProductWithCST[] = importedProducts.map(product => {
-      const productDesc = product.description.toLowerCase();
+      const productDesc = product.description.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // Remove acentos
       const productWords = productDesc.split(/\s+/).filter(w => w.length >= 3);
       
-      // Buscar correspondências usando fuzzyMatch em todos os campos
-      const matches = cstData.filter(cst => {
-        const cstNameLower = cst.cClassTribName.toLowerCase();
-        const cstDescLower = cst.cClassTribDescription.toLowerCase();
-        
-        // Busca direta em cClassTribName ou cClassTribDescription
-        if (fuzzyMatch(cst.cClassTribName, product.description, true)) return true;
-        if (fuzzyMatch(cst.cClassTribDescription, product.description, true)) return true;
-        
-        // Busca inversa: produto contém termos do CST
-        if (fuzzyMatch(product.description, cst.cClassTribName, true)) return true;
-        
-        // Busca especial para alimentos da Cesta Básica (cClassTrib 200003)
-        if (cst.cClassTrib === '200003') {
-          const alimentoKeywords = [
-            'massas', 'macarrao', 'espaguete', 'arroz', 'feijao', 'trigo', 'farinha',
-            'aveia', 'milho', 'fuba', 'cereais', 'carne', 'carnes', 'frango', 'peixe',
-            'pescado', 'bovino', 'suino', 'porco', 'aves', 'linguica', 'salsicha',
-            'embutidos', 'leite', 'laticinios', 'queijo', 'iogurte', 'manteiga',
-            'margarina', 'oleo', 'oleos', 'azeite', 'acucar', 'cafe', 'sal', 'pao',
-            'paes', 'biscoito', 'bolachas', 'conserva', 'enlatados', 'sardinha', 'atum',
-            'alimento', 'alimentos', 'alimenticio'
-          ];
-          if (productWords.some(word => alimentoKeywords.includes(word))) return true;
+      // Tentar detectar NCM nos dados brutos
+      const rawData = product.rawData;
+      let ncmCode = '';
+      for (const key of Object.keys(rawData)) {
+        const keyLower = key.toLowerCase();
+        if (keyLower.includes('ncm') || keyLower.includes('codigo') || keyLower.includes('cod')) {
+          const value = String(rawData[key] || '').replace(/\D/g, '');
+          if (value.length >= 4 && value.length <= 8) {
+            ncmCode = value;
+            break;
+          }
         }
+      }
+      
+      // Calcular pontuação baseada nas palavras-chave
+      // Palavras no INÍCIO da descrição têm peso maior (são o produto principal)
+      const categoryScores: Record<string, number> = {};
+      
+      productWords.forEach((word, index) => {
+        const normalizedWord = word.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const keywordInfo = primaryKeywords[normalizedWord];
         
-        // Busca especial para produtos hortícolas (cClassTrib 200015)
-        if (cst.cClassTrib === '200015') {
-          const horticolaKeywords = [
-            'horticola', 'horticolas', 'frutas', 'fruta', 'ovos', 'ovo', 'legumes',
-            'verduras', 'vegetais', 'tomate', 'batata', 'cebola', 'alface', 'cenoura',
-            'banana', 'laranja', 'maca', 'uva', 'morango', 'melancia', 'abacaxi'
-          ];
-          if (productWords.some(word => horticolaKeywords.includes(word))) return true;
+        if (keywordInfo) {
+          // Multiplicador de posição: palavras no início são mais importantes
+          const positionMultiplier = index < 3 ? 2 : 1;
+          
+          // Se a palavra é secundária (ingrediente) e não está no início, reduzir peso
+          const isSecondary = secondaryKeywords.includes(normalizedWord);
+          const secondaryPenalty = isSecondary && index > 0 ? 0.3 : 1;
+          
+          const score = keywordInfo.weight * positionMultiplier * secondaryPenalty;
+          
+          if (!categoryScores[keywordInfo.cClassTrib] || categoryScores[keywordInfo.cClassTrib] < score) {
+            categoryScores[keywordInfo.cClassTrib] = score;
+          }
         }
-        
-        // Busca especial para medicamentos (cClassTrib 200009)
-        if (cst.cClassTrib === '200009') {
-          const medKeywords = ['medicamento', 'medicamentos', 'remedio', 'remedios', 'farmaceutico', 'farmacia'];
-          if (productWords.some(word => medKeywords.includes(word))) return true;
-        }
-        
-        return false;
       });
-
-      // Ordenar por relevância
-      const sortedMatches = matches.sort((a, b) => {
-        // Priorizar correspondências mais diretas
-        let aScore = 0;
-        let bScore = 0;
-        
-        productWords.forEach(word => {
-          if (a.cClassTribName.toLowerCase().includes(word)) aScore += 3;
-          if (a.cClassTribDescription.toLowerCase().includes(word)) aScore += 2;
-          if (b.cClassTribName.toLowerCase().includes(word)) bScore += 3;
-          if (b.cClassTribDescription.toLowerCase().includes(word)) bScore += 2;
+      
+      // Encontrar a categoria com maior pontuação
+      let bestCategory = '';
+      let bestScore = 0;
+      for (const [category, score] of Object.entries(categoryScores)) {
+        if (score > bestScore) {
+          bestScore = score;
+          bestCategory = category;
+        }
+      }
+      
+      // Buscar correspondências no cstData
+      let matches: CSTRecord[] = [];
+      
+      if (bestCategory) {
+        // Priorizar a categoria detectada
+        const categoryMatch = cstData.find(cst => cst.cClassTrib === bestCategory);
+        if (categoryMatch) {
+          matches = [categoryMatch];
+        }
+      }
+      
+      // Se não encontrou por categoria, usar busca fuzzy tradicional
+      if (matches.length === 0) {
+        matches = cstData.filter(cst => {
+          if (fuzzyMatch(cst.cClassTribName, product.description, true)) return true;
+          if (fuzzyMatch(cst.cClassTribDescription, product.description, true)) return true;
+          if (fuzzyMatch(product.description, cst.cClassTribName, true)) return true;
+          return false;
         });
-        
-        // Priorizar CST 200 para alimentos (Cesta Básica - 200003)
-        if (a.cClassTrib === '200003') aScore += 10;
-        if (b.cClassTrib === '200003') bScore += 10;
-        
-        // Priorizar hortícolas (200015)
-        if (a.cClassTrib === '200015') aScore += 8;
-        if (b.cClassTrib === '200015') bScore += 8;
-        
-        return bScore - aScore;
-      });
+      }
 
       // Se não encontrar correspondência, usar CST 000 / cClassTrib 000001 como padrão
-      const bestMatch = sortedMatches[0] || defaultCST;
+      const bestMatch = matches[0] || defaultCST;
 
       return {
         product,
-        matches: sortedMatches.length > 0 ? sortedMatches.slice(0, 5) : [defaultCST],
+        matches: matches.length > 0 ? matches.slice(0, 5) : [defaultCST],
         bestMatch
       };
     });
