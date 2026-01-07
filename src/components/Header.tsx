@@ -44,14 +44,18 @@ export const Header = () => {
       
       <div className="relative max-w-4xl mx-auto text-center">
         {/* Logo com faixa branca */}
-        <div className="mb-6 inline-block px-8 py-4 bg-white rounded-xl shadow-lg">
-          <img src={logo2m} alt="2M Contabilidade" className="h-16 w-auto mx-auto" />
+        <div className="flex justify-center mb-6">
+          <div className="px-8 py-4 bg-white rounded-xl shadow-lg">
+            <img src={logo2m} alt="2M Contabilidade" className="h-16 w-auto" />
+          </div>
         </div>
         
-        <div className="inline-flex items-center gap-3 mb-6 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm">
-          <span className="text-sm font-medium text-white/90">
-            LC 214/2025 • Reforma Tributária
-          </span>
+        <div className="flex justify-center mb-6">
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm">
+            <span className="text-sm font-medium text-white/90">
+              LC 214/2025 • Reforma Tributária
+            </span>
+          </div>
         </div>
         
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
