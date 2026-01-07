@@ -72,9 +72,16 @@ export const ncmToClassTrib: Record<string, { cClassTrib: string; description: s
   '1604': { cClassTrib: '200003', description: 'Conservas de peixes (sardinha, atum)' },
   // Capítulo 17 - Açúcares
   '1701': { cClassTrib: '200003', description: 'Açúcar de cana ou beterraba' },
-  // Capítulo 19 - Massas e produtos de padaria
-  '1902': { cClassTrib: '200003', description: 'Massas alimentícias (macarrão)' },
-  '1905': { cClassTrib: '200003', description: 'Pães, biscoitos, bolachas' },
+  '1702': { cClassTrib: '200003', description: 'Outros açúcares' },
+  '1703': { cClassTrib: '200003', description: 'Melaços' },
+  // Capítulo 19 - Preparações à base de cereais, farinhas, massas
+  '1901': { cClassTrib: '200003', description: 'Preparações alimentícias de farinhas, sêmolas (farofa, mingau, etc.)' },
+  '190190': { cClassTrib: '200003', description: 'Outras preparações alimentícias' },
+  '19019090': { cClassTrib: '200003', description: 'Outras preparações alimentícias de farinhas' },
+  '1902': { cClassTrib: '200003', description: 'Massas alimentícias (macarrão, espaguete, lasanha)' },
+  '1903': { cClassTrib: '200003', description: 'Tapioca e seus sucedâneos' },
+  '1904': { cClassTrib: '200003', description: 'Cereais expandidos (corn flakes, granola)' },
+  '1905': { cClassTrib: '200003', description: 'Pães, biscoitos, bolachas, torradas' },
   // Capítulo 20 - Preparações de hortícolas e frutas
   '2001': { cClassTrib: '200003', description: 'Hortícolas em conserva' },
   '2002': { cClassTrib: '200003', description: 'Tomates preparados' },
