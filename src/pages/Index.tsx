@@ -4,12 +4,16 @@ import { SearchBar } from "@/components/SearchBar";
 import { FilterChips } from "@/components/FilterChips";
 import { StatsCards } from "@/components/StatsCards";
 import { CSTCard } from "@/components/CSTCard";
+import { AnexoModal } from "@/components/AnexoModal";
 import { cstData } from "@/data/cstData";
+import { getAnexoById, type Anexo } from "@/data/anexosData";
 import { SearchX } from "lucide-react";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [selectedAnexo, setSelectedAnexo] = useState<Anexo | null>(null);
+  const [isAnexoModalOpen, setIsAnexoModalOpen] = useState(false);
 
   const filteredRecords = useMemo(() => {
     return cstData.filter((record) => {
@@ -29,6 +33,19 @@ const Index = () => {
       return matchesFilter && matchesSearch;
     });
   }, [searchQuery, selectedFilter]);
+
+  const handleOpenAnexo = (anexoId: string) => {
+    const anexo = getAnexoById(anexoId);
+    if (anexo) {
+      setSelectedAnexo(anexo);
+      setIsAnexoModalOpen(true);
+    }
+  };
+
+  const handleCloseAnexo = () => {
+    setIsAnexoModalOpen(false);
+    setSelectedAnexo(null);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,6 +88,7 @@ const Index = () => {
                   key={`${record.cClassTrib}-${index}`} 
                   record={record} 
                   index={index}
+                  onOpenAnexo={handleOpenAnexo}
                 />
               ))}
             </div>
@@ -99,6 +117,13 @@ const Index = () => {
           </p>
         </footer>
       </main>
+
+      {/* Anexo Modal */}
+      <AnexoModal 
+        anexo={selectedAnexo}
+        isOpen={isAnexoModalOpen}
+        onClose={handleCloseAnexo}
+      />
     </div>
   );
 };

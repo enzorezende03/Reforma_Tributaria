@@ -1,12 +1,14 @@
-import { ExternalLink, Percent, Calendar, FileText } from "lucide-react";
+import { ExternalLink, Percent, Calendar, FileText, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { CSTRecord } from "@/data/cstData";
+import { extractAnexoNumber } from "@/data/anexosData";
 
 interface CSTCardProps {
   record: CSTRecord;
   index: number;
+  onOpenAnexo?: (anexoId: string) => void;
 }
 
 const getReductionColor = (reduction: number) => {
@@ -16,7 +18,10 @@ const getReductionColor = (reduction: number) => {
   return "bg-secondary text-secondary-foreground";
 };
 
-export const CSTCard = ({ record, index }: CSTCardProps) => {
+export const CSTCard = ({ record, index, onOpenAnexo }: CSTCardProps) => {
+  // Detectar se há referência a anexo na descrição ou nome
+  const anexoId = extractAnexoNumber(record.cClassTribName) || extractAnexoNumber(record.cClassTribDescription);
+  
   return (
     <Card 
       className="card-elevated border-0 overflow-hidden animate-fade-in"
@@ -79,17 +84,30 @@ export const CSTCard = ({ record, index }: CSTCardProps) => {
           </Badge>
         </div>
         
-        <Button
-          variant="outline"
-          size="sm"
-          asChild
-          className="w-full mt-2 hover:bg-primary hover:text-primary-foreground transition-colors"
-        >
-          <a href={record.link} target="_blank" rel="noopener noreferrer">
-            <ExternalLink className="h-4 w-4 mr-2" />
-            Ver na LC 214/2025
-          </a>
-        </Button>
+        <div className="flex gap-2 mt-2">
+          {anexoId && onOpenAnexo && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => onOpenAnexo(anexoId)}
+              className="flex-1 bg-primary hover:bg-primary/90"
+            >
+              <BookOpen className="h-4 w-4 mr-2" />
+              Ver Anexo {['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV'][parseInt(anexoId) - 1] || anexoId}
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className={`${anexoId && onOpenAnexo ? 'flex-1' : 'w-full'} hover:bg-secondary`}
+          >
+            <a href={record.link} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Ver na LC 214/2025
+            </a>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
