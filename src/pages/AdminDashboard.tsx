@@ -79,8 +79,8 @@ const AdminDashboard = () => {
     fetchClients();
   }, []);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/admin/login');
   };
 
