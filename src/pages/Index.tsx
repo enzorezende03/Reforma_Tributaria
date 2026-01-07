@@ -7,6 +7,7 @@ import { CSTCard } from "@/components/CSTCard";
 import { AnexoModal } from "@/components/AnexoModal";
 import { cstData } from "@/data/cstData";
 import { getAnexoById, type Anexo } from "@/data/anexosData";
+import { fuzzyMatch } from "@/lib/fuzzySearch";
 import { SearchX } from "lucide-react";
 
 const Index = () => {
@@ -14,6 +15,7 @@ const Index = () => {
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const [selectedAnexo, setSelectedAnexo] = useState<Anexo | null>(null);
   const [isAnexoModalOpen, setIsAnexoModalOpen] = useState(false);
+  const [useSimilarSearch, setUseSimilarSearch] = useState(true);
 
   const filteredRecords = useMemo(() => {
     return cstData.filter((record) => {
@@ -21,18 +23,20 @@ const Index = () => {
       
       if (!searchQuery) return matchesFilter;
       
-      const query = searchQuery.toLowerCase();
-      const matchesSearch = 
-        record.cstCode.toLowerCase().includes(query) ||
-        record.cstDescription.toLowerCase().includes(query) ||
-        record.cClassTrib.toLowerCase().includes(query) ||
-        record.cClassTribName.toLowerCase().includes(query) ||
-        record.cClassTribDescription.toLowerCase().includes(query) ||
-        record.lcArticle.toLowerCase().includes(query);
+      const searchableFields = [
+        record.cstCode,
+        record.cstDescription,
+        record.cClassTrib,
+        record.cClassTribName,
+        record.cClassTribDescription,
+        record.lcArticle
+      ].join(" ");
+      
+      const matchesSearch = fuzzyMatch(searchableFields, searchQuery, useSimilarSearch);
       
       return matchesFilter && matchesSearch;
     });
-  }, [searchQuery, selectedFilter]);
+  }, [searchQuery, selectedFilter, useSimilarSearch]);
 
   const handleOpenAnexo = (anexoId: string) => {
     const anexo = getAnexoById(anexoId);
@@ -56,7 +60,9 @@ const Index = () => {
         <section className="-mt-20 relative z-10">
           <SearchBar 
             value={searchQuery} 
-            onChange={setSearchQuery} 
+            onChange={setSearchQuery}
+            useSimilar={useSimilarSearch}
+            onToggleSimilar={() => setUseSimilarSearch(prev => !prev)}
           />
         </section>
 
