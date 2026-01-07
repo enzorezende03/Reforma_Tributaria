@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Client {
   id: string;
@@ -47,41 +48,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (cnpj: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       // Formatar CNPJ removendo caracteres especiais
       const formattedCnpj = cnpj.replace(/\D/g, '');
       
-      // Buscar cliente pelo CNPJ
-      const { data: clientData, error } = await supabase
-        .from('clients')
-        .select('id, cnpj, company_name, password_hash, is_active')
-        .eq('cnpj', formattedCnpj)
-        .single();
+      // Usar função segura de verificação de login
+      const { data, error } = await supabase.rpc('verify_client_login', {
+        p_cnpj: formattedCnpj,
+        p_password: password
+      });
 
-      if (error || !clientData) {
-        return { success: false, error: 'CNPJ não encontrado' };
+      if (error) {
+        console.error('Login error:', error);
+        return { success: false, error: 'Erro ao fazer login. Tente novamente.' };
       }
 
-      if (!clientData.is_active) {
-        return { success: false, error: 'Conta desativada. Entre em contato com o suporte.' };
+      // A função retorna um JSON com success e client ou error
+      const result = data as unknown as { success: boolean; error?: string; client?: Client };
+
+      if (!result.success) {
+        return { success: false, error: result.error };
       }
 
-      // Verificar senha (comparação simples - em produção use hash)
-      if (clientData.password_hash !== password) {
-        return { success: false, error: 'Senha incorreta' };
+      if (result.client) {
+        setClient(result.client);
+        localStorage.setItem('client_session', JSON.stringify(result.client));
+        return { success: true };
       }
 
-      const loggedClient: Client = {
-        id: clientData.id,
-        cnpj: clientData.cnpj,
-        company_name: clientData.company_name,
-      };
-
-      setClient(loggedClient);
-      localStorage.setItem('client_session', JSON.stringify(loggedClient));
-      
-      return { success: true };
+      return { success: false, error: 'Erro ao fazer login' };
     } catch (err) {
       console.error('Login error:', err);
       return { success: false, error: 'Erro ao fazer login. Tente novamente.' };
