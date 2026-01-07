@@ -137,19 +137,50 @@ const ImportExcel = () => {
     setIsProcessing(true);
     
     const resultsWithCST: ProductWithCST[] = importedProducts.map(product => {
-      // Buscar correspondências usando fuzzyMatch
-      const matches = cstData.filter(cst => 
-        fuzzyMatch(cst.cClassTribName, product.description, true) ||
-        fuzzyMatch(cst.cClassTribDescription, product.description, true)
-      );
+      const productDesc = product.description.toLowerCase();
+      
+      // Buscar correspondências usando fuzzyMatch em todos os campos
+      const matches = cstData.filter(cst => {
+        // Busca em cClassTribName
+        if (fuzzyMatch(cst.cClassTribName, product.description, true)) return true;
+        // Busca em cClassTribDescription
+        if (fuzzyMatch(cst.cClassTribDescription, product.description, true)) return true;
+        // Busca inversa: produto contém termos do CST
+        if (fuzzyMatch(product.description, cst.cClassTribName, true)) return true;
+        return false;
+      });
 
-      // Ordenar por relevância (correspondências mais diretas primeiro)
+      // Ordenar por relevância
       const sortedMatches = matches.sort((a, b) => {
-        const aNameMatch = a.cClassTribName.toLowerCase().includes(product.description.toLowerCase().split(' ')[0]);
-        const bNameMatch = b.cClassTribName.toLowerCase().includes(product.description.toLowerCase().split(' ')[0]);
-        if (aNameMatch && !bNameMatch) return -1;
-        if (!aNameMatch && bNameMatch) return 1;
-        return 0;
+        const productWords = productDesc.split(/\s+/).filter(w => w.length >= 3);
+        
+        // Priorizar correspondências mais diretas
+        const aScore = productWords.reduce((score, word) => {
+          if (a.cClassTribName.toLowerCase().includes(word)) score += 3;
+          if (a.cClassTribDescription.toLowerCase().includes(word)) score += 2;
+          return score;
+        }, 0);
+        
+        const bScore = productWords.reduce((score, word) => {
+          if (b.cClassTribName.toLowerCase().includes(word)) score += 3;
+          if (b.cClassTribDescription.toLowerCase().includes(word)) score += 2;
+          return score;
+        }, 0);
+        
+        // Priorizar CST 200 para alimentos (Cesta Básica)
+        const isAFood = a.cClassTribName.toLowerCase().includes('cesta') || 
+                        a.cClassTribName.toLowerCase().includes('aliment') ||
+                        a.cClassTribName.toLowerCase().includes('horticola') ||
+                        a.cClassTribName.toLowerCase().includes('frutas');
+        const isBFood = b.cClassTribName.toLowerCase().includes('cesta') || 
+                        b.cClassTribName.toLowerCase().includes('aliment') ||
+                        b.cClassTribName.toLowerCase().includes('horticola') ||
+                        b.cClassTribName.toLowerCase().includes('frutas');
+        
+        if (isAFood && !isBFood) return -1;
+        if (!isAFood && isBFood) return 1;
+        
+        return bScore - aScore;
       });
 
       // Se não encontrar correspondência, usar CST 000 / cClassTrib 000001 como padrão
