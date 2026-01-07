@@ -138,47 +138,73 @@ const ImportExcel = () => {
     
     const resultsWithCST: ProductWithCST[] = importedProducts.map(product => {
       const productDesc = product.description.toLowerCase();
+      const productWords = productDesc.split(/\s+/).filter(w => w.length >= 3);
       
       // Buscar correspondências usando fuzzyMatch em todos os campos
       const matches = cstData.filter(cst => {
-        // Busca em cClassTribName
+        const cstNameLower = cst.cClassTribName.toLowerCase();
+        const cstDescLower = cst.cClassTribDescription.toLowerCase();
+        
+        // Busca direta em cClassTribName ou cClassTribDescription
         if (fuzzyMatch(cst.cClassTribName, product.description, true)) return true;
-        // Busca em cClassTribDescription
         if (fuzzyMatch(cst.cClassTribDescription, product.description, true)) return true;
+        
         // Busca inversa: produto contém termos do CST
         if (fuzzyMatch(product.description, cst.cClassTribName, true)) return true;
+        
+        // Busca especial para alimentos da Cesta Básica (cClassTrib 200003)
+        if (cst.cClassTrib === '200003') {
+          const alimentoKeywords = [
+            'massas', 'macarrao', 'espaguete', 'arroz', 'feijao', 'trigo', 'farinha',
+            'aveia', 'milho', 'fuba', 'cereais', 'carne', 'carnes', 'frango', 'peixe',
+            'pescado', 'bovino', 'suino', 'porco', 'aves', 'linguica', 'salsicha',
+            'embutidos', 'leite', 'laticinios', 'queijo', 'iogurte', 'manteiga',
+            'margarina', 'oleo', 'oleos', 'azeite', 'acucar', 'cafe', 'sal', 'pao',
+            'paes', 'biscoito', 'bolachas', 'conserva', 'enlatados', 'sardinha', 'atum',
+            'alimento', 'alimentos', 'alimenticio'
+          ];
+          if (productWords.some(word => alimentoKeywords.includes(word))) return true;
+        }
+        
+        // Busca especial para produtos hortícolas (cClassTrib 200015)
+        if (cst.cClassTrib === '200015') {
+          const horticolaKeywords = [
+            'horticola', 'horticolas', 'frutas', 'fruta', 'ovos', 'ovo', 'legumes',
+            'verduras', 'vegetais', 'tomate', 'batata', 'cebola', 'alface', 'cenoura',
+            'banana', 'laranja', 'maca', 'uva', 'morango', 'melancia', 'abacaxi'
+          ];
+          if (productWords.some(word => horticolaKeywords.includes(word))) return true;
+        }
+        
+        // Busca especial para medicamentos (cClassTrib 200009)
+        if (cst.cClassTrib === '200009') {
+          const medKeywords = ['medicamento', 'medicamentos', 'remedio', 'remedios', 'farmaceutico', 'farmacia'];
+          if (productWords.some(word => medKeywords.includes(word))) return true;
+        }
+        
         return false;
       });
 
       // Ordenar por relevância
       const sortedMatches = matches.sort((a, b) => {
-        const productWords = productDesc.split(/\s+/).filter(w => w.length >= 3);
-        
         // Priorizar correspondências mais diretas
-        const aScore = productWords.reduce((score, word) => {
-          if (a.cClassTribName.toLowerCase().includes(word)) score += 3;
-          if (a.cClassTribDescription.toLowerCase().includes(word)) score += 2;
-          return score;
-        }, 0);
+        let aScore = 0;
+        let bScore = 0;
         
-        const bScore = productWords.reduce((score, word) => {
-          if (b.cClassTribName.toLowerCase().includes(word)) score += 3;
-          if (b.cClassTribDescription.toLowerCase().includes(word)) score += 2;
-          return score;
-        }, 0);
+        productWords.forEach(word => {
+          if (a.cClassTribName.toLowerCase().includes(word)) aScore += 3;
+          if (a.cClassTribDescription.toLowerCase().includes(word)) aScore += 2;
+          if (b.cClassTribName.toLowerCase().includes(word)) bScore += 3;
+          if (b.cClassTribDescription.toLowerCase().includes(word)) bScore += 2;
+        });
         
-        // Priorizar CST 200 para alimentos (Cesta Básica)
-        const isAFood = a.cClassTribName.toLowerCase().includes('cesta') || 
-                        a.cClassTribName.toLowerCase().includes('aliment') ||
-                        a.cClassTribName.toLowerCase().includes('horticola') ||
-                        a.cClassTribName.toLowerCase().includes('frutas');
-        const isBFood = b.cClassTribName.toLowerCase().includes('cesta') || 
-                        b.cClassTribName.toLowerCase().includes('aliment') ||
-                        b.cClassTribName.toLowerCase().includes('horticola') ||
-                        b.cClassTribName.toLowerCase().includes('frutas');
+        // Priorizar CST 200 para alimentos (Cesta Básica - 200003)
+        if (a.cClassTrib === '200003') aScore += 10;
+        if (b.cClassTrib === '200003') bScore += 10;
         
-        if (isAFood && !isBFood) return -1;
-        if (!isAFood && isBFood) return 1;
+        // Priorizar hortícolas (200015)
+        if (a.cClassTrib === '200015') aScore += 8;
+        if (b.cClassTrib === '200015') bScore += 8;
         
         return bScore - aScore;
       });
