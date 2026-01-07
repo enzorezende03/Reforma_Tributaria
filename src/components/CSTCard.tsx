@@ -1,11 +1,13 @@
-import { ExternalLink, Percent, Calendar, FileText, BookOpen, Settings2 } from "lucide-react";
+import { ExternalLink, Percent, Calendar, FileText, BookOpen, Settings2, Scale, ChevronDown } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { CSTRecord } from "@/data/cstData";
 import { extractAnexoNumber } from "@/data/anexosData";
 import { isServicoRecord, findIndOpByServico, getIndOpDetails } from "@/data/indOpData";
+import { useState } from "react";
 
 interface CSTCardProps {
   record: CSTRecord;
@@ -21,6 +23,8 @@ const getReductionColor = (reduction: number) => {
 };
 
 export const CSTCard = ({ record, index, onOpenAnexo }: CSTCardProps) => {
+  const [isRequisitosOpen, setIsRequisitosOpen] = useState(false);
+  
   // Detectar se há referência a anexo na descrição ou nome
   const anexoId = extractAnexoNumber(record.cClassTribName) || extractAnexoNumber(record.cClassTribDescription);
   
@@ -28,6 +32,9 @@ export const CSTCard = ({ record, index, onOpenAnexo }: CSTCardProps) => {
   const isServico = isServicoRecord(record.cClassTribName, record.cClassTribDescription);
   const indOpCodes = isServico ? findIndOpByServico(record.cClassTribName) : [];
   const primaryIndOp = indOpCodes.length > 0 ? getIndOpDetails(indOpCodes[0]) : undefined;
+  
+  // Verificar se há requisitos legais
+  const hasRequisitos = record.requisitosLegais && record.requisitosLegais.length > 0;
   
   return (
     <Card 
@@ -117,6 +124,47 @@ export const CSTCard = ({ record, index, onOpenAnexo }: CSTCardProps) => {
               )}
             </div>
           </TooltipProvider>
+        )}
+        
+        {/* Requisitos Legais para obter o benefício */}
+        {hasRequisitos && (
+          <Collapsible open={isRequisitosOpen} onOpenChange={setIsRequisitosOpen}>
+            <CollapsibleTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-between p-3 h-auto bg-success/10 hover:bg-success/20 border border-success/30 rounded-lg"
+              >
+                <div className="flex items-center gap-2">
+                  <Scale className="h-4 w-4 text-success" />
+                  <span className="text-sm font-semibold text-success">
+                    Requisitos Legais para o Benefício
+                  </span>
+                </div>
+                <ChevronDown className={`h-4 w-4 text-success transition-transform ${isRequisitosOpen ? 'rotate-180' : ''}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2">
+              <div className="bg-success/5 rounded-lg p-4 border border-success/20 space-y-4">
+                {record.requisitosLegais?.map((requisito, idx) => (
+                  <div key={idx} className="space-y-2">
+                    <h4 className="text-sm font-semibold text-foreground">
+                      {requisito.titulo}
+                    </h4>
+                    <ul className="space-y-1 text-sm text-muted-foreground">
+                      {requisito.itens.map((item, itemIdx) => (
+                        <li 
+                          key={itemIdx} 
+                          className={`leading-relaxed ${item.startsWith('   ') ? 'ml-4' : ''}`}
+                        >
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         )}
         
         <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-border/50">
