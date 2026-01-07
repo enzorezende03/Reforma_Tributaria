@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { SearchBar } from "@/components/SearchBar";
 import { FilterChips } from "@/components/FilterChips";
@@ -8,13 +9,15 @@ import { AnexoModal } from "@/components/AnexoModal";
 import { cstData } from "@/data/cstData";
 import { getAnexoById, type Anexo } from "@/data/anexosData";
 import { fuzzyMatch } from "@/lib/fuzzySearch";
-import { SearchX, AlertCircle } from "lucide-react";
+import { SearchX, AlertCircle, FileSpreadsheet } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 // Registro padrão CST 000 / cClassTrib 000001 para quando não encontrar resultados
 const defaultRecord = cstData.find(r => r.cstCode === "000" && r.cClassTrib === "000001");
 
 const Index = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const [selectedAnexo, setSelectedAnexo] = useState<Anexo | null>(null);
@@ -78,11 +81,18 @@ const Index = () => {
         </section>
 
         {/* Stats */}
-        <section>
+        <section className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <StatsCards 
             totalRecords={cstData.length} 
             filteredRecords={filteredRecords.length} 
           />
+          <Button 
+            onClick={() => navigate('/importar')}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            Importar Planilha
+          </Button>
         </section>
 
         {/* Filters */}
