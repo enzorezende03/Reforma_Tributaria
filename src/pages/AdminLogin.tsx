@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -119,6 +119,15 @@ const AdminLogin = () => {
             >
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
+
+            <div className="text-center pt-2">
+              <Link 
+                to="/admin/register" 
+                className="text-sm text-slate-600 hover:text-slate-800 hover:underline"
+              >
+                Criar conta de administrador
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>

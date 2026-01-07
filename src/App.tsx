@@ -8,6 +8,7 @@ import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
+import AdminRegister from "./pages/AdminRegister";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -70,6 +71,7 @@ const App = () => (
               
               {/* Rotas de admin */}
               <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/register" element={<AdminRegister />} />
               <Route path="/admin" element={
                 <AdminProtectedRoute>
                   <AdminDashboard />

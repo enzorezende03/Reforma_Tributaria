@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 interface Admin {
   id: string;
@@ -10,7 +12,7 @@ interface AdminAuthContextType {
   admin: Admin | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -32,53 +34,95 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
   const [admin, setAdmin] = useState<Admin | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const savedAdmin = localStorage.getItem('admin_session');
-    if (savedAdmin) {
-      try {
-        setAdmin(JSON.parse(savedAdmin));
-      } catch {
-        localStorage.removeItem('admin_session');
-      }
+  const checkAdminRole = async (user: User): Promise<Admin | null> => {
+    // Verificar se o usuário tem role de admin
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+
+    if (!roleData) {
+      return null;
     }
-    setIsLoading(false);
-  }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
-      const { data: adminData, error } = await supabase
-        .from('admins')
-        .select('id, email, name, password_hash, is_active')
-        .eq('email', email.toLowerCase().trim())
-        .maybeSingle();
+    // Buscar dados do admin
+    const { data: adminData } = await supabase
+      .from('admins')
+      .select('id, email, name')
+      .eq('email', user.email)
+      .maybeSingle();
 
-      if (error) {
-        return { success: false, error: 'Erro ao verificar credenciais' };
-      }
-
-      if (!adminData) {
-        return { success: false, error: 'Email não encontrado' };
-      }
-
-      if (!adminData.is_active) {
-        return { success: false, error: 'Conta desativada' };
-      }
-
-      if (adminData.password_hash !== password) {
-        return { success: false, error: 'Senha incorreta' };
-      }
-
-      const loggedAdmin: Admin = {
+    if (adminData) {
+      return {
         id: adminData.id,
         email: adminData.email,
         name: adminData.name,
       };
+    }
 
-      setAdmin(loggedAdmin);
-      localStorage.setItem('admin_session', JSON.stringify(loggedAdmin));
+    // Se não existe na tabela admins, usar dados do auth
+    return {
+      id: user.id,
+      email: user.email || '',
+      name: user.user_metadata?.name || 'Admin',
+    };
+  };
+
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          const adminData = await checkAdminRole(session.user);
+          setAdmin(adminData);
+        } else {
+          setAdmin(null);
+        }
+        setIsLoading(false);
+      }
+    );
+
+    // Then check initial session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        const adminData = await checkAdminRole(session.user);
+        setAdmin(adminData);
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.toLowerCase().trim(),
+        password,
+      });
+
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          return { success: false, error: 'Email ou senha incorretos' };
+        }
+        return { success: false, error: error.message };
+      }
+
+      if (!data.user) {
+        return { success: false, error: 'Erro ao fazer login' };
+      }
+
+      // Verificar se tem role de admin
+      const adminData = await checkAdminRole(data.user);
       
+      if (!adminData) {
+        await supabase.auth.signOut();
+        return { success: false, error: 'Você não tem permissão de administrador' };
+      }
+
+      setAdmin(adminData);
       return { success: true };
     } catch (err) {
       console.error('Admin login error:', err);
@@ -86,9 +130,9 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setAdmin(null);
-    localStorage.removeItem('admin_session');
   };
 
   return (
