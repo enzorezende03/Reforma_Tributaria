@@ -118,6 +118,21 @@ const ImportExcel = () => {
     }
   };
 
+  // Fallback CST padrão para quando não encontrar correspondência
+  const defaultCST: CSTRecord = {
+    cstCode: '000',
+    cstDescription: 'Tributação integral',
+    cClassTrib: '000001',
+    cClassTribName: 'Situações tributadas integralmente pelo IBS e CBS',
+    cClassTribDescription: 'Código padrão quando não há correspondência específica',
+    lcArticle: 'Art. 4°',
+    aliquotaType: 'Padrão',
+    pRedIBS: 0,
+    pRedCBS: 0,
+    dIniVig: '01/01/2026',
+    link: ''
+  };
+
   const searchCSTCodes = () => {
     setIsProcessing(true);
     
@@ -137,20 +152,23 @@ const ImportExcel = () => {
         return 0;
       });
 
+      // Se não encontrar correspondência, usar CST 000 / cClassTrib 000001 como padrão
+      const bestMatch = sortedMatches[0] || defaultCST;
+
       return {
         product,
-        matches: sortedMatches.slice(0, 5), // Limitar a 5 sugestões
-        bestMatch: sortedMatches[0] || null
+        matches: sortedMatches.length > 0 ? sortedMatches.slice(0, 5) : [defaultCST],
+        bestMatch
       };
     });
 
     setResults(resultsWithCST);
     setIsProcessing(false);
     
-    const foundCount = resultsWithCST.filter(r => r.bestMatch).length;
+    const foundCount = resultsWithCST.filter(r => r.bestMatch && r.bestMatch.cstCode !== '000').length;
     toast({
       title: "Busca concluída",
-      description: `Códigos sugeridos para ${foundCount} de ${importedProducts.length} produtos.`,
+      description: `${foundCount} produtos com códigos específicos. ${importedProducts.length - foundCount} produtos com código padrão (CST 000).`,
     });
   };
 
