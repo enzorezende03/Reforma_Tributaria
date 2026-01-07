@@ -32,7 +32,7 @@ const Index = () => {
     const cleanQuery = searchQuery.replace(/\D/g, '');
     const isNCMSearch = cleanQuery.length >= 4 && cleanQuery.length <= 8 && /^\d+$/.test(cleanQuery);
     
-    let ncmMatchResult: { cClassTrib: string; description: string } | null = null;
+    let ncmMatchResult: { cClassTrib: string; description: string; anexo: string } | null = null;
     
     if (isNCMSearch) {
       ncmMatchResult = findByNCM(cleanQuery);
@@ -154,7 +154,7 @@ const Index = () => {
                 <Alert className="mb-6 border-green-500/50 bg-green-500/10">
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
                   <AlertDescription className="text-green-700 dark:text-green-400">
-                    <strong>NCM {searchQuery}</strong> encontrado: {ncmMatch.description} - Classificação tributária com benefício fiscal.
+                    <strong>NCM {searchQuery}</strong> encontrado no <strong>{ncmMatch.anexo}</strong>: {ncmMatch.description} - Classificação tributária com benefício fiscal (Alíquota Reduzida ou Zero).
                   </AlertDescription>
                 </Alert>
               )}

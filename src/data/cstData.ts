@@ -13,90 +13,172 @@ export interface CSTRecord {
   ncmCodes?: string[]; // Códigos NCM associados (prefixos de 4 dígitos)
 }
 
-// Mapeamento de NCM (prefixos) para cClassTrib
-export const ncmToClassTrib: Record<string, { cClassTrib: string; description: string }> = {
-  // Capítulo 01 - Animais vivos
-  '0105': { cClassTrib: '200015', description: 'Aves vivas' },
-  '0407': { cClassTrib: '200015', description: 'Ovos de aves' },
-  // Capítulo 02 - Carnes
-  '0201': { cClassTrib: '200003', description: 'Carnes bovinas frescas' },
-  '0202': { cClassTrib: '200003', description: 'Carnes bovinas congeladas' },
-  '0203': { cClassTrib: '200003', description: 'Carnes suínas' },
-  '0207': { cClassTrib: '200003', description: 'Carnes de aves' },
-  // Capítulo 03 - Peixes
-  '0302': { cClassTrib: '200003', description: 'Peixes frescos' },
-  '0303': { cClassTrib: '200003', description: 'Peixes congelados' },
-  // Capítulo 04 - Laticínios e ovos
-  '0401': { cClassTrib: '200003', description: 'Leite' },
-  '0402': { cClassTrib: '200003', description: 'Leite concentrado' },
-  '0403': { cClassTrib: '200003', description: 'Iogurte e leite fermentado' },
-  '0405': { cClassTrib: '200003', description: 'Manteiga e gorduras lácteas' },
-  '0406': { cClassTrib: '200003', description: 'Queijos' },
-  // Capítulo 07 - Hortícolas
-  '0701': { cClassTrib: '200015', description: 'Batatas' },
-  '0702': { cClassTrib: '200015', description: 'Tomates' },
-  '0703': { cClassTrib: '200015', description: 'Cebolas, alhos' },
-  '0704': { cClassTrib: '200015', description: 'Couves, repolhos' },
-  '0705': { cClassTrib: '200015', description: 'Alfaces' },
-  '0706': { cClassTrib: '200015', description: 'Cenouras, nabos' },
-  '0707': { cClassTrib: '200015', description: 'Pepinos' },
-  '0708': { cClassTrib: '200015', description: 'Leguminosas' },
-  '0709': { cClassTrib: '200015', description: 'Outros hortícolas' },
-  // Capítulo 08 - Frutas
-  '0803': { cClassTrib: '200015', description: 'Bananas' },
-  '0804': { cClassTrib: '200015', description: 'Tâmaras, figos' },
-  '0805': { cClassTrib: '200015', description: 'Cítricos' },
-  '0806': { cClassTrib: '200015', description: 'Uvas' },
-  '0807': { cClassTrib: '200015', description: 'Melões, melancias' },
-  '0808': { cClassTrib: '200015', description: 'Maçãs, peras' },
-  '0810': { cClassTrib: '200015', description: 'Morangos e outras frutas' },
-  // Capítulo 09 - Café, chá
-  '0901': { cClassTrib: '200003', description: 'Café' },
-  // Capítulo 10 - Cereais
-  '1001': { cClassTrib: '200003', description: 'Trigo' },
-  '1005': { cClassTrib: '200003', description: 'Milho' },
-  '1006': { cClassTrib: '200003', description: 'Arroz' },
-  // Capítulo 11 - Farinhas
-  '1101': { cClassTrib: '200003', description: 'Farinhas de trigo' },
-  '1102': { cClassTrib: '200003', description: 'Farinhas de cereais' },
-  '1103': { cClassTrib: '200003', description: 'Farinhas, sêmolas' },
-  '1104': { cClassTrib: '200003', description: 'Grãos trabalhados' },
-  '1106': { cClassTrib: '200003', description: 'Farinhas de leguminosas (farofa)' },
-  // Capítulo 15 - Óleos
-  '1507': { cClassTrib: '200003', description: 'Óleo de soja' },
-  '1509': { cClassTrib: '200003', description: 'Azeite de oliva' },
-  '1512': { cClassTrib: '200003', description: 'Óleo de girassol' },
-  // Capítulo 16 - Preparações de carnes
-  '1601': { cClassTrib: '200003', description: 'Embutidos (linguiças, salsichas)' },
-  '1602': { cClassTrib: '200003', description: 'Outras preparações de carnes' },
-  '1604': { cClassTrib: '200003', description: 'Conservas de peixes (sardinha, atum)' },
-  // Capítulo 17 - Açúcares
-  '1701': { cClassTrib: '200003', description: 'Açúcar de cana ou beterraba' },
-  '1702': { cClassTrib: '200003', description: 'Outros açúcares' },
-  '1703': { cClassTrib: '200003', description: 'Melaços' },
-  // Capítulo 19 - Preparações à base de cereais, farinhas, massas
-  '1901': { cClassTrib: '200003', description: 'Preparações alimentícias de farinhas, sêmolas (farofa, mingau, etc.)' },
-  '190190': { cClassTrib: '200003', description: 'Outras preparações alimentícias' },
-  '19019090': { cClassTrib: '200003', description: 'Outras preparações alimentícias de farinhas' },
-  '1902': { cClassTrib: '200003', description: 'Massas alimentícias (macarrão, espaguete, lasanha)' },
-  '1903': { cClassTrib: '200003', description: 'Tapioca e seus sucedâneos' },
-  '1904': { cClassTrib: '200003', description: 'Cereais expandidos (corn flakes, granola)' },
-  '1905': { cClassTrib: '200003', description: 'Pães, biscoitos, bolachas, torradas' },
-  // Capítulo 20 - Preparações de hortícolas e frutas
-  '2001': { cClassTrib: '200003', description: 'Hortícolas em conserva' },
-  '2002': { cClassTrib: '200003', description: 'Tomates preparados' },
-  '2005': { cClassTrib: '200003', description: 'Outros hortícolas preparados' },
-  // Capítulo 21 - Preparações alimentícias diversas
-  '2103': { cClassTrib: '200003', description: 'Molhos e condimentos' },
-  // Capítulo 25 - Sal
-  '2501': { cClassTrib: '200003', description: 'Sal' },
-  // Capítulo 30 - Medicamentos
-  '3003': { cClassTrib: '200009', description: 'Medicamentos não dosados' },
-  '3004': { cClassTrib: '200009', description: 'Medicamentos dosados' },
+// Mapeamento de NCM (prefixos) para cClassTrib - descrições conforme Anexos da LC 214/2025
+export const ncmToClassTrib: Record<string, { cClassTrib: string; description: string; anexo: string }> = {
+  // ANEXO I - Cesta Básica Nacional de Alimentos (Alíquota Zero)
+  // Arroz
+  '100620': { cClassTrib: '200003', description: 'Arroz descascado (arroz "cargo" ou castanho)', anexo: 'Anexo I' },
+  '100630': { cClassTrib: '200003', description: 'Arroz semibranqueado ou branqueado', anexo: 'Anexo I' },
+  '10064000': { cClassTrib: '200003', description: 'Arroz quebrado', anexo: 'Anexo I' },
+  '1006': { cClassTrib: '200003', description: 'Arroz', anexo: 'Anexo I' },
+  // Leite
+  '040110': { cClassTrib: '200003', description: 'Leite fluido pasteurizado ou esterilizado', anexo: 'Anexo I' },
+  '040120': { cClassTrib: '200003', description: 'Leite fluido pasteurizado ou esterilizado', anexo: 'Anexo I' },
+  '040140': { cClassTrib: '200003', description: 'Leite fluido pasteurizado ou esterilizado', anexo: 'Anexo I' },
+  '040150': { cClassTrib: '200003', description: 'Leite fluido pasteurizado ou esterilizado', anexo: 'Anexo I' },
+  '040210': { cClassTrib: '200003', description: 'Leite em pó integral ou desnatado', anexo: 'Anexo I' },
+  '040221': { cClassTrib: '200003', description: 'Leite em pó integral ou desnatado', anexo: 'Anexo I' },
+  '040229': { cClassTrib: '200003', description: 'Leite em pó integral ou desnatado', anexo: 'Anexo I' },
+  '0401': { cClassTrib: '200003', description: 'Leite fluido', anexo: 'Anexo I' },
+  '0402': { cClassTrib: '200003', description: 'Leite em pó, concentrado ou adicionado de açúcar', anexo: 'Anexo I' },
+  // Fórmulas infantis
+  '19011010': { cClassTrib: '200003', description: 'Fórmulas infantis definidas por previsão legal específica', anexo: 'Anexo I' },
+  '19011020': { cClassTrib: '200003', description: 'Fórmulas infantis definidas por previsão legal específica', anexo: 'Anexo I' },
+  // Manteiga e margarina
+  '04051000': { cClassTrib: '200003', description: 'Manteiga', anexo: 'Anexo I' },
+  '15171000': { cClassTrib: '200003', description: 'Margarina', anexo: 'Anexo I' },
+  '0405': { cClassTrib: '200003', description: 'Manteiga e outras matérias gordas provenientes do leite', anexo: 'Anexo I' },
+  // Feijões
+  '071331': { cClassTrib: '200003', description: 'Feijões secos, inclusive descascados', anexo: 'Anexo I' },
+  '071332': { cClassTrib: '200003', description: 'Feijões secos, inclusive descascados', anexo: 'Anexo I' },
+  '071333': { cClassTrib: '200003', description: 'Feijões secos, inclusive descascados', anexo: 'Anexo I' },
+  '071334': { cClassTrib: '200003', description: 'Feijões secos, inclusive descascados', anexo: 'Anexo I' },
+  '071335': { cClassTrib: '200003', description: 'Feijões secos, inclusive descascados', anexo: 'Anexo I' },
+  '071339': { cClassTrib: '200003', description: 'Feijões secos, inclusive descascados', anexo: 'Anexo I' },
+  '0713': { cClassTrib: '200003', description: 'Legumes de vagem, secos, em grãos', anexo: 'Anexo I' },
+  // Café
+  '090121': { cClassTrib: '200003', description: 'Café torrado e moído', anexo: 'Anexo I' },
+  '090122': { cClassTrib: '200003', description: 'Café torrado e moído', anexo: 'Anexo I' },
+  '210111': { cClassTrib: '200003', description: 'Café solúvel', anexo: 'Anexo I' },
+  '210112': { cClassTrib: '200003', description: 'Café solúvel', anexo: 'Anexo I' },
+  '0901': { cClassTrib: '200003', description: 'Café', anexo: 'Anexo I' },
+  // Óleo de babaçu
+  '15132120': { cClassTrib: '200003', description: 'Óleo de babaçu', anexo: 'Anexo I' },
+  // Farinhas
+  '11062000': { cClassTrib: '200003', description: 'Farinha de mandioca', anexo: 'Anexo I' },
+  '19030000': { cClassTrib: '200003', description: 'Tapioca e seus sucedâneos', anexo: 'Anexo I' },
+  '11022000': { cClassTrib: '200003', description: 'Farinha de milho', anexo: 'Anexo I' },
+  '11031300': { cClassTrib: '200003', description: 'Grumos e sêmolas de milho', anexo: 'Anexo I' },
+  '11041900': { cClassTrib: '200003', description: 'Grãos de milho esmagados ou em flocos', anexo: 'Anexo I' },
+  '11042300': { cClassTrib: '200003', description: 'Grãos de milho esmagados ou em flocos', anexo: 'Anexo I' },
+  '11010010': { cClassTrib: '200003', description: 'Farinha de trigo', anexo: 'Anexo I' },
+  '1101': { cClassTrib: '200003', description: 'Farinhas de trigo ou de mistura de trigo com centeio', anexo: 'Anexo I' },
+  '1102': { cClassTrib: '200003', description: 'Farinhas de cereais', anexo: 'Anexo I' },
+  '1103': { cClassTrib: '200003', description: 'Grumos, sêmolas e pellets de cereais', anexo: 'Anexo I' },
+  '1104': { cClassTrib: '200003', description: 'Grãos de cereais trabalhados de outro modo', anexo: 'Anexo I' },
+  '1106': { cClassTrib: '200003', description: 'Farinhas de leguminosas secas, de raízes ou tubérculos (farofa, farinha de mandioca)', anexo: 'Anexo I' },
+  // Açúcar
+  '17011400': { cClassTrib: '200003', description: 'Açúcar cristal', anexo: 'Anexo I' },
+  '17019900': { cClassTrib: '200003', description: 'Outros açúcares de cana', anexo: 'Anexo I' },
+  '1701': { cClassTrib: '200003', description: 'Açúcares de cana ou de beterraba', anexo: 'Anexo I' },
+  '1702': { cClassTrib: '200003', description: 'Outros açúcares', anexo: 'Anexo I' },
+  '1703': { cClassTrib: '200003', description: 'Melaços resultantes da extração ou refinação do açúcar', anexo: 'Anexo I' },
+  // Massas alimentícias (Capítulo 19)
+  '190111': { cClassTrib: '200003', description: 'Massas alimentícias não cozidas, nem recheadas', anexo: 'Anexo I' },
+  '190119': { cClassTrib: '200003', description: 'Massas alimentícias não cozidas, nem recheadas', anexo: 'Anexo I' },
+  '19012010': { cClassTrib: '200003', description: 'Pré-misturas de pão francês', anexo: 'Anexo I' },
+  '19012090': { cClassTrib: '200003', description: 'Pré-misturas de pão francês', anexo: 'Anexo I' },
+  '19019090': { cClassTrib: '200003', description: 'Outras preparações alimentícias de farinhas, sêmolas, amidos, féculas ou de extratos de malte', anexo: 'Anexo I' },
+  '1901': { cClassTrib: '200003', description: 'Preparações alimentícias de farinhas, sêmolas, amidos ou féculas (fórmulas infantis, pré-misturas, farofas)', anexo: 'Anexo I' },
+  '1902': { cClassTrib: '200003', description: 'Massas alimentícias (macarrão, espaguete, lasanha, talharim)', anexo: 'Anexo I' },
+  '1903': { cClassTrib: '200003', description: 'Tapioca e seus sucedâneos', anexo: 'Anexo I' },
+  '1904': { cClassTrib: '200003', description: 'Produtos à base de cereais obtidos por expansão ou torrefação (cereais matinais, granola)', anexo: 'Anexo I' },
+  '19059090': { cClassTrib: '200003', description: 'Pão francês (sal, farinha de trigo, água e fermento)', anexo: 'Anexo I' },
+  '1905': { cClassTrib: '200003', description: 'Produtos de padaria, pastelaria ou da indústria de bolachas e biscoitos', anexo: 'Anexo I' },
+  // Aveia
+  '11041200': { cClassTrib: '200003', description: 'Grãos de aveia', anexo: 'Anexo I' },
+  '11042200': { cClassTrib: '200003', description: 'Grãos de aveia trabalhados', anexo: 'Anexo I' },
+  '11029000': { cClassTrib: '200003', description: 'Farinha de aveia', anexo: 'Anexo I' },
+  // Carnes
+  '0201': { cClassTrib: '200003', description: 'Carnes de bovinos, frescas ou refrigeradas', anexo: 'Anexo I' },
+  '0202': { cClassTrib: '200003', description: 'Carnes de bovinos, congeladas', anexo: 'Anexo I' },
+  '0203': { cClassTrib: '200003', description: 'Carnes de suínos, frescas, refrigeradas ou congeladas', anexo: 'Anexo I' },
+  '0204': { cClassTrib: '200003', description: 'Carnes de ovinos e caprinos, frescas, refrigeradas ou congeladas', anexo: 'Anexo I' },
+  '0206': { cClassTrib: '200003', description: 'Miudezas comestíveis de bovinos, suínos, ovinos, caprinos', anexo: 'Anexo I' },
+  '0207': { cClassTrib: '200003', description: 'Carnes e miudezas de aves (frango, pato, peru)', anexo: 'Anexo I' },
+  // Peixes
+  '0302': { cClassTrib: '200003', description: 'Peixes frescos ou refrigerados (exceto salmão, bacalhau, atum e hadoque)', anexo: 'Anexo I' },
+  '0303': { cClassTrib: '200003', description: 'Peixes congelados (exceto salmão, bacalhau, atum e hadoque)', anexo: 'Anexo I' },
+  '0304': { cClassTrib: '200003', description: 'Filés de peixes frescos, refrigerados ou congelados', anexo: 'Anexo I' },
+  // Queijos
+  '04061010': { cClassTrib: '200003', description: 'Queijo tipo mussarela', anexo: 'Anexo I' },
+  '04061090': { cClassTrib: '200003', description: 'Queijo tipo minas, ricota', anexo: 'Anexo I' },
+  '04069020': { cClassTrib: '200003', description: 'Queijo tipo prato', anexo: 'Anexo I' },
+  '04069040': { cClassTrib: '200003', description: 'Queijo tipo provolone', anexo: 'Anexo I' },
+  '04069090': { cClassTrib: '200003', description: 'Queijo tipo coalho e outros queijos', anexo: 'Anexo I' },
+  '04063000': { cClassTrib: '200003', description: 'Requeijão', anexo: 'Anexo I' },
+  '0406': { cClassTrib: '200003', description: 'Queijos e requeijão', anexo: 'Anexo I' },
+  // Sal
+  '25010020': { cClassTrib: '200003', description: 'Sal iodado', anexo: 'Anexo I' },
+  '2501': { cClassTrib: '200003', description: 'Sal', anexo: 'Anexo I' },
+  // Erva-mate
+  '0903': { cClassTrib: '200003', description: 'Erva-mate e mate (cuia ou chimarrão)', anexo: 'Anexo I' },
+  // Cereais
+  '1001': { cClassTrib: '200003', description: 'Trigo e mistura de trigo com centeio', anexo: 'Anexo I' },
+  '1005': { cClassTrib: '200003', description: 'Milho', anexo: 'Anexo I' },
+  // Óleos
+  '1507': { cClassTrib: '200003', description: 'Óleo de soja', anexo: 'Anexo VII' },
+  '1509': { cClassTrib: '200003', description: 'Azeite de oliva', anexo: 'Anexo VII' },
+  '1512': { cClassTrib: '200003', description: 'Óleo de girassol, cártamo ou algodão', anexo: 'Anexo VII' },
+  '1517': { cClassTrib: '200003', description: 'Margarina', anexo: 'Anexo I' },
+  // Embutidos e preparações de carnes
+  '1601': { cClassTrib: '200003', description: 'Enchidos e produtos semelhantes de carne (linguiça, salsicha, mortadela)', anexo: 'Anexo VII' },
+  '1602': { cClassTrib: '200003', description: 'Outras preparações e conservas de carne', anexo: 'Anexo VII' },
+  '1604': { cClassTrib: '200003', description: 'Preparações e conservas de peixes (sardinha, atum em conserva)', anexo: 'Anexo VII' },
+  // Preparações alimentícias (Capítulo 20 e 21)
+  '2001': { cClassTrib: '200003', description: 'Produtos hortícolas, frutas e outras partes comestíveis de plantas, preparados ou conservados em vinagre', anexo: 'Anexo VII' },
+  '2002': { cClassTrib: '200003', description: 'Tomates preparados ou conservados', anexo: 'Anexo VII' },
+  '2005': { cClassTrib: '200003', description: 'Outros produtos hortícolas preparados ou conservados', anexo: 'Anexo VII' },
+  '2101': { cClassTrib: '200003', description: 'Extratos, essências e concentrados de café, chá ou mate', anexo: 'Anexo VII' },
+  '2103': { cClassTrib: '200003', description: 'Preparações para molhos e molhos preparados; condimentos e temperos', anexo: 'Anexo VII' },
+  '2104': { cClassTrib: '200003', description: 'Preparações para caldos e sopas', anexo: 'Anexo VII' },
+  '2106': { cClassTrib: '200003', description: 'Preparações alimentícias não especificadas', anexo: 'Anexo VII' },
+
+  // ANEXO XV - Produtos Hortícolas, Frutas e Ovos (Alíquota Zero)
+  '0701': { cClassTrib: '200015', description: 'Batatas frescas ou refrigeradas', anexo: 'Anexo XV' },
+  '0702': { cClassTrib: '200015', description: 'Tomates frescos ou refrigerados', anexo: 'Anexo XV' },
+  '0703': { cClassTrib: '200015', description: 'Cebolas, chalotas, alhos, alhos-porós frescos ou refrigerados', anexo: 'Anexo XV' },
+  '0704': { cClassTrib: '200015', description: 'Couves, couve-flor, repolho, brócolis frescos ou refrigerados', anexo: 'Anexo XV' },
+  '0705': { cClassTrib: '200015', description: 'Alfaces e chicórias frescas ou refrigeradas', anexo: 'Anexo XV' },
+  '0706': { cClassTrib: '200015', description: 'Cenouras, nabos, beterrabas, rabanetes frescos ou refrigerados', anexo: 'Anexo XV' },
+  '0707': { cClassTrib: '200015', description: 'Pepinos e pepininhos frescos ou refrigerados', anexo: 'Anexo XV' },
+  '0708': { cClassTrib: '200015', description: 'Legumes de vagem frescos ou refrigerados', anexo: 'Anexo XV' },
+  '0709': { cClassTrib: '200015', description: 'Outros produtos hortícolas frescos ou refrigerados', anexo: 'Anexo XV' },
+  '0803': { cClassTrib: '200015', description: 'Bananas frescas ou secas', anexo: 'Anexo XV' },
+  '0804': { cClassTrib: '200015', description: 'Tâmaras, figos, abacaxis, abacates, goiabas, mangas frescos ou secos', anexo: 'Anexo XV' },
+  '0805': { cClassTrib: '200015', description: 'Cítricos frescos ou secos (laranjas, tangerinas, limões)', anexo: 'Anexo XV' },
+  '0806': { cClassTrib: '200015', description: 'Uvas frescas ou secas', anexo: 'Anexo XV' },
+  '0807': { cClassTrib: '200015', description: 'Melões e melancias frescos', anexo: 'Anexo XV' },
+  '0808': { cClassTrib: '200015', description: 'Maçãs, peras e marmelos frescos', anexo: 'Anexo XV' },
+  '0809': { cClassTrib: '200015', description: 'Damascos, cerejas, pêssegos, ameixas frescos', anexo: 'Anexo XV' },
+  '0810': { cClassTrib: '200015', description: 'Outras frutas frescas (morangos, framboesas, etc.)', anexo: 'Anexo XV' },
+  '04072100': { cClassTrib: '200015', description: 'Ovos de galinha, frescos', anexo: 'Anexo XV' },
+  '04072900': { cClassTrib: '200015', description: 'Ovos de galinha, frescos', anexo: 'Anexo XV' },
+  '040790': { cClassTrib: '200015', description: 'Ovos de outras aves', anexo: 'Anexo XV' },
+  '0407': { cClassTrib: '200015', description: 'Ovos de aves, com casca, frescos', anexo: 'Anexo XV' },
+
+  // ANEXO XIV - Medicamentos (Alíquota Zero)
+  '300431': { cClassTrib: '200009', description: 'Insulinas', anexo: 'Anexo XIV' },
+  '300432': { cClassTrib: '200009', description: 'Insulinas', anexo: 'Anexo XIV' },
+  '300490': { cClassTrib: '200009', description: 'Medicamentos (para câncer, HIV/AIDS, doenças raras, etc.)', anexo: 'Anexo XIV' },
+  '300220': { cClassTrib: '200009', description: 'Vacinas para uso humano', anexo: 'Anexo XIV' },
+  '300213': { cClassTrib: '200009', description: 'Imunoglobulinas', anexo: 'Anexo XIV' },
+  '300210': { cClassTrib: '200009', description: 'Soros e hemoderivados', anexo: 'Anexo XIV' },
+  '300290': { cClassTrib: '200009', description: 'Soros e hemoderivados', anexo: 'Anexo XIV' },
+  '3003': { cClassTrib: '200009', description: 'Medicamentos não dosados para venda a retalho', anexo: 'Anexo XIV' },
+  '3004': { cClassTrib: '200009', description: 'Medicamentos dosados para venda a retalho', anexo: 'Anexo XIV' },
+  '3002': { cClassTrib: '200009', description: 'Vacinas, soros, hemoderivados e imunoglobulinas', anexo: 'Anexo XIV' },
+
+  // ANEXO IV e V - Dispositivos Médicos e Acessibilidade
+  '9018': { cClassTrib: '200004', description: 'Instrumentos e aparelhos para medicina, cirurgia, odontologia ou veterinária', anexo: 'Anexo IV' },
+  '9019': { cClassTrib: '200004', description: 'Aparelhos de mecanoterapia; aparelhos de massagem; aparelhos de psicotécnica', anexo: 'Anexo IV' },
+  '9021': { cClassTrib: '200004', description: 'Artigos e aparelhos ortopédicos; próteses; aparelhos para facilitar a audição', anexo: 'Anexo IV/V' },
+  '9022': { cClassTrib: '200004', description: 'Aparelhos de raios X e que utilizem radiações', anexo: 'Anexo IV' },
+  '8713': { cClassTrib: '200008', description: 'Cadeiras de rodas e outros veículos para deficientes', anexo: 'Anexo V/XIII' },
 };
 
 // Função para buscar por NCM
-export const findByNCM = (ncm: string): { cClassTrib: string; description: string } | null => {
+export const findByNCM = (ncm: string): { cClassTrib: string; description: string; anexo: string } | null => {
   if (!ncm || ncm.length < 4) return null;
   const cleanNCM = ncm.replace(/\D/g, '');
   
