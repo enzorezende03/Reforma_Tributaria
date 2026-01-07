@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Building2, Lock, AlertCircle } from 'lucide-react';
+import logo2m from '@/assets/logo-2m.png';
 
 const Login = () => {
   const [cnpj, setCnpj] = useState('');
@@ -66,8 +67,8 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-4">
       <Card className="w-full max-w-md shadow-2xl border-0 bg-white/95 backdrop-blur">
         <CardHeader className="text-center space-y-4 pb-2">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl flex items-center justify-center shadow-lg">
-            <Building2 className="w-8 h-8 text-white" />
+          <div className="mx-auto">
+            <img src={logo2m} alt="2M Contabilidade" className="h-24 w-auto mx-auto" />
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-gray-800">
