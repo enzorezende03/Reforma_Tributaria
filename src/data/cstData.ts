@@ -1,3 +1,8 @@
+export interface RequisitoLegal {
+  titulo: string;
+  itens: string[];
+}
+
 export interface CSTRecord {
   cstCode: string;
   cstDescription: string;
@@ -11,6 +16,7 @@ export interface CSTRecord {
   dIniVig: string;
   link: string;
   ncmCodes?: string[]; // Códigos NCM associados (prefixos de 4 dígitos)
+  requisitosLegais?: RequisitoLegal[]; // Requisitos legais para obter o benefício
 }
 
 // Mapeamento de NCM (prefixos) para cClassTrib - descrições conforme Anexos da LC 214/2025
@@ -647,13 +653,34 @@ export const cstData: CSTRecord[] = [
     cstDescription: "Alíquota reduzida",
     cClassTrib: "200029",
     cClassTribName: "Serviços de educação (Anexo II)",
-    cClassTribDescription: "Fornecimento dos serviços de educação (Anexo II).",
+    cClassTribDescription: "Fornecimento dos serviços de educação (Anexo II): educação infantil, ensino fundamental, ensino médio, educação superior, pós-graduação, ensino técnico e profissional.",
     lcArticle: "Art. 129",
     aliquotaType: "Padrão",
     pRedIBS: 60,
     pRedCBS: 60,
     dIniVig: "01/01/2026",
-    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art129"
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art129",
+    requisitosLegais: [
+      {
+        titulo: "Serviços de educação contemplados (Anexo II):",
+        itens: [
+          "I - Educação infantil (creche e pré-escola);",
+          "II - Ensino fundamental;",
+          "III - Ensino médio;",
+          "IV - Educação superior (graduação e pós-graduação);",
+          "V - Educação profissional técnica de nível médio;",
+          "VI - Educação de jovens e adultos;",
+          "VII - Educação especial."
+        ]
+      },
+      {
+        titulo: "Requisitos para aplicação da redução:",
+        itens: [
+          "Os serviços devem ser prestados por instituições regularmente constituídas e autorizadas pelos órgãos competentes.",
+          "A redução aplica-se aos serviços diretamente relacionados à atividade educacional."
+        ]
+      }
+    ]
   },
   {
     cstCode: "200",
@@ -666,7 +693,33 @@ export const cstData: CSTRecord[] = [
     pRedIBS: 60,
     pRedCBS: 60,
     dIniVig: "01/01/2026",
-    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art130"
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art130",
+    requisitosLegais: [
+      {
+        titulo: "Serviços de saúde humana contemplados (Anexo III):",
+        itens: [
+          "I - Serviços cirúrgicos;",
+          "II - Serviços obstétricos;",
+          "III - Serviços de UTI, emergência e urgência;",
+          "IV - Serviços de enfermagem;",
+          "V - Diagnóstico por imagem e análise laboratorial;",
+          "VI - Serviços de pré-parto, parto e pós-parto;",
+          "VII - Consultas médicas;",
+          "VIII - Serviços de odontologia;",
+          "IX - Fisioterapia, fonoaudiologia, psicologia e nutrição;",
+          "X - Serviços hospitalares;",
+          "XI - Transporte de pacientes em ambulância ou UTI móvel."
+        ]
+      },
+      {
+        titulo: "Requisitos para aplicação da redução:",
+        itens: [
+          "Os serviços devem ser prestados por profissionais ou estabelecimentos regularmente habilitados.",
+          "Os estabelecimentos devem possuir licença sanitária válida.",
+          "A redução aplica-se exclusivamente aos serviços listados no Anexo III da LC 214/2025."
+        ]
+      }
+    ]
   },
   {
     cstCode: "200",
@@ -959,13 +1012,41 @@ export const cstData: CSTRecord[] = [
     cstDescription: "Alíquota reduzida",
     cClassTrib: "200053",
     cClassTribName: "Prestação de serviços de profissões intelectuais",
-    cClassTribDescription: "Prestação de serviços de profissões intelectuais.",
+    cClassTribDescription: "Prestação de serviços de profissões intelectuais de natureza científica, literária ou artística, incluindo: advogados, arquitetos e urbanistas, assistentes sociais, bibliotecários, biólogos, contabilistas, economistas, economistas domésticos, profissionais de educação física, engenheiros e agrônomos, estatísticos, médicos veterinários e zootecnistas, museólogos, químicos, profissionais de relações públicas, técnicos industriais e técnicos agrícolas.",
     lcArticle: "Art. 127",
     aliquotaType: "Padrão",
     pRedIBS: 30,
     pRedCBS: 30,
     dIniVig: "01/01/2026",
-    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art127"
+    link: "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm#art127",
+    requisitosLegais: [
+      {
+        titulo: "§ 1º A redução de alíquotas aplica-se à prestação de serviços realizada por:",
+        itens: [
+          "I - pessoa física, desde que os serviços prestados estejam vinculados à habilitação dos profissionais;",
+          "II - pessoa jurídica que cumpra, cumulativamente, os seguintes requisitos:",
+          "   a) possuam os sócios habilitações profissionais diretamente relacionadas com os objetivos da sociedade e estejam submetidos à fiscalização de conselho profissional;",
+          "   b) não tenha como sócio pessoa jurídica;",
+          "   c) não seja sócia de outra pessoa jurídica;",
+          "   d) não exerça atividade diversa das habilitações profissionais dos sócios;",
+          "   e) sejam os serviços relacionados à atividade-fim prestados diretamente pelos sócios, admitido o concurso de auxiliares ou colaboradores."
+        ]
+      },
+      {
+        titulo: "§ 2º Para fins do inciso II do § 1º, NÃO impedem a redução de alíquotas:",
+        itens: [
+          "I - a natureza jurídica da sociedade;",
+          "II - a união de diferentes profissionais previstos nos incisos I a XVIII do caput, desde que a atuação de cada sócio seja na sua habilitação profissional;",
+          "III - a forma de distribuição de lucros."
+        ]
+      },
+      {
+        titulo: "§ 3º Exceção para Profissionais de Educação Física (inciso X):",
+        itens: [
+          "Não se aplicam os §§ 1º e 2º à prestação de serviços relacionada à profissão do inciso X (educação física) efetuada por pessoa jurídica, desde que submetida à fiscalização de conselho profissional."
+        ]
+      }
+    ]
   },
 
   // CST 220 - Alíquota fixa
