@@ -10,8 +10,8 @@ import { NewsTab } from "@/components/NewsTab";
 import { cstData, findByNCM } from "@/data/cstData";
 import { getAnexoById, type Anexo } from "@/data/anexosData";
 import { fuzzyMatch } from "@/lib/fuzzySearch";
-import { SearchX, AlertCircle, FileSpreadsheet, Search, Newspaper, CheckCircle2 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { SearchX, AlertCircle, FileSpreadsheet, Search, Newspaper, CheckCircle2, ShieldAlert } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -168,6 +168,19 @@ const Index = () => {
                 </Alert>
               )}
               
+              {/* Aviso de conferência */}
+              {filteredRecords.length > 0 && searchQuery && (
+                <Alert className="mb-6 border-blue-500/50 bg-blue-500/10">
+                  <ShieldAlert className="h-4 w-4 text-blue-500" />
+                  <AlertTitle className="text-blue-700 dark:text-blue-400 font-semibold">Atenção: Conferência Obrigatória</AlertTitle>
+                  <AlertDescription className="text-blue-600 dark:text-blue-300 text-sm">
+                    Os códigos CST apresentados são <strong>sugestões</strong> baseadas na descrição informada. 
+                    É de <strong>responsabilidade do cliente</strong> conferir se a classificação tributária sugerida 
+                    condiz com as características reais do produto/serviço, consultando a legislação vigente e os anexos da LC 214/2025.
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {filteredRecords.length > 0 ? (
                 <div className="grid gap-6 md:grid-cols-2">
                   {filteredRecords.map((record, index) => (

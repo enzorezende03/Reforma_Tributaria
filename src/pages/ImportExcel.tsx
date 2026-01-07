@@ -1,10 +1,11 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Upload, FileSpreadsheet, Search, Download } from "lucide-react";
+import { ArrowLeft, Upload, FileSpreadsheet, Search, Download, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { cstData, CSTRecord } from "@/data/cstData";
 import { fuzzyMatch } from "@/lib/fuzzySearch";
@@ -600,6 +601,17 @@ const ImportExcel = () => {
                 <CardDescription className="text-slate-400">
                   Códigos CST sugeridos para cada produto/serviço da sua planilha
                 </CardDescription>
+                
+                {/* Aviso de conferência */}
+                <Alert className="mt-4 border-amber-500/50 bg-amber-500/10">
+                  <ShieldAlert className="h-4 w-4 text-amber-500" />
+                  <AlertTitle className="text-amber-400 font-semibold">Atenção: Conferência Obrigatória</AlertTitle>
+                  <AlertDescription className="text-amber-300 text-sm">
+                    Os códigos CST apresentados são <strong>sugestões</strong> baseadas na descrição e/ou NCM dos produtos. 
+                    É de <strong>responsabilidade do cliente</strong> conferir se a classificação tributária sugerida 
+                    condiz com as características reais do produto/serviço, consultando a legislação vigente e os anexos da LC 214/2025.
+                  </AlertDescription>
+                </Alert>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
