@@ -8,7 +8,11 @@ import { AnexoModal } from "@/components/AnexoModal";
 import { cstData } from "@/data/cstData";
 import { getAnexoById, type Anexo } from "@/data/anexosData";
 import { fuzzyMatch } from "@/lib/fuzzySearch";
-import { SearchX } from "lucide-react";
+import { SearchX, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+// Registro padrão CST 000 / cClassTrib 000001 para quando não encontrar resultados
+const defaultRecord = cstData.find(r => r.cstCode === "000" && r.cClassTrib === "000001");
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,8 +21,8 @@ const Index = () => {
   const [isAnexoModalOpen, setIsAnexoModalOpen] = useState(false);
   const [useSimilarSearch, setUseSimilarSearch] = useState(true);
 
-  const filteredRecords = useMemo(() => {
-    return cstData.filter((record) => {
+  const { filteredRecords, showingDefault } = useMemo(() => {
+    const results = cstData.filter((record) => {
       const matchesFilter = selectedFilter === null || record.cstCode === selectedFilter;
       
       if (!searchQuery) return matchesFilter;
@@ -36,6 +40,13 @@ const Index = () => {
       
       return matchesFilter && matchesSearch;
     });
+
+    // Se há busca ativa e não encontrou resultados, mostrar o registro padrão
+    if (searchQuery && results.length === 0 && defaultRecord && selectedFilter === null) {
+      return { filteredRecords: [defaultRecord], showingDefault: true };
+    }
+
+    return { filteredRecords: results, showingDefault: false };
   }, [searchQuery, selectedFilter, useSimilarSearch]);
 
   const handleOpenAnexo = (anexoId: string) => {
@@ -87,6 +98,15 @@ const Index = () => {
 
         {/* Results */}
         <section>
+          {showingDefault && (
+            <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
+              <AlertCircle className="h-4 w-4 text-amber-500" />
+              <AlertDescription className="text-amber-700 dark:text-amber-400">
+                <strong>"{searchQuery}"</strong> não possui classificação específica. Sugerimos o CST 000 - Tributação integral (cClassTrib 000001).
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {filteredRecords.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2">
               {filteredRecords.map((record, index) => (
