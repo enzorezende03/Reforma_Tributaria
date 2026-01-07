@@ -1,8 +1,10 @@
-import { X, ExternalLink, FileText, Percent, Book } from "lucide-react";
+import { useState, useMemo } from "react";
+import { ExternalLink, FileText, Percent, Book, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Anexo } from "@/data/anexosData";
 
@@ -13,6 +15,20 @@ interface AnexoModalProps {
 }
 
 export const AnexoModal = ({ anexo, isOpen, onClose }: AnexoModalProps) => {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredItens = useMemo(() => {
+    if (!anexo) return [];
+    if (!searchTerm.trim()) return anexo.itens;
+    
+    const term = searchTerm.toLowerCase();
+    return anexo.itens.filter(
+      item => 
+        item.produto.toLowerCase().includes(term) ||
+        item.ncm.toLowerCase().includes(term)
+    );
+  }, [anexo, searchTerm]);
+
   if (!anexo) return null;
 
   const isAliquotaZero = anexo.reducao.includes("100%") || anexo.reducao.includes("Zero");
@@ -54,9 +70,20 @@ export const AnexoModal = ({ anexo, isOpen, onClose }: AnexoModalProps) => {
 
         <ScrollArea className="max-h-[50vh] p-6">
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-              <Book className="h-4 w-4" />
-              <span>{anexo.itens.length} itens listados</span>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por nome ou NCM..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap">
+                <Book className="h-4 w-4" />
+                <span>{filteredItens.length} de {anexo.itens.length} itens</span>
+              </div>
             </div>
 
             <Table>
@@ -68,7 +95,7 @@ export const AnexoModal = ({ anexo, isOpen, onClose }: AnexoModalProps) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {anexo.itens.map((item, index) => (
+                {filteredItens.map((item, index) => (
                   <TableRow key={index} className="table-row-hover">
                     <TableCell className="font-medium">{item.produto}</TableCell>
                     <TableCell>
