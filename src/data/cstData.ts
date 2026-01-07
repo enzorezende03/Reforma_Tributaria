@@ -660,7 +660,7 @@ export const cstData: CSTRecord[] = [
     cstDescription: "Alíquota reduzida",
     cClassTrib: "200030",
     cClassTribName: "Serviços de saúde humana (Anexo III)",
-    cClassTribDescription: "Fornecimento dos serviços de saúde humana (Anexo III).",
+    cClassTribDescription: "Serviços cirúrgicos, obstétricos, UTI, emergência e urgência, enfermagem, diagnóstico por imagem, análise laboratorial, pré-parto, parto e pós-parto, consultas médicas, odontologia, fisioterapia, fonoaudiologia, psicologia, nutrição, serviços hospitalares e transporte de pacientes (Anexo III).",
     lcArticle: "Art. 130",
     aliquotaType: "Padrão",
     pRedIBS: 60,
