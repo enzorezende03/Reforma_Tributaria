@@ -71,6 +71,19 @@ const synonyms: Record<string, string[]> = {
   "jornalista": ["profissoes intelectuais", "intelectual", "jornalismo"],
   "intelectual": ["profissoes intelectuais"],
   "profissoes intelectuais": ["intelectual", "arquitetura", "engenharia", "advocacia", "contabilidade", "medicina", "consultoria", "design"],
+  
+  // Operações com bens imóveis
+  "locacao": ["bens imoveis", "imoveis", "aluguel", "arrendamento"],
+  "locacao de imoveis": ["bens imoveis", "operacoes imoveis", "aluguel"],
+  "aluguel": ["bens imoveis", "locacao", "imoveis", "arrendamento"],
+  "aluguel de imoveis": ["bens imoveis", "locacao", "operacoes imoveis"],
+  "imovel": ["bens imoveis", "imoveis", "imobiliario"],
+  "imoveis": ["bens imoveis", "imovel", "imobiliario", "locacao"],
+  "imobiliario": ["bens imoveis", "imoveis", "imovel"],
+  "imobiliaria": ["bens imoveis", "imoveis", "imobiliario"],
+  "arrendamento": ["bens imoveis", "locacao", "aluguel"],
+  "bens imoveis": ["imoveis", "imovel", "locacao", "aluguel", "imobiliario"],
+  "operacoes imoveis": ["bens imoveis", "imoveis", "locacao"],
 };
 
 // Função para encontrar sinônimos de um termo (mais restrita)
