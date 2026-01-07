@@ -133,6 +133,96 @@ const ImportExcel = () => {
     link: ''
   };
 
+  // Mapeamento de NCM para cClassTrib (baseado na LC 214/2025)
+  // NCM de 4 a 8 dígitos - usamos prefixos para matching
+  const ncmToCategory: Record<string, { cClassTrib: string; description: string }> = {
+    // Capítulo 01 - Animais vivos
+    '0105': { cClassTrib: '200015', description: 'Aves vivas' },
+    '0407': { cClassTrib: '200015', description: 'Ovos de aves' },
+    // Capítulo 02 - Carnes
+    '0201': { cClassTrib: '200003', description: 'Carnes bovinas frescas' },
+    '0202': { cClassTrib: '200003', description: 'Carnes bovinas congeladas' },
+    '0203': { cClassTrib: '200003', description: 'Carnes suínas' },
+    '0207': { cClassTrib: '200003', description: 'Carnes de aves' },
+    // Capítulo 03 - Peixes
+    '0302': { cClassTrib: '200003', description: 'Peixes frescos' },
+    '0303': { cClassTrib: '200003', description: 'Peixes congelados' },
+    // Capítulo 04 - Laticínios e ovos
+    '0401': { cClassTrib: '200003', description: 'Leite' },
+    '0402': { cClassTrib: '200003', description: 'Leite concentrado' },
+    '0403': { cClassTrib: '200003', description: 'Iogurte e leite fermentado' },
+    '0405': { cClassTrib: '200003', description: 'Manteiga e gorduras lácteas' },
+    '0406': { cClassTrib: '200003', description: 'Queijos' },
+    // Capítulo 07 - Hortícolas
+    '0701': { cClassTrib: '200015', description: 'Batatas' },
+    '0702': { cClassTrib: '200015', description: 'Tomates' },
+    '0703': { cClassTrib: '200015', description: 'Cebolas, alhos' },
+    '0704': { cClassTrib: '200015', description: 'Couves, repolhos' },
+    '0705': { cClassTrib: '200015', description: 'Alfaces' },
+    '0706': { cClassTrib: '200015', description: 'Cenouras, nabos' },
+    '0707': { cClassTrib: '200015', description: 'Pepinos' },
+    '0708': { cClassTrib: '200015', description: 'Leguminosas' },
+    '0709': { cClassTrib: '200015', description: 'Outros hortícolas' },
+    // Capítulo 08 - Frutas
+    '0803': { cClassTrib: '200015', description: 'Bananas' },
+    '0804': { cClassTrib: '200015', description: 'Tâmaras, figos' },
+    '0805': { cClassTrib: '200015', description: 'Cítricos' },
+    '0806': { cClassTrib: '200015', description: 'Uvas' },
+    '0807': { cClassTrib: '200015', description: 'Melões, melancias' },
+    '0808': { cClassTrib: '200015', description: 'Maçãs, peras' },
+    '0810': { cClassTrib: '200015', description: 'Morangos e outras frutas' },
+    // Capítulo 09 - Café, chá
+    '0901': { cClassTrib: '200003', description: 'Café' },
+    // Capítulo 10 - Cereais
+    '1001': { cClassTrib: '200003', description: 'Trigo' },
+    '1005': { cClassTrib: '200003', description: 'Milho' },
+    '1006': { cClassTrib: '200003', description: 'Arroz' },
+    // Capítulo 11 - Farinhas
+    '1101': { cClassTrib: '200003', description: 'Farinhas de trigo' },
+    '1102': { cClassTrib: '200003', description: 'Farinhas de cereais' },
+    '1103': { cClassTrib: '200003', description: 'Farinhas, sêmolas' },
+    '1104': { cClassTrib: '200003', description: 'Grãos trabalhados' },
+    '1106': { cClassTrib: '200003', description: 'Farinhas de leguminosas (farofa inclusa)' },
+    // Capítulo 15 - Óleos
+    '1507': { cClassTrib: '200003', description: 'Óleo de soja' },
+    '1509': { cClassTrib: '200003', description: 'Azeite de oliva' },
+    '1512': { cClassTrib: '200003', description: 'Óleo de girassol' },
+    // Capítulo 16 - Preparações de carnes
+    '1601': { cClassTrib: '200003', description: 'Embutidos (linguiças, salsichas)' },
+    '1602': { cClassTrib: '200003', description: 'Outras preparações de carnes' },
+    '1604': { cClassTrib: '200003', description: 'Conservas de peixes (sardinha, atum)' },
+    // Capítulo 17 - Açúcares
+    '1701': { cClassTrib: '200003', description: 'Açúcar de cana ou beterraba' },
+    // Capítulo 19 - Massas e produtos de padaria
+    '1902': { cClassTrib: '200003', description: 'Massas alimentícias (macarrão, espaguete)' },
+    '1905': { cClassTrib: '200003', description: 'Pães, biscoitos, bolachas' },
+    // Capítulo 20 - Preparações de hortícolas e frutas
+    '2001': { cClassTrib: '200003', description: 'Hortícolas em conserva' },
+    '2002': { cClassTrib: '200003', description: 'Tomates preparados' },
+    '2005': { cClassTrib: '200003', description: 'Outros hortícolas preparados' },
+    // Capítulo 21 - Preparações alimentícias diversas
+    '2103': { cClassTrib: '200003', description: 'Molhos e condimentos' },
+    // Capítulo 25 - Sal
+    '2501': { cClassTrib: '200003', description: 'Sal' },
+    // Capítulo 30 - Medicamentos
+    '3003': { cClassTrib: '200009', description: 'Medicamentos não dosados' },
+    '3004': { cClassTrib: '200009', description: 'Medicamentos dosados' },
+  };
+
+  // Função para buscar categoria por NCM (verifica prefixos)
+  const findCategoryByNCM = (ncm: string): { cClassTrib: string; description: string } | null => {
+    if (!ncm || ncm.length < 4) return null;
+    
+    // Tenta match exato primeiro, depois prefixos decrescentes
+    for (let len = Math.min(ncm.length, 8); len >= 4; len--) {
+      const prefix = ncm.substring(0, len);
+      if (ncmToCategory[prefix]) {
+        return ncmToCategory[prefix];
+      }
+    }
+    return null;
+  };
+
   // Palavras-chave PRIMÁRIAS - definem a categoria principal do produto
   const primaryKeywords: Record<string, { cClassTrib: string; weight: number }> = {
     // Massas e derivados - Cesta Básica (200003)
@@ -160,6 +250,7 @@ const ImportExcel = () => {
     'fuba': { cClassTrib: '200003', weight: 100 },
     'farinha': { cClassTrib: '200003', weight: 100 },
     'farinhas': { cClassTrib: '200003', weight: 100 },
+    'farofa': { cClassTrib: '000001', weight: 50 }, // Por nome não tem benefício, mas por NCM pode ter
     // Carnes - Cesta Básica
     'carne': { cClassTrib: '200003', weight: 100 },
     'carnes': { cClassTrib: '200003', weight: 100 },
@@ -282,22 +373,55 @@ const ImportExcel = () => {
         }
       });
       
-      // Encontrar a categoria com maior pontuação
-      let bestCategory = '';
-      let bestScore = 0;
+      // Encontrar a categoria com maior pontuação por NOME
+      let bestCategoryByName = '';
+      let bestScoreByName = 0;
       for (const [category, score] of Object.entries(categoryScores)) {
-        if (score > bestScore) {
-          bestScore = score;
-          bestCategory = category;
+        if (score > bestScoreByName) {
+          bestScoreByName = score;
+          bestCategoryByName = category;
         }
       }
+      
+      // Buscar categoria por NCM
+      const ncmCategoryInfo = findCategoryByNCM(ncmCode);
+      const bestCategoryByNCM = ncmCategoryInfo?.cClassTrib || '';
       
       // Buscar correspondências no cstData
       let matches: CSTRecord[] = [];
       
-      if (bestCategory) {
-        // Priorizar a categoria detectada
-        const categoryMatch = cstData.find(cst => cst.cClassTrib === bestCategory);
+      // Se NCM e Nome apontam para categorias DIFERENTES, mostrar ambas opções
+      if (ncmCode && bestCategoryByNCM && bestCategoryByName && bestCategoryByNCM !== bestCategoryByName) {
+        // Adiciona match por NCM primeiro (prioridade)
+        const ncmMatch = cstData.find(cst => cst.cClassTrib === bestCategoryByNCM);
+        if (ncmMatch) {
+          // Criar cópia com indicação de que veio do NCM
+          matches.push({
+            ...ncmMatch,
+            cClassTribDescription: `[NCM ${ncmCode}] ${ncmCategoryInfo?.description || ncmMatch.cClassTribDescription}`
+          });
+        }
+        
+        // Adiciona match por nome
+        const nameMatch = cstData.find(cst => cst.cClassTrib === bestCategoryByName);
+        if (nameMatch) {
+          matches.push({
+            ...nameMatch,
+            cClassTribDescription: `[Por Nome] ${nameMatch.cClassTribDescription}`
+          });
+        }
+      } else if (ncmCode && bestCategoryByNCM) {
+        // NCM disponível e válido - usar NCM como principal
+        const ncmMatch = cstData.find(cst => cst.cClassTrib === bestCategoryByNCM);
+        if (ncmMatch) {
+          matches = [{
+            ...ncmMatch,
+            cClassTribDescription: `[NCM ${ncmCode}] ${ncmCategoryInfo?.description || ncmMatch.cClassTribDescription}`
+          }];
+        }
+      } else if (bestCategoryByName) {
+        // Usar categoria por nome
+        const categoryMatch = cstData.find(cst => cst.cClassTrib === bestCategoryByName);
         if (categoryMatch) {
           matches = [categoryMatch];
         }
@@ -327,9 +451,10 @@ const ImportExcel = () => {
     setIsProcessing(false);
     
     const foundCount = resultsWithCST.filter(r => r.bestMatch && r.bestMatch.cstCode !== '000').length;
+    const conflictCount = resultsWithCST.filter(r => r.matches.length > 1).length;
     toast({
       title: "Busca concluída",
-      description: `${foundCount} produtos com códigos específicos. ${importedProducts.length - foundCount} produtos com código padrão (CST 000).`,
+      description: `${foundCount} produtos com códigos específicos. ${conflictCount > 0 ? `${conflictCount} com múltiplas sugestões (NCM vs Nome).` : ''} ${importedProducts.length - foundCount} com código padrão.`,
     });
   };
 
@@ -490,15 +615,31 @@ const ImportExcel = () => {
                     </TableHeader>
                     <TableBody>
                       {results.map((result, index) => (
-                        <TableRow key={index} className="border-slate-700 hover:bg-slate-700/50">
+                        <TableRow key={index} className={`border-slate-700 hover:bg-slate-700/50 ${result.matches.length > 1 ? 'bg-amber-900/20' : ''}`}>
                           <TableCell className="text-slate-400 font-mono">
                             {result.product.originalRow}
                           </TableCell>
-                          <TableCell className="text-white max-w-xs truncate">
-                            {result.product.description}
+                          <TableCell className="text-white max-w-xs">
+                            <div className="truncate">{result.product.description}</div>
+                            {result.matches.length > 1 && (
+                              <span className="text-xs text-amber-400 mt-1 block">
+                                ⚠️ Múltiplas sugestões (ver classificação)
+                              </span>
+                            )}
                           </TableCell>
                           <TableCell>
-                            {result.bestMatch ? (
+                            {result.matches.length > 1 ? (
+                              <div className="flex flex-col gap-1">
+                                {result.matches.slice(0, 2).map((match, i) => (
+                                  <Badge 
+                                    key={i} 
+                                    className={`font-mono ${i === 0 ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-600 hover:bg-slate-500'}`}
+                                  >
+                                    {match.cstCode}
+                                  </Badge>
+                                ))}
+                              </div>
+                            ) : result.bestMatch ? (
                               <Badge className="bg-blue-600 hover:bg-blue-700 font-mono">
                                 {result.bestMatch.cstCode}
                               </Badge>
@@ -509,7 +650,19 @@ const ImportExcel = () => {
                             )}
                           </TableCell>
                           <TableCell className="text-slate-300 max-w-sm">
-                            {result.bestMatch?.cClassTribName || '-'}
+                            {result.matches.length > 1 ? (
+                              <div className="space-y-2">
+                                {result.matches.slice(0, 2).map((match, i) => (
+                                  <div key={i} className={`text-sm ${i === 0 ? 'text-green-400' : 'text-slate-400'}`}>
+                                    <span className="font-medium">{match.cClassTribName}</span>
+                                    <br />
+                                    <span className="text-xs opacity-75">{match.cClassTribDescription}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              result.bestMatch?.cClassTribName || '-'
+                            )}
                           </TableCell>
                           <TableCell className="text-slate-300">
                             {result.bestMatch ? (
