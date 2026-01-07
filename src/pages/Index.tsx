@@ -7,10 +7,10 @@ import { StatsCards } from "@/components/StatsCards";
 import { CSTCard } from "@/components/CSTCard";
 import { AnexoModal } from "@/components/AnexoModal";
 import { NewsTab } from "@/components/NewsTab";
-import { cstData } from "@/data/cstData";
+import { cstData, findByNCM } from "@/data/cstData";
 import { getAnexoById, type Anexo } from "@/data/anexosData";
 import { fuzzyMatch } from "@/lib/fuzzySearch";
-import { SearchX, AlertCircle, FileSpreadsheet, Search, Newspaper } from "lucide-react";
+import { SearchX, AlertCircle, FileSpreadsheet, Search, Newspaper, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,7 +27,29 @@ const Index = () => {
   const [useSimilarSearch, setUseSimilarSearch] = useState(true);
   const [activeTab, setActiveTab] = useState("consulta");
 
-  const { filteredRecords, showingDefault } = useMemo(() => {
+  const { filteredRecords, showingDefault, ncmMatch } = useMemo(() => {
+    // Verificar se a busca é um NCM (apenas números, 4-8 dígitos)
+    const cleanQuery = searchQuery.replace(/\D/g, '');
+    const isNCMSearch = cleanQuery.length >= 4 && cleanQuery.length <= 8 && /^\d+$/.test(cleanQuery);
+    
+    let ncmMatchResult: { cClassTrib: string; description: string } | null = null;
+    
+    if (isNCMSearch) {
+      ncmMatchResult = findByNCM(cleanQuery);
+      
+      if (ncmMatchResult) {
+        // Buscar registros que correspondem ao cClassTrib do NCM
+        const ncmResults = cstData.filter(record => 
+          record.cClassTrib === ncmMatchResult!.cClassTrib &&
+          (selectedFilter === null || record.cstCode === selectedFilter)
+        );
+        
+        if (ncmResults.length > 0) {
+          return { filteredRecords: ncmResults, showingDefault: false, ncmMatch: ncmMatchResult };
+        }
+      }
+    }
+    
     const results = cstData.filter((record) => {
       const matchesFilter = selectedFilter === null || record.cstCode === selectedFilter;
       
@@ -49,10 +71,10 @@ const Index = () => {
 
     // Se há busca ativa e não encontrou resultados, mostrar o registro padrão
     if (searchQuery && results.length === 0 && defaultRecord && selectedFilter === null) {
-      return { filteredRecords: [defaultRecord], showingDefault: true };
+      return { filteredRecords: [defaultRecord], showingDefault: true, ncmMatch: null };
     }
 
-    return { filteredRecords: results, showingDefault: false };
+    return { filteredRecords: results, showingDefault: false, ncmMatch: null };
   }, [searchQuery, selectedFilter, useSimilarSearch]);
 
   const handleOpenAnexo = (anexoId: string) => {
@@ -128,6 +150,15 @@ const Index = () => {
 
             {/* Results */}
             <section>
+              {ncmMatch && (
+                <Alert className="mb-6 border-green-500/50 bg-green-500/10">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <AlertDescription className="text-green-700 dark:text-green-400">
+                    <strong>NCM {searchQuery}</strong> encontrado: {ncmMatch.description} - Classificação tributária com benefício fiscal.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               {showingDefault && (
                 <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
                   <AlertCircle className="h-4 w-4 text-amber-500" />

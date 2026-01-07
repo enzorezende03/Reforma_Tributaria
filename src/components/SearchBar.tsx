@@ -15,7 +15,7 @@ interface SearchBarProps {
 export const SearchBar = ({ 
   value, 
   onChange, 
-  placeholder = "Buscar por código CST, cClassTrib ou descrição...",
+  placeholder = "Buscar por código CST, cClassTrib, NCM ou descrição...",
   useSimilar = true,
   onToggleSimilar
 }: SearchBarProps) => {

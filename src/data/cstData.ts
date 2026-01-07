@@ -10,7 +10,98 @@ export interface CSTRecord {
   pRedCBS: number;
   dIniVig: string;
   link: string;
+  ncmCodes?: string[]; // Códigos NCM associados (prefixos de 4 dígitos)
 }
+
+// Mapeamento de NCM (prefixos) para cClassTrib
+export const ncmToClassTrib: Record<string, { cClassTrib: string; description: string }> = {
+  // Capítulo 01 - Animais vivos
+  '0105': { cClassTrib: '200015', description: 'Aves vivas' },
+  '0407': { cClassTrib: '200015', description: 'Ovos de aves' },
+  // Capítulo 02 - Carnes
+  '0201': { cClassTrib: '200003', description: 'Carnes bovinas frescas' },
+  '0202': { cClassTrib: '200003', description: 'Carnes bovinas congeladas' },
+  '0203': { cClassTrib: '200003', description: 'Carnes suínas' },
+  '0207': { cClassTrib: '200003', description: 'Carnes de aves' },
+  // Capítulo 03 - Peixes
+  '0302': { cClassTrib: '200003', description: 'Peixes frescos' },
+  '0303': { cClassTrib: '200003', description: 'Peixes congelados' },
+  // Capítulo 04 - Laticínios e ovos
+  '0401': { cClassTrib: '200003', description: 'Leite' },
+  '0402': { cClassTrib: '200003', description: 'Leite concentrado' },
+  '0403': { cClassTrib: '200003', description: 'Iogurte e leite fermentado' },
+  '0405': { cClassTrib: '200003', description: 'Manteiga e gorduras lácteas' },
+  '0406': { cClassTrib: '200003', description: 'Queijos' },
+  // Capítulo 07 - Hortícolas
+  '0701': { cClassTrib: '200015', description: 'Batatas' },
+  '0702': { cClassTrib: '200015', description: 'Tomates' },
+  '0703': { cClassTrib: '200015', description: 'Cebolas, alhos' },
+  '0704': { cClassTrib: '200015', description: 'Couves, repolhos' },
+  '0705': { cClassTrib: '200015', description: 'Alfaces' },
+  '0706': { cClassTrib: '200015', description: 'Cenouras, nabos' },
+  '0707': { cClassTrib: '200015', description: 'Pepinos' },
+  '0708': { cClassTrib: '200015', description: 'Leguminosas' },
+  '0709': { cClassTrib: '200015', description: 'Outros hortícolas' },
+  // Capítulo 08 - Frutas
+  '0803': { cClassTrib: '200015', description: 'Bananas' },
+  '0804': { cClassTrib: '200015', description: 'Tâmaras, figos' },
+  '0805': { cClassTrib: '200015', description: 'Cítricos' },
+  '0806': { cClassTrib: '200015', description: 'Uvas' },
+  '0807': { cClassTrib: '200015', description: 'Melões, melancias' },
+  '0808': { cClassTrib: '200015', description: 'Maçãs, peras' },
+  '0810': { cClassTrib: '200015', description: 'Morangos e outras frutas' },
+  // Capítulo 09 - Café, chá
+  '0901': { cClassTrib: '200003', description: 'Café' },
+  // Capítulo 10 - Cereais
+  '1001': { cClassTrib: '200003', description: 'Trigo' },
+  '1005': { cClassTrib: '200003', description: 'Milho' },
+  '1006': { cClassTrib: '200003', description: 'Arroz' },
+  // Capítulo 11 - Farinhas
+  '1101': { cClassTrib: '200003', description: 'Farinhas de trigo' },
+  '1102': { cClassTrib: '200003', description: 'Farinhas de cereais' },
+  '1103': { cClassTrib: '200003', description: 'Farinhas, sêmolas' },
+  '1104': { cClassTrib: '200003', description: 'Grãos trabalhados' },
+  '1106': { cClassTrib: '200003', description: 'Farinhas de leguminosas (farofa)' },
+  // Capítulo 15 - Óleos
+  '1507': { cClassTrib: '200003', description: 'Óleo de soja' },
+  '1509': { cClassTrib: '200003', description: 'Azeite de oliva' },
+  '1512': { cClassTrib: '200003', description: 'Óleo de girassol' },
+  // Capítulo 16 - Preparações de carnes
+  '1601': { cClassTrib: '200003', description: 'Embutidos (linguiças, salsichas)' },
+  '1602': { cClassTrib: '200003', description: 'Outras preparações de carnes' },
+  '1604': { cClassTrib: '200003', description: 'Conservas de peixes (sardinha, atum)' },
+  // Capítulo 17 - Açúcares
+  '1701': { cClassTrib: '200003', description: 'Açúcar de cana ou beterraba' },
+  // Capítulo 19 - Massas e produtos de padaria
+  '1902': { cClassTrib: '200003', description: 'Massas alimentícias (macarrão)' },
+  '1905': { cClassTrib: '200003', description: 'Pães, biscoitos, bolachas' },
+  // Capítulo 20 - Preparações de hortícolas e frutas
+  '2001': { cClassTrib: '200003', description: 'Hortícolas em conserva' },
+  '2002': { cClassTrib: '200003', description: 'Tomates preparados' },
+  '2005': { cClassTrib: '200003', description: 'Outros hortícolas preparados' },
+  // Capítulo 21 - Preparações alimentícias diversas
+  '2103': { cClassTrib: '200003', description: 'Molhos e condimentos' },
+  // Capítulo 25 - Sal
+  '2501': { cClassTrib: '200003', description: 'Sal' },
+  // Capítulo 30 - Medicamentos
+  '3003': { cClassTrib: '200009', description: 'Medicamentos não dosados' },
+  '3004': { cClassTrib: '200009', description: 'Medicamentos dosados' },
+};
+
+// Função para buscar por NCM
+export const findByNCM = (ncm: string): { cClassTrib: string; description: string } | null => {
+  if (!ncm || ncm.length < 4) return null;
+  const cleanNCM = ncm.replace(/\D/g, '');
+  
+  // Tenta match exato primeiro, depois prefixos decrescentes
+  for (let len = Math.min(cleanNCM.length, 8); len >= 4; len--) {
+    const prefix = cleanNCM.substring(0, len);
+    if (ncmToClassTrib[prefix]) {
+      return ncmToClassTrib[prefix];
+    }
+  }
+  return null;
+};
 
 export const cstData: CSTRecord[] = [
   // CST 000 - Tributação integral
