@@ -72,10 +72,10 @@ const Login = () => {
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-gray-800">
-              Consulta CST/cClassTrib
+              Reforma Tributária
             </CardTitle>
             <CardDescription className="text-gray-600 mt-2">
-              Faça login para acessar o sistema de consulta
+              Faça login para acessar o sistema
             </CardDescription>
           </div>
         </CardHeader>
