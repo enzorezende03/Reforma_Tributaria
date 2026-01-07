@@ -7,99 +7,49 @@ export const normalizeText = (text: string): string => {
     .replace(/[^a-z0-9\s]/g, "");
 };
 
-// Dicionário de sinônimos/termos similares para o contexto tributário
+// Dicionário de sinônimos ESTRITO - apenas termos muito próximos
 const synonyms: Record<string, string[]> = {
-  // Alimentos
-  "cesta basica": ["alimentos", "alimentacao", "comida", "mantimentos", "generos alimenticios"],
-  "alimentos": ["cesta basica", "comida", "alimentacao", "mantimentos"],
-  "comida": ["alimentos", "alimentacao", "cesta basica"],
-  "arroz": ["cereal", "graos", "alimentos"],
-  "feijao": ["leguminosa", "graos", "alimentos"],
-  "carne": ["proteina", "carnes", "bovino", "frango", "suino", "alimentos"],
-  "carnes": ["carne", "proteina", "bovino", "frango", "suino"],
-  "leite": ["laticinio", "laticinios", "derivados do leite"],
-  "laticinios": ["leite", "queijo", "iogurte", "derivados do leite"],
+  // Alimentos - termos próximos
+  "cesta basica": ["cesta", "basica"],
+  "alimento": ["alimentos", "alimenticio"],
+  "alimentos": ["alimento", "alimenticio"],
   
-  // Saúde
-  "medicamento": ["remedio", "farmaco", "medicamentos", "remedios", "farmacia", "saude"],
-  "medicamentos": ["remedio", "farmaco", "medicamento", "remedios", "farmacia"],
-  "remedio": ["medicamento", "farmaco", "medicamentos", "farmacia"],
-  "remedios": ["medicamentos", "farmacos", "medicamento", "farmacia"],
-  "saude": ["medicamentos", "hospital", "medico", "tratamento", "higiene"],
-  "higiene": ["limpeza", "higiene pessoal", "saude"],
-  "hospital": ["saude", "medico", "clinica", "tratamento"],
+  // Saúde - termos próximos
+  "medicamento": ["medicamentos", "remedio", "remedios"],
+  "medicamentos": ["medicamento", "remedio", "remedios"],
+  "remedio": ["remedios", "medicamento", "medicamentos"],
+  "remedios": ["remedio", "medicamento", "medicamentos"],
   
   // Educação
-  "educacao": ["ensino", "escola", "aprendizado", "formacao", "curso"],
-  "escola": ["educacao", "ensino", "colegio", "instituicao de ensino"],
-  "ensino": ["educacao", "escola", "aprendizado", "curso"],
-  "livro": ["livros", "material didatico", "educacao", "leitura"],
-  "livros": ["livro", "material didatico", "educacao", "leitura"],
-  
-  // Transporte
-  "transporte": ["mobilidade", "locomocao", "veiculo", "onibus", "metro"],
-  "onibus": ["transporte", "transporte publico", "coletivo"],
-  "metro": ["transporte", "transporte publico", "trem urbano"],
-  
-  // Tecnologia
-  "software": ["programa", "sistema", "aplicativo", "tecnologia", "informatica"],
-  "tecnologia": ["informatica", "computador", "software", "digital"],
-  "informatica": ["tecnologia", "computador", "software", "ti"],
-  
-  // Construção
-  "construcao": ["obra", "edificacao", "imovel", "reforma"],
-  "imovel": ["imobiliario", "propriedade", "construcao", "edificacao"],
-  "imobiliario": ["imovel", "propriedade", "construcao"],
+  "educacao": ["educacional", "ensino"],
+  "ensino": ["educacao", "educacional"],
   
   // Serviços
-  "servico": ["servicos", "prestacao", "atendimento"],
-  "servicos": ["servico", "prestacao", "atendimento"],
+  "servico": ["servicos"],
+  "servicos": ["servico"],
   
-  // Agricultura
-  "agricultura": ["agropecuaria", "rural", "fazenda", "produtor rural", "agro"],
-  "agropecuaria": ["agricultura", "rural", "pecuaria", "agro"],
-  "agro": ["agricultura", "agropecuaria", "rural", "produtor"],
-  "insumo": ["insumos", "materia prima", "producao"],
-  "insumos": ["insumo", "materia prima", "agricultura"],
-  
-  // Financeiro
-  "financeiro": ["financeira", "banco", "credito", "financiamento"],
-  "banco": ["financeiro", "instituicao financeira", "credito"],
-  "seguro": ["seguros", "seguradora", "protecao"],
-  "seguros": ["seguro", "seguradora", "protecao"],
-  
-  // Combustíveis
-  "combustivel": ["combustiveis", "gasolina", "diesel", "etanol", "energia"],
-  "combustiveis": ["combustivel", "gasolina", "diesel", "etanol"],
-  "gasolina": ["combustivel", "combustiveis", "posto"],
-  "energia": ["eletricidade", "luz", "energetico"],
-  
-  // Bebidas
-  "bebida": ["bebidas", "refrigerante", "suco", "agua"],
-  "bebidas": ["bebida", "refrigerante", "suco", "agua"],
-  "alcoolica": ["alcoolicas", "cerveja", "vinho", "destilados"],
-  "alcoolicas": ["alcoolica", "cerveja", "vinho", "destilados"],
+  // Dispositivos médicos
+  "dispositivo": ["dispositivos"],
+  "dispositivos": ["dispositivo"],
   
   // Termos tributários
-  "isento": ["isencao", "isentos", "nao tributado", "aliquota zero"],
-  "isencao": ["isento", "isentos", "nao tributado"],
-  "tributado": ["tributacao", "imposto", "tributo"],
-  "imposto": ["tributado", "tributo", "taxa", "contribuicao"],
-  "aliquota": ["percentual", "taxa", "imposto"],
-  "reducao": ["reduzido", "desconto", "beneficio fiscal"],
-  "reduzido": ["reducao", "menor aliquota", "beneficio"],
+  "isento": ["isencao", "isentos"],
+  "isencao": ["isento", "isentos"],
+  "tributado": ["tributavel", "tributacao"],
+  "reducao": ["reduzida", "reduzido"],
+  "reduzida": ["reducao", "reduzido"],
+  "reduzido": ["reducao", "reduzida"],
   
-  // Dispositivos
-  "dispositivo": ["dispositivos", "equipamento", "aparelho"],
-  "dispositivos": ["dispositivo", "equipamento", "aparelho"],
-  "medico": ["medicina", "saude", "hospitalar", "clinico"],
+  // Insumos
+  "insumo": ["insumos"],
+  "insumos": ["insumo"],
   
-  // Outros
-  "profissional": ["profissionais", "trabalhador", "autonomo"],
-  "autonomo": ["autonomos", "profissional liberal", "mei"],
+  // Transporte
+  "transporte": ["transportes"],
+  "transportes": ["transporte"],
 };
 
-// Função para encontrar sinônimos de um termo
+// Função para encontrar sinônimos de um termo (mais restrita)
 export const findSynonyms = (term: string): string[] => {
   const normalized = normalizeText(term);
   const result: Set<string> = new Set();
@@ -107,53 +57,43 @@ export const findSynonyms = (term: string): string[] => {
   // Adicionar o próprio termo
   result.add(normalized);
   
-  // Buscar sinônimos diretos
+  // Buscar sinônimos diretos apenas
   if (synonyms[normalized]) {
     synonyms[normalized].forEach(syn => result.add(syn));
   }
   
-  // Buscar em quais grupos o termo aparece como sinônimo
-  Object.entries(synonyms).forEach(([key, values]) => {
-    if (values.some(v => normalizeText(v).includes(normalized) || normalized.includes(normalizeText(v)))) {
-      result.add(key);
-      values.forEach(v => result.add(normalizeText(v)));
-    }
-  });
-  
   return Array.from(result);
 };
 
-// Função de busca com termos similares
+// Função de busca com termos similares (mais restrita)
 export const fuzzyMatch = (text: string, query: string, useSimilar: boolean = true): boolean => {
   const normalizedText = normalizeText(text);
   const normalizedQuery = normalizeText(query);
   
-  // Busca direta
+  // Busca direta - prioridade máxima
   if (normalizedText.includes(normalizedQuery)) {
     return true;
   }
   
-  // Busca por palavras individuais da query
-  const queryWords = normalizedQuery.split(/\s+/).filter(w => w.length > 2);
-  const textWords = normalizedText.split(/\s+/);
+  // Dividir query em palavras (mínimo 3 caracteres)
+  const queryWords = normalizedQuery.split(/\s+/).filter(w => w.length >= 3);
   
-  const directMatch = queryWords.every(qWord => 
-    textWords.some(tWord => tWord.includes(qWord) || qWord.includes(tWord))
-  );
+  if (queryWords.length === 0) return false;
   
-  if (directMatch) return true;
+  // Todas as palavras da query devem estar no texto
+  const allWordsMatch = queryWords.every(qWord => normalizedText.includes(qWord));
+  if (allWordsMatch) return true;
   
-  // Busca por sinônimos (se habilitado)
-  if (useSimilar) {
-    const synonymsToCheck = findSynonyms(normalizedQuery);
-    
-    return synonymsToCheck.some(syn => {
-      if (normalizedText.includes(syn)) return true;
+  // Busca por sinônimos (se habilitado) - mais restrita
+  if (useSimilar && queryWords.length <= 2) {
+    // Para cada palavra da query, verificar se ela ou um sinônimo direto está no texto
+    return queryWords.every(qWord => {
+      // Primeiro tenta match direto
+      if (normalizedText.includes(qWord)) return true;
       
-      const synWords = syn.split(/\s+/).filter(w => w.length > 2);
-      return synWords.every(sWord => 
-        textWords.some(tWord => tWord.includes(sWord) || sWord.includes(tWord))
-      );
+      // Depois tenta sinônimos diretos
+      const directSynonyms = synonyms[qWord] || [];
+      return directSynonyms.some(syn => normalizedText.includes(syn));
     });
   }
   
