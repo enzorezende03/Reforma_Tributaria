@@ -47,6 +47,30 @@ const synonyms: Record<string, string[]> = {
   // Transporte
   "transporte": ["transportes"],
   "transportes": ["transporte"],
+  
+  // Profissões intelectuais - CST 200
+  "arquitetura": ["profissoes intelectuais", "intelectual", "arquiteto"],
+  "arquiteto": ["profissoes intelectuais", "intelectual", "arquitetura"],
+  "engenharia": ["profissoes intelectuais", "intelectual", "engenheiro"],
+  "engenheiro": ["profissoes intelectuais", "intelectual", "engenharia"],
+  "advocacia": ["profissoes intelectuais", "intelectual", "advogado", "juridico"],
+  "advogado": ["profissoes intelectuais", "intelectual", "advocacia", "juridico"],
+  "contabilidade": ["profissoes intelectuais", "intelectual", "contador", "contabil"],
+  "contador": ["profissoes intelectuais", "intelectual", "contabilidade", "contabil"],
+  "medicina": ["profissoes intelectuais", "intelectual", "medico"],
+  "medico": ["profissoes intelectuais", "intelectual", "medicina", "saude"],
+  "psicologia": ["profissoes intelectuais", "intelectual", "psicologo"],
+  "psicologo": ["profissoes intelectuais", "intelectual", "psicologia"],
+  "consultoria": ["profissoes intelectuais", "intelectual", "consultor"],
+  "consultor": ["profissoes intelectuais", "intelectual", "consultoria"],
+  "design": ["profissoes intelectuais", "intelectual", "designer"],
+  "designer": ["profissoes intelectuais", "intelectual", "design"],
+  "publicidade": ["profissoes intelectuais", "intelectual", "publicitario", "marketing"],
+  "marketing": ["profissoes intelectuais", "intelectual", "publicidade"],
+  "jornalismo": ["profissoes intelectuais", "intelectual", "jornalista"],
+  "jornalista": ["profissoes intelectuais", "intelectual", "jornalismo"],
+  "intelectual": ["profissoes intelectuais"],
+  "profissoes intelectuais": ["intelectual", "arquitetura", "engenharia", "advocacia", "contabilidade", "medicina", "consultoria", "design"],
 };
 
 // Função para encontrar sinônimos de um termo (mais restrita)
