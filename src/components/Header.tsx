@@ -1,6 +1,17 @@
-import { Scale, FileText } from "lucide-react";
+import { Scale, FileText, LogOut, Building2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export const Header = () => {
+  const { client, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <header className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-accent py-16 px-6">
       {/* Decorative elements */}
@@ -8,6 +19,27 @@ export const Header = () => {
         <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-white/20 blur-3xl" />
         <div className="absolute bottom-10 right-20 w-48 h-48 rounded-full bg-white/20 blur-3xl" />
       </div>
+      
+      {/* User info and logout */}
+      {client && (
+        <div className="absolute top-4 right-4 flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 backdrop-blur-sm">
+            <Building2 className="h-4 w-4 text-primary-foreground/80" />
+            <span className="text-sm font-medium text-primary-foreground/90 max-w-[200px] truncate">
+              {client.company_name}
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/10"
+          >
+            <LogOut className="h-4 w-4 mr-1" />
+            Sair
+          </Button>
+        </div>
+      )}
       
       <div className="relative max-w-4xl mx-auto text-center">
         <div className="inline-flex items-center gap-3 mb-6 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm">
