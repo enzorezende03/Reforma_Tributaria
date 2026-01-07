@@ -1,9 +1,11 @@
-import { ExternalLink, Percent, Calendar, FileText, BookOpen } from "lucide-react";
+import { ExternalLink, Percent, Calendar, FileText, BookOpen, Settings2 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { CSTRecord } from "@/data/cstData";
 import { extractAnexoNumber } from "@/data/anexosData";
+import { isServicoRecord, findIndOpByServico, getIndOpDetails } from "@/data/indOpData";
 
 interface CSTCardProps {
   record: CSTRecord;
@@ -21,6 +23,11 @@ const getReductionColor = (reduction: number) => {
 export const CSTCard = ({ record, index, onOpenAnexo }: CSTCardProps) => {
   // Detectar se há referência a anexo na descrição ou nome
   const anexoId = extractAnexoNumber(record.cClassTribName) || extractAnexoNumber(record.cClassTribDescription);
+  
+  // Verificar se é prestação de serviço e obter códigos indOp
+  const isServico = isServicoRecord(record.cClassTribName, record.cClassTribDescription);
+  const indOpCodes = isServico ? findIndOpByServico(record.cClassTribName) : [];
+  const primaryIndOp = indOpCodes.length > 0 ? getIndOpDetails(indOpCodes[0]) : undefined;
   
   return (
     <Card 
@@ -69,6 +76,48 @@ export const CSTCard = ({ record, index, onOpenAnexo }: CSTCardProps) => {
             {record.cClassTribDescription}
           </p>
         </div>
+        
+        {/* Indicador de Operação para prestação de serviços */}
+        {isServico && indOpCodes.length > 0 && (
+          <TooltipProvider>
+            <div className="bg-accent/30 rounded-lg p-3 border border-accent/50">
+              <div className="flex items-center gap-2 mb-2">
+                <Settings2 className="h-4 w-4 text-accent-foreground" />
+                <span className="text-sm font-semibold text-accent-foreground">
+                  Indicador de Operação (indOp) - Art. 11
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {indOpCodes.map((code) => {
+                  const details = getIndOpDetails(code);
+                  return (
+                    <Tooltip key={code}>
+                      <TooltipTrigger asChild>
+                        <Badge 
+                          variant="secondary" 
+                          className="bg-accent text-accent-foreground cursor-help font-mono text-xs px-2 py-1"
+                        >
+                          {code}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs">
+                        <div className="space-y-1 text-xs">
+                          <p className="font-semibold">{details?.tipoOperacao}</p>
+                          <p className="text-muted-foreground">{details?.localFornecimentoDfe}</p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </div>
+              {primaryIndOp && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Local do fornecimento no DFe: {primaryIndOp.localFornecimentoDfe}
+                </p>
+              )}
+            </div>
+          </TooltipProvider>
+        )}
         
         <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-border/50">
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
