@@ -228,11 +228,12 @@ const ImportExcel = () => {
     'farmaceutico': { cClassTrib: '200009', weight: 100 },
   };
 
-  // Palavras que são SECUNDÁRIAS (ingredientes, sabores, etc.) e não definem a categoria
-  const secondaryKeywords = [
-    'ovos', 'ovo', 'queijo', 'carne', 'frango', 'bacon', 'chocolate',
-    'morango', 'baunilha', 'limao', 'laranja', 'cebola', 'alho', 'tomate',
-    'calabresa', 'presunto', 'mussarela', 'cheddar', 'leite'
+  // Palavras que são SEMPRE ingredientes/sabores quando aparecem depois da primeira palavra
+  // Essas palavras NÃO definem a categoria do produto quando estão em posição secundária
+  const alwaysSecondaryKeywords = [
+    'ovos', 'ovo', 'bacon', 'chocolate', 'baunilha', 'limao', 'alho',
+    'calabresa', 'mussarela', 'cheddar', 'integral', 'light', 'diet',
+    'tradicional', 'caseiro', 'artesanal', 'premium', 'especial'
   ];
 
   const searchCSTCodes = () => {
@@ -270,7 +271,7 @@ const ImportExcel = () => {
           const positionMultiplier = index < 3 ? 2 : 1;
           
           // Se a palavra é secundária (ingrediente) e não está no início, reduzir peso
-          const isSecondary = secondaryKeywords.includes(normalizedWord);
+          const isSecondary = alwaysSecondaryKeywords.includes(normalizedWord);
           const secondaryPenalty = isSecondary && index > 0 ? 0.3 : 1;
           
           const score = keywordInfo.weight * positionMultiplier * secondaryPenalty;
