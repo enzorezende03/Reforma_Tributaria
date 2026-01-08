@@ -3,6 +3,7 @@ import { Calculator, TrendingUp, Info, DollarSign, Percent, MapPin, AlertTriangl
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import logoImage from "@/assets/logo-2m.png";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -226,58 +227,123 @@ export const SimuladorTab = () => {
     return { diferenca, percentual };
   }, [resultados]);
 
-  const exportarPDF = () => {
+  const exportarPDF = async () => {
     const doc = new jsPDF();
     const dataAtual = new Date().toLocaleDateString('pt-BR');
     
-    // Título
-    doc.setFontSize(18);
-    doc.text("Simulação da Reforma Tributária", 14, 20);
-    
-    // Informações da simulação
-    doc.setFontSize(10);
-    doc.text(`Data: ${dataAtual}`, 14, 30);
-    doc.text(`Categoria: ${categoria === 'servicos' ? 'Serviços' : 'Produtos'}`, 14, 36);
-    doc.text(`Regime: ${regimeTributario === 'normal' ? 'Regime Normal' : 'Simples Nacional'}`, 14, 42);
-    doc.text(`Preço Base: ${formatCurrency(parseFloat(preco) || 0)}`, 14, 48);
-    doc.text(`CST: ${cstSelecionado} - ${REDUCOES_CST[cstSelecionado]?.descricao}`, 14, 54);
-    
-    if (regimeTributario === 'simples') {
-      doc.text(`Anexo: ${anexoAtual.nome}`, 14, 60);
-      doc.text(`Faixa: ${faixaAtual.nome}`, 14, 66);
+    // Carregar logo como base64
+    try {
+      const response = await fetch(logoImage);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      
+      reader.onloadend = () => {
+        const base64Logo = reader.result as string;
+        
+        // Adicionar logo
+        doc.addImage(base64Logo, 'PNG', 14, 10, 40, 15);
+        
+        // Título
+        doc.setFontSize(18);
+        doc.text("Simulação da Reforma Tributária", 60, 20);
+        
+        // Informações da simulação
+        doc.setFontSize(10);
+        doc.text(`Data: ${dataAtual}`, 14, 35);
+        doc.text(`Categoria: ${categoria === 'servicos' ? 'Serviços' : 'Produtos'}`, 14, 41);
+        doc.text(`Regime: ${regimeTributario === 'normal' ? 'Regime Normal' : 'Simples Nacional'}`, 14, 47);
+        doc.text(`Preço Base: ${formatCurrency(parseFloat(preco) || 0)}`, 14, 53);
+        doc.text(`CST: ${cstSelecionado} - ${REDUCOES_CST[cstSelecionado]?.descricao}`, 14, 59);
+        
+        let startY = 65;
+        if (regimeTributario === 'simples') {
+          doc.text(`Anexo: ${anexoAtual.nome}`, 14, 65);
+          doc.text(`Faixa: ${faixaAtual.nome}`, 14, 71);
+          startY = 77;
+        }
+        
+        // Tabela de resultados
+        const headers = regimeTributario === 'simples' 
+          ? ['Ano', 'Simples', 'CBS', 'IBS', 'Total', 'Preço Final']
+          : ['Ano', 'ISS', 'PIS', 'COFINS', 'CBS', 'IBS', 'Total', 'Preço Final'];
+        
+        const data = resultados.map(r => 
+          regimeTributario === 'simples'
+            ? [r.ano.toString(), formatCurrency(r.simples), formatCurrency(r.cbs), formatCurrency(r.ibs), formatCurrency(r.total), formatCurrency(r.precoFinal)]
+            : [r.ano.toString(), formatCurrency(r.iss), formatCurrency(r.pis), formatCurrency(r.cofins), formatCurrency(r.cbs), formatCurrency(r.ibs), formatCurrency(r.total), formatCurrency(r.precoFinal)]
+        );
+        
+        autoTable(doc, {
+          head: [headers],
+          body: data,
+          startY: startY,
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [16, 185, 129] },
+        });
+        
+        // Comparativo
+        const finalY = (doc as any).lastAutoTable.finalY + 10;
+        doc.setFontSize(10);
+        doc.text(`Comparativo 2025 vs 2033:`, 14, finalY);
+        doc.text(`Diferença: ${formatCurrency(comparativo.diferenca)} (${comparativo.percentual >= 0 ? '+' : ''}${comparativo.percentual.toFixed(1)}%)`, 14, finalY + 6);
+        
+        // Aviso legal
+        doc.setFontSize(8);
+        doc.setTextColor(100);
+        doc.text("Os dados apresentados são de responsabilidade do usuário.", 14, finalY + 16);
+        
+        doc.save(`simulacao-tributaria-${dataAtual.replace(/\//g, '-')}.pdf`);
+      };
+      
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      // Fallback sem logo
+      doc.setFontSize(18);
+      doc.text("Simulação da Reforma Tributária", 14, 20);
+      
+      doc.setFontSize(10);
+      doc.text(`Data: ${dataAtual}`, 14, 30);
+      doc.text(`Categoria: ${categoria === 'servicos' ? 'Serviços' : 'Produtos'}`, 14, 36);
+      doc.text(`Regime: ${regimeTributario === 'normal' ? 'Regime Normal' : 'Simples Nacional'}`, 14, 42);
+      doc.text(`Preço Base: ${formatCurrency(parseFloat(preco) || 0)}`, 14, 48);
+      doc.text(`CST: ${cstSelecionado} - ${REDUCOES_CST[cstSelecionado]?.descricao}`, 14, 54);
+      
+      let startY = 60;
+      if (regimeTributario === 'simples') {
+        doc.text(`Anexo: ${anexoAtual.nome}`, 14, 60);
+        doc.text(`Faixa: ${faixaAtual.nome}`, 14, 66);
+        startY = 72;
+      }
+      
+      const headers = regimeTributario === 'simples' 
+        ? ['Ano', 'Simples', 'CBS', 'IBS', 'Total', 'Preço Final']
+        : ['Ano', 'ISS', 'PIS', 'COFINS', 'CBS', 'IBS', 'Total', 'Preço Final'];
+      
+      const data = resultados.map(r => 
+        regimeTributario === 'simples'
+          ? [r.ano.toString(), formatCurrency(r.simples), formatCurrency(r.cbs), formatCurrency(r.ibs), formatCurrency(r.total), formatCurrency(r.precoFinal)]
+          : [r.ano.toString(), formatCurrency(r.iss), formatCurrency(r.pis), formatCurrency(r.cofins), formatCurrency(r.cbs), formatCurrency(r.ibs), formatCurrency(r.total), formatCurrency(r.precoFinal)]
+      );
+      
+      autoTable(doc, {
+        head: [headers],
+        body: data,
+        startY: startY,
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [16, 185, 129] },
+      });
+      
+      const finalY = (doc as any).lastAutoTable.finalY + 10;
+      doc.setFontSize(10);
+      doc.text(`Comparativo 2025 vs 2033:`, 14, finalY);
+      doc.text(`Diferença: ${formatCurrency(comparativo.diferenca)} (${comparativo.percentual >= 0 ? '+' : ''}${comparativo.percentual.toFixed(1)}%)`, 14, finalY + 6);
+      
+      doc.setFontSize(8);
+      doc.setTextColor(100);
+      doc.text("Os dados apresentados são de responsabilidade do usuário.", 14, finalY + 16);
+      
+      doc.save(`simulacao-tributaria-${dataAtual.replace(/\//g, '-')}.pdf`);
     }
-    
-    // Tabela de resultados
-    const headers = regimeTributario === 'simples' 
-      ? ['Ano', 'Simples', 'CBS', 'IBS', 'Total', 'Preço Final']
-      : ['Ano', 'ISS', 'PIS', 'COFINS', 'CBS', 'IBS', 'Total', 'Preço Final'];
-    
-    const data = resultados.map(r => 
-      regimeTributario === 'simples'
-        ? [r.ano.toString(), formatCurrency(r.simples), formatCurrency(r.cbs), formatCurrency(r.ibs), formatCurrency(r.total), formatCurrency(r.precoFinal)]
-        : [r.ano.toString(), formatCurrency(r.iss), formatCurrency(r.pis), formatCurrency(r.cofins), formatCurrency(r.cbs), formatCurrency(r.ibs), formatCurrency(r.total), formatCurrency(r.precoFinal)]
-    );
-    
-    autoTable(doc, {
-      head: [headers],
-      body: data,
-      startY: regimeTributario === 'simples' ? 72 : 62,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [16, 185, 129] },
-    });
-    
-    // Comparativo
-    const finalY = (doc as any).lastAutoTable.finalY + 10;
-    doc.setFontSize(10);
-    doc.text(`Comparativo 2025 vs 2033:`, 14, finalY);
-    doc.text(`Diferença: ${formatCurrency(comparativo.diferenca)} (${comparativo.percentual >= 0 ? '+' : ''}${comparativo.percentual.toFixed(1)}%)`, 14, finalY + 6);
-    
-    // Aviso legal
-    doc.setFontSize(8);
-    doc.setTextColor(100);
-    doc.text("Os dados apresentados são de responsabilidade do usuário.", 14, finalY + 16);
-    
-    doc.save(`simulacao-tributaria-${dataAtual.replace(/\//g, '-')}.pdf`);
   };
 
   const exportarExcel = () => {
