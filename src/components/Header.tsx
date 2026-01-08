@@ -50,29 +50,19 @@ export const Header = () => {
           </div>
         </div>
         
-        <div className="flex justify-center mb-6">
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm">
-            <span className="text-sm font-medium text-white/90">
-              LC 214/2025 • Reforma Tributária
-            </span>
-          </div>
-        </div>
-        
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-          Consulta CST-IBS/CBS
+          Reforma Tributária - LC 214/2025
         </h1>
         
         <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
-          Sistema de consulta dos novos Códigos de Situação Tributária conforme a Reforma Tributária
+          Sistema integrado de consultas e ferramentas para o novo modelo tributário brasileiro
         </p>
         
         <div className="flex items-center justify-center gap-6 mt-8 text-sm text-white/70">
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
-            <span>Tabela cClassTrib</span>
+            <span>Vigência: 01/01/2026</span>
           </div>
-          <div className="w-1 h-1 rounded-full bg-white/50" />
-          <span>Vigência: 01/01/2026</span>
         </div>
       </div>
     </header>
