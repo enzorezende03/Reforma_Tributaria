@@ -166,6 +166,33 @@ export type Database = {
       }
     }
     Views: {
+      admin_invites_safe: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          email: string | null
+          expires_at: string | null
+          id: string | null
+          used: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string | null
+          used?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string | null
+          used?: boolean | null
+        }
+        Relationships: []
+      }
       admins_safe: {
         Row: {
           created_at: string | null
