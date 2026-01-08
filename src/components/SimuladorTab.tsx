@@ -419,8 +419,81 @@ export const SimuladorTab = () => {
                     />
                   </div>
                 </div>
-              </div>
+            </div>
             )}
+
+            {/* Seção de Custos */}
+            <div className="pt-4 border-t space-y-4">
+              <div className="flex items-center gap-2">
+                <Building className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm font-medium">Estrutura de Custos</p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-xs">Custos Fixos (%)</Label>
+                <Input
+                  type="number"
+                  value={custosFixos}
+                  onChange={(e) => setCustosFixos(e.target.value)}
+                  step="0.1"
+                  placeholder="Ex: 20"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Aluguel, salários, despesas administrativas, etc.
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-xs">Custos Variáveis (%)</Label>
+                <Input
+                  type="number"
+                  value={custosVariaveis}
+                  onChange={(e) => setCustosVariaveis(e.target.value)}
+                  step="0.1"
+                  placeholder="Ex: 10"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Matéria-prima, comissões, fretes, embalagens, etc.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">Margem de Lucro (%)</Label>
+                <Input
+                  type="number"
+                  value={margemLucro}
+                  onChange={(e) => setMargemLucro(e.target.value)}
+                  step="0.1"
+                  placeholder="Ex: 30"
+                />
+              </div>
+              
+              <div className="p-3 rounded-lg bg-muted/50 space-y-2">
+                <p className="text-xs font-medium">Resumo dos Custos</p>
+                <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                  <div>
+                    <p className="text-muted-foreground">Fixos</p>
+                    <p className="font-bold">{parseFloat(custosFixos) || 0}%</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Variáveis</p>
+                    <p className="font-bold">{parseFloat(custosVariaveis) || 0}%</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Margem</p>
+                    <p className="font-bold">{parseFloat(margemLucro) || 0}%</p>
+                  </div>
+                </div>
+                <div className="pt-2 border-t">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Total custos + margem:</span>
+                    <span className="font-bold">
+                      {((parseFloat(custosFixos) || 0) + (parseFloat(custosVariaveis) || 0) + (parseFloat(margemLucro) || 0)).toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <div className="pt-4 border-t">
               <p className="text-sm font-medium mb-2">
