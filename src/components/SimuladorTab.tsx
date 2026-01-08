@@ -286,13 +286,16 @@ export const SimuladorTab = () => {
             </div>
 
             <div className="space-y-2">
-              <Label>Valor da Operação (R$)</Label>
+              <Label>Preço de Custo (R$)</Label>
               <Input
                 type="number"
                 value={preco}
                 onChange={(e) => setPreco(e.target.value)}
                 placeholder="1.000,00"
               />
+              <p className="text-xs text-muted-foreground">
+                Valor base para cálculo dos tributos
+              </p>
             </div>
 
             <div className="space-y-2">
