@@ -88,13 +88,20 @@ const ClientChangePasswordModal = ({ isOpen, clientId, onPasswordChanged }: Clie
         return;
       }
 
+      // Limpar campos e resetar estado antes de fechar
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setError('');
+      setIsSubmitting(false);
+      
+      // Chamar callback para fechar o modal
       onPasswordChanged();
     } catch (err) {
       console.error('Password change error:', err);
       setError('Erro ao alterar senha. Tente novamente.');
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   return (
