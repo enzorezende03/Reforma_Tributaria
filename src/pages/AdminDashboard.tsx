@@ -25,7 +25,8 @@ import {
   UserPlus,
   KeyRound,
   Newspaper,
-  Users2
+  Users2,
+  Eye
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -321,6 +322,16 @@ const AdminDashboard = () => {
             <span className="text-sm text-slate-300">
               Olá, <span className="font-medium text-white">{admin?.name}</span>
             </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/')}
+              className="text-slate-300 hover:text-white hover:bg-slate-700"
+              title="Ver painel do cliente"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Ver como Cliente
+            </Button>
             {hasPermission('manage_team') && (
               <Button
                 variant="ghost"
