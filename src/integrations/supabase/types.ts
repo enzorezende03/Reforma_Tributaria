@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_invites: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          expires_at: string
+          id: string
+          token: string
+          used: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          expires_at?: string
+          id?: string
+          token?: string
+          used?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          token?: string
+          used?: boolean | null
+        }
+        Relationships: []
+      }
       admins: {
         Row: {
           created_at: string
@@ -133,6 +163,11 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      use_admin_invite: { Args: { p_invite_id: string }; Returns: boolean }
+      validate_admin_invite: {
+        Args: { p_email: string; p_token: string }
+        Returns: Json
       }
       verify_client_login: {
         Args: { p_cnpj: string; p_password: string }
