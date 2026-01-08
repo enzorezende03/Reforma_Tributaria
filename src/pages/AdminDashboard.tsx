@@ -24,7 +24,8 @@ import {
   CheckCircle,
   UserPlus,
   KeyRound,
-  Newspaper
+  Newspaper,
+  Users2
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -32,6 +33,7 @@ import ChangePasswordModal from '@/components/ChangePasswordModal';
 import AdminInviteModal from '@/components/AdminInviteModal';
 import ClientResetPasswordModal from '@/components/ClientResetPasswordModal';
 import { NewsManagement } from '@/components/NewsManagement';
+import { TeamManagement } from '@/components/TeamManagement';
 
 interface Client {
   id: string;
@@ -43,7 +45,7 @@ interface Client {
 }
 
 const AdminDashboard = () => {
-  const { admin, logout, setMustChangePassword } = useAdminAuth();
+  const { admin, logout, setMustChangePassword, hasPermission } = useAdminAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -319,15 +321,17 @@ const AdminDashboard = () => {
             <span className="text-sm text-slate-300">
               Olá, <span className="font-medium text-white">{admin?.name}</span>
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsInviteModalOpen(true)}
-              className="text-slate-300 hover:text-white hover:bg-slate-700"
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Convidar Admin
-            </Button>
+            {hasPermission('manage_team') && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsInviteModalOpen(true)}
+                className="text-slate-300 hover:text-white hover:bg-slate-700"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Convidar Admin
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -380,19 +384,30 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        {/* Tabs for Clients and News */}
-        <Tabs defaultValue="clients" className="space-y-6">
+        {/* Tabs for Clients, News and Team */}
+        <Tabs defaultValue={hasPermission('view_clients') || hasPermission('manage_clients') ? 'clients' : 'news'} className="space-y-6">
           <TabsList>
-            <TabsTrigger value="clients" className="gap-2">
-              <Users className="h-4 w-4" />
-              Clientes
-            </TabsTrigger>
-            <TabsTrigger value="news" className="gap-2">
-              <Newspaper className="h-4 w-4" />
-              Notícias
-            </TabsTrigger>
+            {(hasPermission('view_clients') || hasPermission('manage_clients')) && (
+              <TabsTrigger value="clients" className="gap-2">
+                <Users className="h-4 w-4" />
+                Clientes
+              </TabsTrigger>
+            )}
+            {(hasPermission('view_news') || hasPermission('manage_news')) && (
+              <TabsTrigger value="news" className="gap-2">
+                <Newspaper className="h-4 w-4" />
+                Notícias
+              </TabsTrigger>
+            )}
+            {hasPermission('manage_team') && (
+              <TabsTrigger value="team" className="gap-2">
+                <Users2 className="h-4 w-4" />
+                Equipe
+              </TabsTrigger>
+            )}
           </TabsList>
 
+          {(hasPermission('view_clients') || hasPermission('manage_clients')) && (
           <TabsContent value="clients">
             {/* Clients Table */}
             <Card>
@@ -548,10 +563,19 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+          )}
 
+          {(hasPermission('view_news') || hasPermission('manage_news')) && (
           <TabsContent value="news">
             <NewsManagement />
           </TabsContent>
+          )}
+
+          {hasPermission('manage_team') && (
+          <TabsContent value="team">
+            <TeamManagement />
+          </TabsContent>
+          )}
         </Tabs>
       </main>
 
