@@ -8,11 +8,12 @@ import { StatsCards } from "@/components/StatsCards";
 import { CSTCard } from "@/components/CSTCard";
 import { AnexoModal } from "@/components/AnexoModal";
 import { NewsTab } from "@/components/NewsTab";
+import { SimuladorTab } from "@/components/SimuladorTab";
 import ClientChangePasswordModal from "@/components/ClientChangePasswordModal";
 import { cstData, findByNCM } from "@/data/cstData";
 import { getAnexoById, type Anexo } from "@/data/anexosData";
 import { fuzzyMatch } from "@/lib/fuzzySearch";
-import { SearchX, AlertCircle, FileSpreadsheet, Search, Newspaper, CheckCircle2, ShieldAlert } from "lucide-react";
+import { SearchX, AlertCircle, FileSpreadsheet, Search, Newspaper, CheckCircle2, ShieldAlert, Calculator } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -119,6 +120,10 @@ const Index = () => {
                 <Search className="h-4 w-4" />
                 Consulta CST
               </TabsTrigger>
+              <TabsTrigger value="simulador" className="gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <Calculator className="h-4 w-4" />
+                Simulador
+              </TabsTrigger>
               <TabsTrigger value="noticias" className="gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
                 <Newspaper className="h-4 w-4" />
                 Notícias
@@ -222,6 +227,11 @@ const Index = () => {
                 </div>
               )}
             </section>
+          </TabsContent>
+
+          {/* Aba Simulador */}
+          <TabsContent value="simulador" className="mt-0">
+            <SimuladorTab />
           </TabsContent>
 
           {/* Aba Notícias */}
