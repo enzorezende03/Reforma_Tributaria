@@ -28,15 +28,71 @@ const TRANSICAO_NORMAL = {
   2033: { iss: 0, pis: 0, cofins: 0, ibs: 100, cbs: 100 },
 };
 
-// Faixas do Simples Nacional (valores anuais de faturamento)
-const FAIXAS_SIMPLES = [
-  { limite: 180000, aliquota: 6.0, nome: '1ª Faixa (até R$ 180 mil)' },
-  { limite: 360000, aliquota: 11.2, nome: '2ª Faixa (R$ 180 mil a R$ 360 mil)' },
-  { limite: 720000, aliquota: 13.5, nome: '3ª Faixa (R$ 360 mil a R$ 720 mil)' },
-  { limite: 1800000, aliquota: 16.0, nome: '4ª Faixa (R$ 720 mil a R$ 1,8 mi)' },
-  { limite: 3600000, aliquota: 21.0, nome: '5ª Faixa (R$ 1,8 mi a R$ 3,6 mi)' },
-  { limite: 4800000, aliquota: 33.0, nome: '6ª Faixa (R$ 3,6 mi a R$ 4,8 mi)' },
-];
+// Anexos do Simples Nacional com alíquotas por faixa
+const ANEXOS_SIMPLES = {
+  'I': {
+    nome: 'Anexo I - Comércio',
+    descricao: 'Revenda de mercadorias',
+    faixas: [
+      { limite: 180000, aliquota: 4.0, deducao: 0, nome: '1ª Faixa (até R$ 180 mil)' },
+      { limite: 360000, aliquota: 7.3, deducao: 5940, nome: '2ª Faixa (R$ 180 mil a R$ 360 mil)' },
+      { limite: 720000, aliquota: 9.5, deducao: 13860, nome: '3ª Faixa (R$ 360 mil a R$ 720 mil)' },
+      { limite: 1800000, aliquota: 10.7, deducao: 22500, nome: '4ª Faixa (R$ 720 mil a R$ 1,8 mi)' },
+      { limite: 3600000, aliquota: 14.3, deducao: 87300, nome: '5ª Faixa (R$ 1,8 mi a R$ 3,6 mi)' },
+      { limite: 4800000, aliquota: 19.0, deducao: 378000, nome: '6ª Faixa (R$ 3,6 mi a R$ 4,8 mi)' },
+    ],
+  },
+  'II': {
+    nome: 'Anexo II - Indústria',
+    descricao: 'Fabricação e industrialização',
+    faixas: [
+      { limite: 180000, aliquota: 4.5, deducao: 0, nome: '1ª Faixa (até R$ 180 mil)' },
+      { limite: 360000, aliquota: 7.8, deducao: 5940, nome: '2ª Faixa (R$ 180 mil a R$ 360 mil)' },
+      { limite: 720000, aliquota: 10.0, deducao: 13860, nome: '3ª Faixa (R$ 360 mil a R$ 720 mil)' },
+      { limite: 1800000, aliquota: 11.2, deducao: 22500, nome: '4ª Faixa (R$ 720 mil a R$ 1,8 mi)' },
+      { limite: 3600000, aliquota: 14.7, deducao: 85500, nome: '5ª Faixa (R$ 1,8 mi a R$ 3,6 mi)' },
+      { limite: 4800000, aliquota: 30.0, deducao: 720000, nome: '6ª Faixa (R$ 3,6 mi a R$ 4,8 mi)' },
+    ],
+  },
+  'III': {
+    nome: 'Anexo III - Serviços',
+    descricao: 'Serviços de instalação, reparos, contabilidade, advocacia, etc.',
+    faixas: [
+      { limite: 180000, aliquota: 6.0, deducao: 0, nome: '1ª Faixa (até R$ 180 mil)' },
+      { limite: 360000, aliquota: 11.2, deducao: 9360, nome: '2ª Faixa (R$ 180 mil a R$ 360 mil)' },
+      { limite: 720000, aliquota: 13.5, deducao: 17640, nome: '3ª Faixa (R$ 360 mil a R$ 720 mil)' },
+      { limite: 1800000, aliquota: 16.0, deducao: 35640, nome: '4ª Faixa (R$ 720 mil a R$ 1,8 mi)' },
+      { limite: 3600000, aliquota: 21.0, deducao: 125640, nome: '5ª Faixa (R$ 1,8 mi a R$ 3,6 mi)' },
+      { limite: 4800000, aliquota: 33.0, deducao: 648000, nome: '6ª Faixa (R$ 3,6 mi a R$ 4,8 mi)' },
+    ],
+  },
+  'IV': {
+    nome: 'Anexo IV - Serviços',
+    descricao: 'Construção civil, vigilância, limpeza, obras',
+    faixas: [
+      { limite: 180000, aliquota: 4.5, deducao: 0, nome: '1ª Faixa (até R$ 180 mil)' },
+      { limite: 360000, aliquota: 9.0, deducao: 8100, nome: '2ª Faixa (R$ 180 mil a R$ 360 mil)' },
+      { limite: 720000, aliquota: 10.2, deducao: 12420, nome: '3ª Faixa (R$ 360 mil a R$ 720 mil)' },
+      { limite: 1800000, aliquota: 14.0, deducao: 39780, nome: '4ª Faixa (R$ 720 mil a R$ 1,8 mi)' },
+      { limite: 3600000, aliquota: 22.0, deducao: 183780, nome: '5ª Faixa (R$ 1,8 mi a R$ 3,6 mi)' },
+      { limite: 4800000, aliquota: 33.0, deducao: 828000, nome: '6ª Faixa (R$ 3,6 mi a R$ 4,8 mi)' },
+    ],
+  },
+  'V': {
+    nome: 'Anexo V - Serviços',
+    descricao: 'Engenharia, auditoria, tecnologia, publicidade',
+    faixas: [
+      { limite: 180000, aliquota: 15.5, deducao: 0, nome: '1ª Faixa (até R$ 180 mil)' },
+      { limite: 360000, aliquota: 18.0, deducao: 4500, nome: '2ª Faixa (R$ 180 mil a R$ 360 mil)' },
+      { limite: 720000, aliquota: 19.5, deducao: 9900, nome: '3ª Faixa (R$ 360 mil a R$ 720 mil)' },
+      { limite: 1800000, aliquota: 20.5, deducao: 17100, nome: '4ª Faixa (R$ 720 mil a R$ 1,8 mi)' },
+      { limite: 3600000, aliquota: 23.0, deducao: 62100, nome: '5ª Faixa (R$ 1,8 mi a R$ 3,6 mi)' },
+      { limite: 4800000, aliquota: 30.5, deducao: 540000, nome: '6ª Faixa (R$ 3,6 mi a R$ 4,8 mi)' },
+    ],
+  },
+};
+
+type AnexoSimples = keyof typeof ANEXOS_SIMPLES;
 
 // Reduções de alíquota por CST
 const REDUCOES_CST: Record<string, { ibs: number; cbs: number; descricao: string }> = {
@@ -73,6 +129,7 @@ export const SimuladorTab = () => {
   const [aliquotaCofins, setAliquotaCofins] = useState<string>('7.6');
   
   // Simples Nacional
+  const [anexoSimples, setAnexoSimples] = useState<AnexoSimples>('III');
   const [faixaSimples, setFaixaSimples] = useState<number>(0);
   const [optanteIbsCbs, setOptanteIbsCbs] = useState(false); // Opção de recolher IBS/CBS separadamente
   
@@ -82,8 +139,10 @@ export const SimuladorTab = () => {
   const [custosFixos, setCustosFixos] = useState<string>('20');
   const [margemLucro, setMargemLucro] = useState<string>('30');
 
-  // Alíquota do Simples selecionada
-  const aliquotaSimples = FAIXAS_SIMPLES[faixaSimples]?.aliquota || 6.0;
+  // Dados do Anexo e Faixa selecionados
+  const anexoAtual = ANEXOS_SIMPLES[anexoSimples];
+  const faixaAtual = anexoAtual.faixas[faixaSimples] || anexoAtual.faixas[0];
+  const aliquotaSimples = faixaAtual.aliquota;
 
   // Calcular resultados
   const resultados = useMemo((): SimulacaoResultado[] => {
@@ -150,7 +209,7 @@ export const SimuladorTab = () => {
         precoFinal: Math.round(precoFinal * 100) / 100,
       };
     });
-  }, [preco, categoria, regimeTributario, cstSelecionado, aliquotaIss, aliquotaPis, aliquotaCofins, usarMarkup, faixaSimples, optanteIbsCbs, aliquotaSimples]);
+  }, [preco, categoria, regimeTributario, cstSelecionado, aliquotaIss, aliquotaPis, aliquotaCofins, usarMarkup, anexoSimples, faixaSimples, optanteIbsCbs, aliquotaSimples]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -264,13 +323,35 @@ export const SimuladorTab = () => {
                 </div>
                 
                 <div className="space-y-2">
+                  <Label>Anexo</Label>
+                  <Select value={anexoSimples} onValueChange={(v: AnexoSimples) => {
+                    setAnexoSimples(v);
+                    setFaixaSimples(0); // Reset faixa quando muda o anexo
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(ANEXOS_SIMPLES).map(([key, anexo]) => (
+                        <SelectItem key={key} value={key}>
+                          {anexo.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {anexoAtual.descricao}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
                   <Label>Faixa de Faturamento</Label>
                   <Select value={faixaSimples.toString()} onValueChange={(v) => setFaixaSimples(parseInt(v))}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {FAIXAS_SIMPLES.map((faixa, idx) => (
+                      {anexoAtual.faixas.map((faixa, idx) => (
                         <SelectItem key={idx} value={idx.toString()}>
                           {faixa.nome} - {faixa.aliquota}%
                         </SelectItem>
