@@ -15,11 +15,12 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Componente para proteger rotas de clientes
+// Componente para proteger rotas de clientes (também permite acesso de admins)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated: isClientAuthenticated, isLoading: isClientLoading } = useAuth();
+  const { isAuthenticated: isAdminAuthenticated, isLoading: isAdminLoading } = useAdminAuth();
   
-  if (isLoading) {
+  if (isClientLoading || isAdminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
         <div className="text-white text-lg">Carregando...</div>
@@ -27,7 +28,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  if (!isAuthenticated) {
+  // Permite acesso se for cliente OU admin
+  if (!isClientAuthenticated && !isAdminAuthenticated) {
     return <Navigate to="/login" replace />;
   }
   
