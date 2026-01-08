@@ -21,10 +21,12 @@ import {
   Shield,
   Search,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  UserPlus
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ChangePasswordModal from '@/components/ChangePasswordModal';
+import AdminInviteModal from '@/components/AdminInviteModal';
 
 interface Client {
   id: string;
@@ -48,6 +50,7 @@ const AdminDashboard = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   
   // Form states
@@ -279,6 +282,15 @@ const AdminDashboard = () => {
             <span className="text-sm text-slate-300">
               Olá, <span className="font-medium text-white">{admin?.name}</span>
             </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsInviteModalOpen(true)}
+              className="text-slate-300 hover:text-white hover:bg-slate-700"
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Convidar Admin
+            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -537,6 +549,13 @@ const AdminDashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Admin Invite Modal */}
+      <AdminInviteModal
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        onInviteSent={() => {}}
+      />
     </div>
   );
 };
