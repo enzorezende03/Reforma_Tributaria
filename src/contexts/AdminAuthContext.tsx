@@ -6,6 +6,7 @@ interface Admin {
   id: string;
   email: string;
   name: string;
+  mustChangePassword: boolean;
 }
 
 interface AdminAuthContextType {
@@ -14,6 +15,7 @@ interface AdminAuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   isLoading: boolean;
+  setMustChangePassword: (value: boolean) => void;
 }
 
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
@@ -34,6 +36,12 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
   const [admin, setAdmin] = useState<Admin | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const setMustChangePassword = (value: boolean) => {
+    if (admin) {
+      setAdmin({ ...admin, mustChangePassword: value });
+    }
+  };
+
   const checkAdminRole = async (user: User): Promise<Admin | null> => {
     // Verificar se o usuário tem role de admin
     const { data: roleData } = await supabase
@@ -47,10 +55,10 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
       return null;
     }
 
-    // Buscar dados do admin
+    // Buscar dados do admin usando a view segura (exclui password_hash)
     const { data: adminData } = await supabase
-      .from('admins')
-      .select('id, email, name')
+      .from('admins_safe')
+      .select('id, email, name, must_change_password')
       .eq('email', user.email)
       .maybeSingle();
 
@@ -59,6 +67,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
         id: adminData.id,
         email: adminData.email,
         name: adminData.name,
+        mustChangePassword: adminData.must_change_password ?? true,
       };
     }
 
@@ -67,6 +76,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
       id: user.id,
       email: user.email || '',
       name: user.user_metadata?.name || 'Admin',
+      mustChangePassword: true,
     };
   };
 
@@ -141,7 +151,8 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
       isAuthenticated: !!admin, 
       login, 
       logout,
-      isLoading 
+      isLoading,
+      setMustChangePassword
     }}>
       {children}
     </AdminAuthContext.Provider>

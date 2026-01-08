@@ -24,6 +24,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import ChangePasswordModal from '@/components/ChangePasswordModal';
 
 interface Client {
   id: string;
@@ -35,7 +36,7 @@ interface Client {
 }
 
 const AdminDashboard = () => {
-  const { admin, logout } = useAdminAuth();
+  const { admin, logout, setMustChangePassword } = useAdminAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -252,8 +253,18 @@ const AdminDashboard = () => {
     client.cnpj.includes(searchTerm.replace(/\D/g, ''))
   );
 
+  const handlePasswordChanged = () => {
+    setMustChangePassword(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Modal de troca de senha obrigatória */}
+      <ChangePasswordModal
+        isOpen={admin?.mustChangePassword ?? false}
+        onPasswordChanged={handlePasswordChanged}
+        adminEmail={admin?.email ?? ''}
+      />
       {/* Header */}
       <header className="bg-gradient-to-r from-slate-800 to-slate-900 text-white py-4 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
