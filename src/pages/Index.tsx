@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { SearchBar } from "@/components/SearchBar";
 import { FilterChips } from "@/components/FilterChips";
@@ -7,6 +8,7 @@ import { StatsCards } from "@/components/StatsCards";
 import { CSTCard } from "@/components/CSTCard";
 import { AnexoModal } from "@/components/AnexoModal";
 import { NewsTab } from "@/components/NewsTab";
+import ClientChangePasswordModal from "@/components/ClientChangePasswordModal";
 import { cstData, findByNCM } from "@/data/cstData";
 import { getAnexoById, type Anexo } from "@/data/anexosData";
 import { fuzzyMatch } from "@/lib/fuzzySearch";
@@ -20,6 +22,7 @@ const defaultRecord = cstData.find(r => r.cstCode === "000" && r.cClassTrib === 
 
 const Index = () => {
   const navigate = useNavigate();
+  const { client, setMustChangePassword } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const [selectedAnexo, setSelectedAnexo] = useState<Anexo | null>(null);
@@ -90,8 +93,21 @@ const Index = () => {
     setSelectedAnexo(null);
   };
 
+  const handlePasswordChanged = () => {
+    setMustChangePassword(false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Modal de troca de senha obrigatória para clientes */}
+      {client?.mustChangePassword && (
+        <ClientChangePasswordModal
+          isOpen={true}
+          clientId={client.id}
+          onPasswordChanged={handlePasswordChanged}
+        />
+      )}
+
       <Header />
       
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
