@@ -52,7 +52,9 @@ export const CSTCard = ({ record, index, onOpenAnexo }: CSTCardProps) => {
             <Badge 
               variant="secondary" 
               className="badge-cst text-sm px-2.5 py-1 font-medium"
+              title="Código de Classificação Tributária"
             >
+              <span className="text-muted-foreground font-normal mr-1">cClassTrib:</span>
               {record.cClassTrib}
             </Badge>
           </div>
