@@ -32,15 +32,19 @@ interface News {
   published_at: string;
   is_published: boolean;
   created_at: string;
+  tags: string[];
 }
 
-const CATEGORIES = [
+const TAG_OPTIONS = [
   'Legislação',
   'Códigos',
   'Transição',
   'Alíquotas',
   'Arrecadação',
   'Social',
+  'IBS',
+  'CBS',
+  'IS',
   'Geral'
 ];
 
@@ -61,6 +65,7 @@ export const NewsManagement = () => {
   const [formTitle, setFormTitle] = useState('');
   const [formContent, setFormContent] = useState('');
   const [formSummary, setFormSummary] = useState('');
+  const [formTags, setFormTags] = useState<string[]>([]);
   const [formIsPublished, setFormIsPublished] = useState(false);
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -92,8 +97,17 @@ export const NewsManagement = () => {
     setFormTitle('');
     setFormContent('');
     setFormSummary('');
+    setFormTags([]);
     setFormIsPublished(false);
     setFormError('');
+  };
+
+  const toggleTag = (tag: string) => {
+    setFormTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
   };
 
   const handleAddNews = async () => {
@@ -115,6 +129,7 @@ export const NewsManagement = () => {
       title: formTitle.trim(),
       content: formContent.trim(),
       summary: formSummary.trim() || null,
+      tags: formTags,
       is_published: formIsPublished,
       published_at: new Date().toISOString(),
     });
@@ -156,6 +171,7 @@ export const NewsManagement = () => {
         title: formTitle.trim(),
         content: formContent.trim(),
         summary: formSummary.trim() || null,
+        tags: formTags,
         is_published: formIsPublished,
       })
       .eq('id', selectedNews.id);
@@ -225,6 +241,7 @@ export const NewsManagement = () => {
     setFormTitle(newsItem.title);
     setFormContent(newsItem.content);
     setFormSummary(newsItem.summary || '');
+    setFormTags(newsItem.tags || []);
     setFormIsPublished(newsItem.is_published);
     setFormError('');
     setIsEditModalOpen(true);
@@ -237,7 +254,8 @@ export const NewsManagement = () => {
 
   const filteredNews = news.filter(item => 
     item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.content.toLowerCase().includes(searchTerm.toLowerCase())
+    item.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
   );
 
   const formatDate = (dateString: string) => {
@@ -305,6 +323,25 @@ export const NewsManagement = () => {
                   rows={6}
                 />
               </div>
+              <div className="space-y-2">
+                <Label>Tags</Label>
+                <div className="flex flex-wrap gap-2">
+                  {TAG_OPTIONS.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant={formTags.includes(tag) ? 'default' : 'outline'}
+                      className={`cursor-pointer transition-colors ${
+                        formTags.includes(tag) 
+                          ? 'bg-blue-600 hover:bg-blue-700' 
+                          : 'hover:bg-muted'
+                      }`}
+                      onClick={() => toggleTag(tag)}
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
               <div className="flex items-center gap-3">
                 <Switch
                   checked={formIsPublished}
@@ -348,6 +385,7 @@ export const NewsManagement = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Título</TableHead>
+                <TableHead>Tags</TableHead>
                 <TableHead>Data</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -357,10 +395,28 @@ export const NewsManagement = () => {
               {filteredNews.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>
-                    <div className="max-w-md">
+                    <div className="max-w-xs">
                       <span className="font-medium line-clamp-1">{item.title}</span>
                       {item.summary && (
                         <p className="text-sm text-muted-foreground line-clamp-1">{item.summary}</p>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1 max-w-[150px]">
+                      {item.tags && item.tags.length > 0 ? (
+                        item.tags.slice(0, 2).map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))
+                      ) : (
+                        <span className="text-xs text-muted-foreground">-</span>
+                      )}
+                      {item.tags && item.tags.length > 2 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{item.tags.length - 2}
+                        </Badge>
                       )}
                     </div>
                   </TableCell>
@@ -452,6 +508,25 @@ export const NewsManagement = () => {
                 onChange={(e) => setFormContent(e.target.value)}
                 rows={6}
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Tags</Label>
+              <div className="flex flex-wrap gap-2">
+                {TAG_OPTIONS.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant={formTags.includes(tag) ? 'default' : 'outline'}
+                    className={`cursor-pointer transition-colors ${
+                      formTags.includes(tag) 
+                        ? 'bg-blue-600 hover:bg-blue-700' 
+                        : 'hover:bg-muted'
+                    }`}
+                    onClick={() => toggleTag(tag)}
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Switch

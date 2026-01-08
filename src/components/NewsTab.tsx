@@ -12,6 +12,7 @@ interface News {
   content: string;
   summary: string | null;
   published_at: string;
+  tags: string[];
 }
 
 export const NewsTab = () => {
@@ -23,7 +24,7 @@ export const NewsTab = () => {
     setIsLoading(true);
     const { data, error } = await supabase
       .from('news')
-      .select('id, title, content, summary, published_at')
+      .select('id, title, content, summary, published_at, tags')
       .eq('is_published', true)
       .order('published_at', { ascending: false });
     
@@ -79,9 +80,19 @@ export const NewsTab = () => {
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between mb-2">
-                  <Badge variant="outline" className="bg-blue-500/10 text-blue-700 border-blue-500/30">
-                    Notícia
-                  </Badge>
+                  <div className="flex flex-wrap gap-1">
+                    {item.tags && item.tags.length > 0 ? (
+                      item.tags.slice(0, 2).map((tag) => (
+                        <Badge key={tag} variant="outline" className="bg-blue-500/10 text-blue-700 border-blue-500/30 text-xs">
+                          {tag}
+                        </Badge>
+                      ))
+                    ) : (
+                      <Badge variant="outline" className="bg-blue-500/10 text-blue-700 border-blue-500/30">
+                        Notícia
+                      </Badge>
+                    )}
+                  </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Calendar className="h-3 w-3" />
                     {formatDate(item.published_at)}
@@ -112,9 +123,20 @@ export const NewsTab = () => {
       <Dialog open={!!selectedNews} onOpenChange={() => setSelectedNews(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-              <Calendar className="h-4 w-4" />
-              {selectedNews && formatDate(selectedNews.published_at)}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex flex-wrap gap-1">
+                {selectedNews?.tags && selectedNews.tags.length > 0 ? (
+                  selectedNews.tags.map((tag) => (
+                    <Badge key={tag} variant="outline" className="bg-blue-500/10 text-blue-700 border-blue-500/30 text-xs">
+                      {tag}
+                    </Badge>
+                  ))
+                ) : null}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                {selectedNews && formatDate(selectedNews.published_at)}
+              </div>
             </div>
             <DialogTitle className="text-xl">{selectedNews?.title}</DialogTitle>
           </DialogHeader>
