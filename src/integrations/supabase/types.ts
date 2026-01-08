@@ -20,6 +20,7 @@ export type Database = {
           email: string
           id: string
           is_active: boolean
+          must_change_password: boolean
           name: string
           password_hash: string
         }
@@ -28,6 +29,7 @@ export type Database = {
           email: string
           id?: string
           is_active?: boolean
+          must_change_password?: boolean
           name: string
           password_hash: string
         }
@@ -36,6 +38,7 @@ export type Database = {
           email?: string
           id?: string
           is_active?: boolean
+          must_change_password?: boolean
           name?: string
           password_hash?: string
         }
@@ -94,7 +97,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admins_safe: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string | null
+          is_active: boolean | null
+          must_change_password: boolean | null
+          name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          must_change_password?: boolean | null
+          name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          must_change_password?: boolean | null
+          name?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_register_admin: { Args: never; Returns: boolean }
