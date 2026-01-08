@@ -53,6 +53,7 @@ export type Database = {
           must_change_password: boolean
           name: string
           password_hash: string
+          permissions: string[] | null
         }
         Insert: {
           created_at?: string
@@ -62,6 +63,7 @@ export type Database = {
           must_change_password?: boolean
           name: string
           password_hash: string
+          permissions?: string[] | null
         }
         Update: {
           created_at?: string
@@ -71,6 +73,7 @@ export type Database = {
           must_change_password?: boolean
           name?: string
           password_hash?: string
+          permissions?: string[] | null
         }
         Relationships: []
       }
@@ -225,6 +228,7 @@ export type Database = {
           is_active: boolean | null
           must_change_password: boolean | null
           name: string | null
+          permissions: string[] | null
         }
         Insert: {
           created_at?: string | null
@@ -233,6 +237,7 @@ export type Database = {
           is_active?: boolean | null
           must_change_password?: boolean | null
           name?: string | null
+          permissions?: string[] | null
         }
         Update: {
           created_at?: string | null
@@ -241,6 +246,7 @@ export type Database = {
           is_active?: boolean | null
           must_change_password?: boolean | null
           name?: string | null
+          permissions?: string[] | null
         }
         Relationships: []
       }
