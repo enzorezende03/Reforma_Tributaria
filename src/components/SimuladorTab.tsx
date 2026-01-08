@@ -1,21 +1,22 @@
 import { useState, useMemo } from "react";
-import { Calculator, TrendingUp, Info, DollarSign, Percent, Building, MapPin } from "lucide-react";
+import { Calculator, TrendingUp, Info, DollarSign, Percent, Building, MapPin, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Alíquotas padrão de IBS e CBS (podem ser ajustadas conforme legislação)
 const ALIQUOTA_IBS_PADRAO = 18.69;
 const ALIQUOTA_CBS_PADRAO = 9.28;
 
-// Cronograma de transição da reforma tributária
-const TRANSICAO = {
+// Cronograma de transição da reforma tributária - Regime Normal
+const TRANSICAO_NORMAL = {
   2025: { iss: 100, pis: 100, cofins: 100, ibs: 0, cbs: 0 },
   2026: { iss: 100, pis: 100, cofins: 100, ibs: 0.1, cbs: 0.9 },
   2027: { iss: 90, pis: 0, cofins: 0, ibs: 10, cbs: 100 },
@@ -26,6 +27,16 @@ const TRANSICAO = {
   2032: { iss: 40, pis: 0, cofins: 0, ibs: 60, cbs: 100 },
   2033: { iss: 0, pis: 0, cofins: 0, ibs: 100, cbs: 100 },
 };
+
+// Faixas do Simples Nacional (valores anuais de faturamento)
+const FAIXAS_SIMPLES = [
+  { limite: 180000, aliquota: 6.0, nome: '1ª Faixa (até R$ 180 mil)' },
+  { limite: 360000, aliquota: 11.2, nome: '2ª Faixa (R$ 180 mil a R$ 360 mil)' },
+  { limite: 720000, aliquota: 13.5, nome: '3ª Faixa (R$ 360 mil a R$ 720 mil)' },
+  { limite: 1800000, aliquota: 16.0, nome: '4ª Faixa (R$ 720 mil a R$ 1,8 mi)' },
+  { limite: 3600000, aliquota: 21.0, nome: '5ª Faixa (R$ 1,8 mi a R$ 3,6 mi)' },
+  { limite: 4800000, aliquota: 33.0, nome: '6ª Faixa (R$ 3,6 mi a R$ 4,8 mi)' },
+];
 
 // Reduções de alíquota por CST
 const REDUCOES_CST: Record<string, { ibs: number; cbs: number; descricao: string }> = {
@@ -43,6 +54,7 @@ interface SimulacaoResultado {
   cofins: number;
   cbs: number;
   ibs: number;
+  simples: number;
   total: number;
   precoFinal: number;
 }
@@ -60,11 +72,18 @@ export const SimuladorTab = () => {
   const [aliquotaPis, setAliquotaPis] = useState<string>('1.65');
   const [aliquotaCofins, setAliquotaCofins] = useState<string>('7.6');
   
+  // Simples Nacional
+  const [faixaSimples, setFaixaSimples] = useState<number>(0);
+  const [optanteIbsCbs, setOptanteIbsCbs] = useState(false); // Opção de recolher IBS/CBS separadamente
+  
   // Markup
   const [usarMarkup, setUsarMarkup] = useState(false);
   const [custosVariaveis, setCustosVariaveis] = useState<string>('10');
   const [custosFixos, setCustosFixos] = useState<string>('20');
   const [margemLucro, setMargemLucro] = useState<string>('30');
+
+  // Alíquota do Simples selecionada
+  const aliquotaSimples = FAIXAS_SIMPLES[faixaSimples]?.aliquota || 6.0;
 
   // Calcular resultados
   const resultados = useMemo((): SimulacaoResultado[] => {
@@ -77,23 +96,46 @@ export const SimuladorTab = () => {
     const ibsEfetivo = ALIQUOTA_IBS_PADRAO * (1 - reducao.ibs / 100);
     const cbsEfetivo = ALIQUOTA_CBS_PADRAO * (1 - reducao.cbs / 100);
 
-    const anos = Object.keys(TRANSICAO).map(Number).sort();
+    const anos = Object.keys(TRANSICAO_NORMAL).map(Number).sort();
     
     return anos.map((ano) => {
-      const transicao = TRANSICAO[ano as keyof typeof TRANSICAO];
+      const transicao = TRANSICAO_NORMAL[ano as keyof typeof TRANSICAO_NORMAL];
       
-      // Cálculo dos tributos com base na transição
-      const iss = categoria === 'servicos' 
-        ? (precoBase * issRate / 100) * (transicao.iss / 100)
-        : 0;
+      let iss = 0, pis = 0, cofins = 0, cbs = 0, ibs = 0, simples = 0;
       
-      const pis = (precoBase * pisRate / 100) * (transicao.pis / 100);
-      const cofins = (precoBase * cofinsRate / 100) * (transicao.cofins / 100);
+      if (regimeTributario === 'simples') {
+        // Simples Nacional
+        if (ano <= 2026) {
+          // Até 2026: recolhe normalmente pelo DAS
+          simples = precoBase * aliquotaSimples / 100;
+        } else {
+          // A partir de 2027: pode optar por recolher IBS/CBS separadamente
+          if (optanteIbsCbs) {
+            // Optante: recolhe IBS/CBS separado (permite crédito aos clientes)
+            cbs = (precoBase * cbsEfetivo / 100) * (transicao.cbs / 100);
+            ibs = (precoBase * ibsEfetivo / 100) * (transicao.ibs / 100);
+            // Simples reduzido (desconta a parte do IBS/CBS)
+            const reducaoSimples = (ibsEfetivo + cbsEfetivo) * (transicao.ibs + transicao.cbs) / 200;
+            simples = Math.max(0, (precoBase * aliquotaSimples / 100) - (precoBase * reducaoSimples / 100));
+          } else {
+            // Não optante: continua recolhendo tudo pelo DAS (sem gerar crédito)
+            simples = precoBase * aliquotaSimples / 100;
+          }
+        }
+      } else {
+        // Regime Normal
+        iss = categoria === 'servicos' 
+          ? (precoBase * issRate / 100) * (transicao.iss / 100)
+          : 0;
+        
+        pis = (precoBase * pisRate / 100) * (transicao.pis / 100);
+        cofins = (precoBase * cofinsRate / 100) * (transicao.cofins / 100);
+        
+        cbs = (precoBase * cbsEfetivo / 100) * (transicao.cbs / 100);
+        ibs = (precoBase * ibsEfetivo / 100) * (transicao.ibs / 100);
+      }
       
-      const cbs = (precoBase * cbsEfetivo / 100) * (transicao.cbs / 100);
-      const ibs = (precoBase * ibsEfetivo / 100) * (transicao.ibs / 100);
-      
-      const total = iss + pis + cofins + cbs + ibs;
+      const total = iss + pis + cofins + cbs + ibs + simples;
       const precoFinal = precoBase + (usarMarkup ? total : 0);
       
       return {
@@ -103,11 +145,12 @@ export const SimuladorTab = () => {
         cofins: Math.round(cofins * 100) / 100,
         cbs: Math.round(cbs * 100) / 100,
         ibs: Math.round(ibs * 100) / 100,
+        simples: Math.round(simples * 100) / 100,
         total: Math.round(total * 100) / 100,
         precoFinal: Math.round(precoFinal * 100) / 100,
       };
     });
-  }, [preco, categoria, cstSelecionado, aliquotaIss, aliquotaPis, aliquotaCofins, usarMarkup]);
+  }, [preco, categoria, regimeTributario, cstSelecionado, aliquotaIss, aliquotaPis, aliquotaCofins, usarMarkup, faixaSimples, optanteIbsCbs, aliquotaSimples]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -212,52 +255,111 @@ export const SimuladorTab = () => {
               </p>
             </div>
 
-            <div className="pt-4 border-t">
-              <p className="text-sm font-medium mb-3">Alíquotas Atuais</p>
-              
-              {categoria === 'servicos' && (
+            {/* Opções específicas do Simples Nacional */}
+            {regimeTributario === 'simples' && (
+              <div className="pt-4 border-t space-y-4">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  <p className="text-sm font-medium text-amber-700">Simples Nacional</p>
+                </div>
+                
                 <div className="space-y-2">
-                  <Label className="text-xs">ISS (%)</Label>
-                  <Input
-                    type="number"
-                    value={aliquotaIss}
-                    onChange={(e) => setAliquotaIss(e.target.value)}
-                    step="0.01"
-                  />
+                  <Label>Faixa de Faturamento</Label>
+                  <Select value={faixaSimples.toString()} onValueChange={(v) => setFaixaSimples(parseInt(v))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FAIXAS_SIMPLES.map((faixa, idx) => (
+                        <SelectItem key={idx} value={idx.toString()}>
+                          {faixa.nome} - {faixa.aliquota}%
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
-              
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                <div className="space-y-1">
-                  <Label className="text-xs">PIS (%)</Label>
-                  <Input
-                    type="number"
-                    value={aliquotaPis}
-                    onChange={(e) => setAliquotaPis(e.target.value)}
-                    step="0.01"
-                  />
+
+                <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-amber-900">Optar por IBS/CBS separado?</p>
+                      <p className="text-xs text-amber-700 mt-1">
+                        A partir de 2027, permite gerar crédito tributário para seus clientes
+                      </p>
+                    </div>
+                    <Switch
+                      checked={optanteIbsCbs}
+                      onCheckedChange={setOptanteIbsCbs}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">COFINS (%)</Label>
-                  <Input
-                    type="number"
-                    value={aliquotaCofins}
-                    onChange={(e) => setAliquotaCofins(e.target.value)}
-                    step="0.01"
-                  />
+
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>• <strong>Não optante:</strong> Recolhe tudo pelo DAS (não gera crédito ao cliente)</p>
+                  <p>• <strong>Optante:</strong> Recolhe IBS/CBS separado (gera crédito ao cliente)</p>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Alíquotas atuais - apenas para Regime Normal */}
+            {regimeTributario === 'normal' && (
+              <div className="pt-4 border-t">
+                <p className="text-sm font-medium mb-3">Alíquotas Atuais</p>
+                
+                {categoria === 'servicos' && (
+                  <div className="space-y-2">
+                    <Label className="text-xs">ISS (%)</Label>
+                    <Input
+                      type="number"
+                      value={aliquotaIss}
+                      onChange={(e) => setAliquotaIss(e.target.value)}
+                      step="0.01"
+                    />
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs">PIS (%)</Label>
+                    <Input
+                      type="number"
+                      value={aliquotaPis}
+                      onChange={(e) => setAliquotaPis(e.target.value)}
+                      step="0.01"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">COFINS (%)</Label>
+                    <Input
+                      type="number"
+                      value={aliquotaCofins}
+                      onChange={(e) => setAliquotaCofins(e.target.value)}
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="pt-4 border-t">
-              <p className="text-sm font-medium mb-2">Alíquotas Reforma (IBS + CBS)</p>
-              <div className="flex gap-2">
-                <Badge variant="outline" className="bg-blue-50">
-                  IBS: {(ALIQUOTA_IBS_PADRAO * (1 - (REDUCOES_CST[cstSelecionado]?.ibs || 0) / 100)).toFixed(2)}%
-                </Badge>
-                <Badge variant="outline" className="bg-emerald-50">
-                  CBS: {(ALIQUOTA_CBS_PADRAO * (1 - (REDUCOES_CST[cstSelecionado]?.cbs || 0) / 100)).toFixed(2)}%
-                </Badge>
+              <p className="text-sm font-medium mb-2">
+                {regimeTributario === 'simples' ? 'Alíquota DAS' : 'Alíquotas Reforma (IBS + CBS)'}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {regimeTributario === 'simples' ? (
+                  <Badge variant="outline" className="bg-amber-50">
+                    Simples: {aliquotaSimples}%
+                  </Badge>
+                ) : (
+                  <>
+                    <Badge variant="outline" className="bg-blue-50">
+                      IBS: {(ALIQUOTA_IBS_PADRAO * (1 - (REDUCOES_CST[cstSelecionado]?.ibs || 0) / 100)).toFixed(2)}%
+                    </Badge>
+                    <Badge variant="outline" className="bg-emerald-50">
+                      CBS: {(ALIQUOTA_CBS_PADRAO * (1 - (REDUCOES_CST[cstSelecionado]?.cbs || 0) / 100)).toFixed(2)}%
+                    </Badge>
+                  </>
+                )}
               </div>
             </div>
           </CardContent>
@@ -290,11 +392,25 @@ export const SimuladorTab = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Ano</TableHead>
-                    {categoria === 'servicos' && <TableHead className="text-right">ISS</TableHead>}
-                    <TableHead className="text-right">PIS</TableHead>
-                    <TableHead className="text-right">COFINS</TableHead>
-                    <TableHead className="text-right">CBS</TableHead>
-                    <TableHead className="text-right">IBS</TableHead>
+                    {regimeTributario === 'simples' ? (
+                      <>
+                        <TableHead className="text-right">DAS</TableHead>
+                        {optanteIbsCbs && (
+                          <>
+                            <TableHead className="text-right">CBS</TableHead>
+                            <TableHead className="text-right">IBS</TableHead>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {categoria === 'servicos' && <TableHead className="text-right">ISS</TableHead>}
+                        <TableHead className="text-right">PIS</TableHead>
+                        <TableHead className="text-right">COFINS</TableHead>
+                        <TableHead className="text-right">CBS</TableHead>
+                        <TableHead className="text-right">IBS</TableHead>
+                      </>
+                    )}
                     <TableHead className="text-right font-bold">Total</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -302,13 +418,27 @@ export const SimuladorTab = () => {
                   {resultados.map((r) => (
                     <TableRow key={r.ano} className={r.ano === 2033 ? 'bg-muted/50 font-medium' : ''}>
                       <TableCell className="font-medium">{r.ano}</TableCell>
-                      {categoria === 'servicos' && (
-                        <TableCell className="text-right">{formatCurrency(r.iss)}</TableCell>
+                      {regimeTributario === 'simples' ? (
+                        <>
+                          <TableCell className="text-right text-amber-600">{formatCurrency(r.simples)}</TableCell>
+                          {optanteIbsCbs && (
+                            <>
+                              <TableCell className="text-right text-emerald-600">{formatCurrency(r.cbs)}</TableCell>
+                              <TableCell className="text-right text-blue-600">{formatCurrency(r.ibs)}</TableCell>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {categoria === 'servicos' && (
+                            <TableCell className="text-right">{formatCurrency(r.iss)}</TableCell>
+                          )}
+                          <TableCell className="text-right">{formatCurrency(r.pis)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(r.cofins)}</TableCell>
+                          <TableCell className="text-right text-emerald-600">{formatCurrency(r.cbs)}</TableCell>
+                          <TableCell className="text-right text-blue-600">{formatCurrency(r.ibs)}</TableCell>
+                        </>
                       )}
-                      <TableCell className="text-right">{formatCurrency(r.pis)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(r.cofins)}</TableCell>
-                      <TableCell className="text-right text-emerald-600">{formatCurrency(r.cbs)}</TableCell>
-                      <TableCell className="text-right text-blue-600">{formatCurrency(r.ibs)}</TableCell>
                       <TableCell className="text-right font-bold">{formatCurrency(r.total)}</TableCell>
                     </TableRow>
                   ))}
@@ -353,18 +483,41 @@ export const SimuladorTab = () => {
       <Card>
         <CardContent className="py-4">
           <div className="flex flex-wrap gap-4 justify-center text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-gray-400" />
-              <span className="text-muted-foreground">ISS/PIS/COFINS - Sistema atual</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-emerald-500" />
-              <span className="text-muted-foreground">CBS - Contribuição sobre Bens e Serviços</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-blue-500" />
-              <span className="text-muted-foreground">IBS - Imposto sobre Bens e Serviços</span>
-            </div>
+            {regimeTributario === 'simples' ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-amber-500" />
+                  <span className="text-muted-foreground">DAS - Documento de Arrecadação do Simples</span>
+                </div>
+                {optanteIbsCbs && (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                      <span className="text-muted-foreground">CBS - Recolhimento separado</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-500" />
+                      <span className="text-muted-foreground">IBS - Recolhimento separado</span>
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-gray-400" />
+                  <span className="text-muted-foreground">ISS/PIS/COFINS - Sistema atual</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                  <span className="text-muted-foreground">CBS - Contribuição sobre Bens e Serviços</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500" />
+                  <span className="text-muted-foreground">IBS - Imposto sobre Bens e Serviços</span>
+                </div>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
