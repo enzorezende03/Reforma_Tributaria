@@ -2,7 +2,7 @@ import { ExternalLink, Percent, Calendar, FileText, BookOpen, Settings2, Scale, 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { CSTRecord } from "@/data/cstData";
 import { extractAnexoNumber } from "@/data/anexosData";
@@ -31,7 +31,6 @@ export const CSTCard = ({ record, index, onOpenAnexo }: CSTCardProps) => {
   // Verificar se é prestação de serviço e obter códigos indOp
   const isServico = isServicoRecord(record.cClassTribName, record.cClassTribDescription);
   const indOpCodes = isServico ? findIndOpByServico(record.cClassTribName) : [];
-  const primaryIndOp = indOpCodes.length > 0 ? getIndOpDetails(indOpCodes[0]) : undefined;
   
   // Verificar se há requisitos legais
   const hasRequisitos = record.requisitosLegais && record.requisitosLegais.length > 0;
@@ -86,44 +85,52 @@ export const CSTCard = ({ record, index, onOpenAnexo }: CSTCardProps) => {
         
         {/* Indicador de Operação para prestação de serviços */}
         {isServico && indOpCodes.length > 0 && (
-          <TooltipProvider>
-            <div className="bg-accent/30 rounded-lg p-3 border border-accent/50">
-              <div className="flex items-center gap-2 mb-2">
-                <Settings2 className="h-4 w-4 text-accent-foreground" />
-                <span className="text-sm font-semibold text-accent-foreground">
-                  Indicador de Operação (indOp) - Art. 11
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {indOpCodes.map((code) => {
-                  const details = getIndOpDetails(code);
-                  return (
-                    <Tooltip key={code}>
-                      <TooltipTrigger asChild>
-                        <Badge 
-                          variant="secondary" 
-                          className="bg-accent text-accent-foreground cursor-help font-mono text-xs px-2 py-1"
-                        >
-                          {code}
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs">
-                        <div className="space-y-1 text-xs">
-                          <p className="font-semibold">{details?.tipoOperacao}</p>
-                          <p className="text-muted-foreground">{details?.localFornecimentoDfe}</p>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-              </div>
-              {primaryIndOp && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Local do fornecimento no DFe: {primaryIndOp.localFornecimentoDfe}
-                </p>
-              )}
+          <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center gap-2 mb-3">
+              <Settings2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <span className="text-sm font-bold text-blue-800 dark:text-blue-300">
+                Indicador de Operação para o DFe
+              </span>
+              <Badge variant="outline" className="text-xs font-normal border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400">
+                Art. 11 LC 214/2025
+              </Badge>
             </div>
-          </TooltipProvider>
+            
+            <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+              Utilize um dos códigos abaixo no campo <code className="bg-blue-100 dark:bg-blue-900 px-1.5 py-0.5 rounded font-mono text-xs">indOp</code> do documento fiscal, 
+              conforme o local onde o serviço é prestado:
+            </p>
+            
+            <div className="space-y-2">
+              {indOpCodes.map((code) => {
+                const details = getIndOpDetails(code);
+                if (!details) return null;
+                return (
+                  <div 
+                    key={code} 
+                    className="flex items-start gap-3 p-2.5 bg-white dark:bg-gray-900 rounded-md border border-blue-100 dark:border-blue-900"
+                  >
+                    <Badge className="bg-blue-600 text-white font-mono text-sm px-2.5 py-1 shrink-0">
+                      {code}
+                    </Badge>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground leading-tight">
+                        {details.localFornecimentoDfe}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {details.tipoOperacao}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-3 flex items-center gap-1.5">
+              <FileText className="h-3.5 w-3.5" />
+              Escolha o código que corresponde ao local onde o serviço está sendo efetivamente prestado.
+            </p>
+          </div>
         )}
         
         {/* Requisitos Legais para obter o benefício */}
