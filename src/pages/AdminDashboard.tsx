@@ -23,12 +23,15 @@ import {
   AlertCircle,
   CheckCircle,
   UserPlus,
-  KeyRound
+  KeyRound,
+  Newspaper
 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import ChangePasswordModal from '@/components/ChangePasswordModal';
 import AdminInviteModal from '@/components/AdminInviteModal';
 import ClientResetPasswordModal from '@/components/ClientResetPasswordModal';
+import { NewsManagement } from '@/components/NewsManagement';
 
 interface Client {
   id: string;
@@ -377,159 +380,179 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        {/* Clients Table */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Clientes Cadastrados</CardTitle>
-              <CardDescription>Gerencie os acessos dos seus clientes</CardDescription>
-            </div>
-            <Dialog open={isAddModalOpen} onOpenChange={(open) => { setIsAddModalOpen(open); if (!open) resetForm(); }}>
-              <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Cliente
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Cadastrar Novo Cliente</DialogTitle>
-                  <DialogDescription>Preencha os dados do cliente</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  {formError && (
-                    <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>{formError}</AlertDescription>
-                    </Alert>
-                  )}
-                  <div className="space-y-2">
-                    <Label>CNPJ</Label>
+        {/* Tabs for Clients and News */}
+        <Tabs defaultValue="clients" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="clients" className="gap-2">
+              <Users className="h-4 w-4" />
+              Clientes
+            </TabsTrigger>
+            <TabsTrigger value="news" className="gap-2">
+              <Newspaper className="h-4 w-4" />
+              Notícias
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="clients">
+            {/* Clients Table */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Clientes Cadastrados</CardTitle>
+                  <CardDescription>Gerencie os acessos dos seus clientes</CardDescription>
+                </div>
+                <Dialog open={isAddModalOpen} onOpenChange={(open) => { setIsAddModalOpen(open); if (!open) resetForm(); }}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Novo Cliente
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Cadastrar Novo Cliente</DialogTitle>
+                      <DialogDescription>Preencha os dados do cliente</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      {formError && (
+                        <Alert variant="destructive">
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertDescription>{formError}</AlertDescription>
+                        </Alert>
+                      )}
+                      <div className="space-y-2">
+                        <Label>CNPJ</Label>
+                        <Input
+                          placeholder="00.000.000/0000-00"
+                          value={formCnpj}
+                          onChange={(e) => setFormCnpj(formatCnpj(e.target.value))}
+                          maxLength={18}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Nome da Empresa</Label>
+                        <Input
+                          placeholder="Razão Social"
+                          value={formCompanyName}
+                          onChange={(e) => setFormCompanyName(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Senha</Label>
+                        <Input
+                          type="password"
+                          placeholder="Senha de acesso"
+                          value={formPassword}
+                          onChange={(e) => setFormPassword(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>Cancelar</Button>
+                      <Button onClick={handleAddClient} disabled={isSubmitting}>
+                        {isSubmitting ? 'Salvando...' : 'Cadastrar'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
+                {/* Search */}
+                <div className="mb-4">
+                  <div className="relative max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                      placeholder="00.000.000/0000-00"
-                      value={formCnpj}
-                      onChange={(e) => setFormCnpj(formatCnpj(e.target.value))}
-                      maxLength={18}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Nome da Empresa</Label>
-                    <Input
-                      placeholder="Razão Social"
-                      value={formCompanyName}
-                      onChange={(e) => setFormCompanyName(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Senha</Label>
-                    <Input
-                      type="password"
-                      placeholder="Senha de acesso"
-                      value={formPassword}
-                      onChange={(e) => setFormPassword(e.target.value)}
+                      placeholder="Buscar por nome ou CNPJ..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
                     />
                   </div>
                 </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>Cancelar</Button>
-                  <Button onClick={handleAddClient} disabled={isSubmitting}>
-                    {isSubmitting ? 'Salvando...' : 'Cadastrar'}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </CardHeader>
-          <CardContent>
-            {/* Search */}
-            <div className="mb-4">
-              <div className="relative max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Buscar por nome ou CNPJ..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
 
-            {/* Table */}
-            {isLoading ? (
-              <div className="text-center py-8 text-gray-500">Carregando...</div>
-            ) : filteredClients.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                {searchTerm ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Empresa</TableHead>
-                    <TableHead>CNPJ</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredClients.map((client) => (
-                    <TableRow key={client.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Building2 className="h-4 w-4 text-gray-400" />
-                          <span className="font-medium">{client.company_name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {formatCnpj(client.cnpj)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={client.is_active}
-                            onCheckedChange={() => handleToggleActive(client)}
-                          />
-                          <Badge variant={client.is_active ? 'default' : 'secondary'}>
-                            {client.is_active ? 'Ativo' : 'Inativo'}
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => openResetPasswordModal(client)}
-                            title="Resetar Senha"
-                            className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
-                          >
-                            <KeyRound className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => openEditModal(client)}
-                            title="Editar"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => openDeleteModal(client)}
-                            title="Excluir"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+                {/* Table */}
+                {isLoading ? (
+                  <div className="text-center py-8 text-gray-500">Carregando...</div>
+                ) : filteredClients.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    {searchTerm ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Empresa</TableHead>
+                        <TableHead>CNPJ</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredClients.map((client) => (
+                        <TableRow key={client.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Building2 className="h-4 w-4 text-gray-400" />
+                              <span className="font-medium">{client.company_name}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {formatCnpj(client.cnpj)}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={client.is_active}
+                                onCheckedChange={() => handleToggleActive(client)}
+                              />
+                              <Badge variant={client.is_active ? 'default' : 'secondary'}>
+                                {client.is_active ? 'Ativo' : 'Inativo'}
+                              </Badge>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openResetPasswordModal(client)}
+                                title="Resetar Senha"
+                                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                              >
+                                <KeyRound className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openEditModal(client)}
+                                title="Editar"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openDeleteModal(client)}
+                                title="Excluir"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="news">
+            <NewsManagement />
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Edit Modal */}
