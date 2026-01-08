@@ -8,6 +8,14 @@ interface Client {
   mustChangePassword?: boolean;
 }
 
+interface ClientSession {
+  client: Client;
+  expiresAt: number;
+}
+
+// Session expires after 30 minutes of inactivity
+const SESSION_DURATION_MS = 30 * 60 * 1000;
+
 interface AuthContextType {
   client: Client | null;
   isAuthenticated: boolean;
@@ -36,11 +44,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar se existe sessão salva
-    const savedClient = localStorage.getItem('client_session');
-    if (savedClient) {
+    // Verificar se existe sessão salva e se ainda é válida
+    const savedSession = localStorage.getItem('client_session');
+    if (savedSession) {
       try {
-        setClient(JSON.parse(savedClient));
+        const session: ClientSession = JSON.parse(savedSession);
+        // Check if session has expired
+        if (Date.now() < session.expiresAt) {
+          setClient(session.client);
+          // Refresh session expiration on load
+          const refreshedSession: ClientSession = {
+            client: session.client,
+            expiresAt: Date.now() + SESSION_DURATION_MS
+          };
+          localStorage.setItem('client_session', JSON.stringify(refreshedSession));
+        } else {
+          // Session expired - clean up
+          localStorage.removeItem('client_session');
+        }
       } catch {
         localStorage.removeItem('client_session');
       }
@@ -88,7 +109,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           mustChangePassword: result.client.must_change_password ?? false,
         };
         setClient(clientData);
-        localStorage.setItem('client_session', JSON.stringify(clientData));
+        // Store session with expiration timestamp
+        const session: ClientSession = {
+          client: clientData,
+          expiresAt: Date.now() + SESSION_DURATION_MS
+        };
+        localStorage.setItem('client_session', JSON.stringify(session));
         return { success: true };
       }
 
@@ -108,7 +134,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (client) {
       const updatedClient = { ...client, mustChangePassword: value };
       setClient(updatedClient);
-      localStorage.setItem('client_session', JSON.stringify(updatedClient));
+      // Preserve session expiration when updating client data
+      const session: ClientSession = {
+        client: updatedClient,
+        expiresAt: Date.now() + SESSION_DURATION_MS
+      };
+      localStorage.setItem('client_session', JSON.stringify(session));
     }
   };
 

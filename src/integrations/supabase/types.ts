@@ -107,6 +107,27 @@ export type Database = {
         }
         Relationships: []
       }
+      login_attempts: {
+        Row: {
+          attempt_time: string
+          id: string
+          identifier: string
+          success: boolean
+        }
+        Insert: {
+          attempt_time?: string
+          id?: string
+          identifier: string
+          success?: boolean
+        }
+        Update: {
+          attempt_time?: string
+          id?: string
+          identifier?: string
+          success?: boolean
+        }
+        Relationships: []
+      }
       news: {
         Row: {
           content: string
@@ -235,6 +256,7 @@ export type Database = {
         }
         Returns: Json
       }
+      cleanup_old_login_attempts: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
