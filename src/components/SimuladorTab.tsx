@@ -1,5 +1,8 @@
 import { useState, useMemo } from "react";
-import { Calculator, TrendingUp, Info, DollarSign, Percent, MapPin, AlertTriangle } from "lucide-react";
+import { Calculator, TrendingUp, Info, DollarSign, Percent, MapPin, AlertTriangle, FileDown, FileSpreadsheet } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -223,6 +226,111 @@ export const SimuladorTab = () => {
     return { diferenca, percentual };
   }, [resultados]);
 
+  const exportarPDF = () => {
+    const doc = new jsPDF();
+    const dataAtual = new Date().toLocaleDateString('pt-BR');
+    
+    // Título
+    doc.setFontSize(18);
+    doc.text("Simulação da Reforma Tributária", 14, 20);
+    
+    // Informações da simulação
+    doc.setFontSize(10);
+    doc.text(`Data: ${dataAtual}`, 14, 30);
+    doc.text(`Categoria: ${categoria === 'servicos' ? 'Serviços' : 'Produtos'}`, 14, 36);
+    doc.text(`Regime: ${regimeTributario === 'normal' ? 'Regime Normal' : 'Simples Nacional'}`, 14, 42);
+    doc.text(`Preço Base: ${formatCurrency(parseFloat(preco) || 0)}`, 14, 48);
+    doc.text(`CST: ${cstSelecionado} - ${REDUCOES_CST[cstSelecionado]?.descricao}`, 14, 54);
+    
+    if (regimeTributario === 'simples') {
+      doc.text(`Anexo: ${anexoAtual.nome}`, 14, 60);
+      doc.text(`Faixa: ${faixaAtual.nome}`, 14, 66);
+    }
+    
+    // Tabela de resultados
+    const headers = regimeTributario === 'simples' 
+      ? ['Ano', 'Simples', 'CBS', 'IBS', 'Total', 'Preço Final']
+      : ['Ano', 'ISS', 'PIS', 'COFINS', 'CBS', 'IBS', 'Total', 'Preço Final'];
+    
+    const data = resultados.map(r => 
+      regimeTributario === 'simples'
+        ? [r.ano.toString(), formatCurrency(r.simples), formatCurrency(r.cbs), formatCurrency(r.ibs), formatCurrency(r.total), formatCurrency(r.precoFinal)]
+        : [r.ano.toString(), formatCurrency(r.iss), formatCurrency(r.pis), formatCurrency(r.cofins), formatCurrency(r.cbs), formatCurrency(r.ibs), formatCurrency(r.total), formatCurrency(r.precoFinal)]
+    );
+    
+    autoTable(doc, {
+      head: [headers],
+      body: data,
+      startY: regimeTributario === 'simples' ? 72 : 62,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [16, 185, 129] },
+    });
+    
+    // Comparativo
+    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    doc.setFontSize(10);
+    doc.text(`Comparativo 2025 vs 2033:`, 14, finalY);
+    doc.text(`Diferença: ${formatCurrency(comparativo.diferenca)} (${comparativo.percentual >= 0 ? '+' : ''}${comparativo.percentual.toFixed(1)}%)`, 14, finalY + 6);
+    
+    // Aviso legal
+    doc.setFontSize(8);
+    doc.setTextColor(100);
+    doc.text("Os dados apresentados são de responsabilidade do usuário.", 14, finalY + 16);
+    
+    doc.save(`simulacao-tributaria-${dataAtual.replace(/\//g, '-')}.pdf`);
+  };
+
+  const exportarExcel = () => {
+    const dataAtual = new Date().toLocaleDateString('pt-BR');
+    
+    // Dados da simulação
+    const infoSimulacao = [
+      ['Simulação da Reforma Tributária'],
+      [''],
+      ['Data', dataAtual],
+      ['Categoria', categoria === 'servicos' ? 'Serviços' : 'Produtos'],
+      ['Regime', regimeTributario === 'normal' ? 'Regime Normal' : 'Simples Nacional'],
+      ['Preço Base', parseFloat(preco) || 0],
+      ['CST', `${cstSelecionado} - ${REDUCOES_CST[cstSelecionado]?.descricao}`],
+    ];
+    
+    if (regimeTributario === 'simples') {
+      infoSimulacao.push(['Anexo', anexoAtual.nome]);
+      infoSimulacao.push(['Faixa', faixaAtual.nome]);
+    }
+    
+    infoSimulacao.push(['']);
+    
+    // Headers e dados da tabela
+    const headers = regimeTributario === 'simples'
+      ? ['Ano', 'Simples (R$)', 'CBS (R$)', 'IBS (R$)', 'Total (R$)', 'Preço Final (R$)']
+      : ['Ano', 'ISS (R$)', 'PIS (R$)', 'COFINS (R$)', 'CBS (R$)', 'IBS (R$)', 'Total (R$)', 'Preço Final (R$)'];
+    
+    const dadosTabela = resultados.map(r => 
+      regimeTributario === 'simples'
+        ? [r.ano, r.simples, r.cbs, r.ibs, r.total, r.precoFinal]
+        : [r.ano, r.iss, r.pis, r.cofins, r.cbs, r.ibs, r.total, r.precoFinal]
+    );
+    
+    // Criar worksheet
+    const ws = XLSX.utils.aoa_to_sheet([
+      ...infoSimulacao,
+      headers,
+      ...dadosTabela,
+      [''],
+      ['Comparativo 2025 vs 2033'],
+      ['Diferença', comparativo.diferenca],
+      ['Variação %', `${comparativo.percentual >= 0 ? '+' : ''}${comparativo.percentual.toFixed(1)}%`],
+    ]);
+    
+    // Criar workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Simulação');
+    
+    // Salvar
+    XLSX.writeFile(wb, `simulacao-tributaria-${dataAtual.replace(/\//g, '-')}.xlsx`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -235,6 +343,16 @@ export const SimuladorTab = () => {
             <h2 className="text-xl font-semibold text-foreground">Simulador da Reforma Tributária</h2>
             <p className="text-sm text-muted-foreground">Projete o impacto tributário de 2025 a 2033</p>
           </div>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={exportarPDF} className="gap-2">
+            <FileDown className="h-4 w-4" />
+            PDF
+          </Button>
+          <Button variant="outline" size="sm" onClick={exportarExcel} className="gap-2">
+            <FileSpreadsheet className="h-4 w-4" />
+            Excel
+          </Button>
         </div>
       </div>
 
