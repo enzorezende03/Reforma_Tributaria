@@ -137,6 +137,7 @@ export type Database = {
           is_published: boolean
           published_at: string
           summary: string | null
+          tags: string[] | null
           title: string
           updated_at: string
         }
@@ -148,6 +149,7 @@ export type Database = {
           is_published?: boolean
           published_at?: string
           summary?: string | null
+          tags?: string[] | null
           title: string
           updated_at?: string
         }
@@ -159,6 +161,7 @@ export type Database = {
           is_published?: boolean
           published_at?: string
           summary?: string | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
         }
