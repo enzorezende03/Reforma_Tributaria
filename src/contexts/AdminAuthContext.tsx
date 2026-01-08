@@ -42,78 +42,42 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
     }
   };
 
-  const withTimeout = async <T,>(
-    promise: Promise<T>,
-    ms: number,
-    timeoutMessage: string
-  ): Promise<T> => {
-    let timeoutId: number | undefined;
-
-    const timeoutPromise = new Promise<T>((_, reject) => {
-      timeoutId = window.setTimeout(() => {
-        reject(new Error(timeoutMessage));
-      }, ms);
-    });
-
-    try {
-      return await Promise.race([promise, timeoutPromise]);
-    } finally {
-      if (timeoutId) window.clearTimeout(timeoutId);
-    }
-  };
-
   const checkAdminRole = async (user: User): Promise<Admin | null> => {
     try {
       // Verificar se o usuário tem role de admin
-      const roleRes = await withTimeout(
-        supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .maybeSingle(),
-        12000,
-        'Tempo esgotado ao verificar permissão de administrador'
-      );
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
 
-      if (roleRes.error) {
-        console.error('[admin-auth] Erro ao verificar role:', roleRes.error);
+      if (roleError) {
+        console.error('[admin-auth] Erro ao verificar role:', roleError);
         return null;
       }
 
-      if (!roleRes.data) {
+      if (!roleData) {
         return null;
       }
 
       // Buscar dados do admin usando a view segura (exclui password_hash)
-      let adminRes:
-        | Awaited<ReturnType<typeof supabase.from<'admins_safe'>['maybeSingle']>>
-        | null = null;
+      const { data: adminData, error: adminError } = await supabase
+        .from('admins_safe')
+        .select('id, email, name, must_change_password')
+        .eq('email', user.email)
+        .maybeSingle();
 
-      try {
-        adminRes = await withTimeout(
-          supabase
-            .from('admins_safe')
-            .select('id, email, name, must_change_password')
-            .eq('email', user.email)
-            .maybeSingle(),
-          12000,
-          'Tempo esgotado ao buscar dados do administrador'
-        );
-      } catch (err) {
-        console.warn('[admin-auth] Falha ao buscar admins_safe, usando fallback:', err);
+      if (adminError) {
+        console.warn('[admin-auth] Erro ao buscar admins_safe, usando fallback:', adminError);
       }
 
-      if (adminRes?.error) {
-        console.warn('[admin-auth] Erro ao buscar admins_safe, usando fallback:', adminRes.error);
-      }
-
-      if (adminRes?.data) {
+      if (adminData) {
         return {
-          id: adminRes.data.id,
-          email: adminRes.data.email,
-          name: adminRes.data.name,
-          mustChangePassword: adminRes.data.must_change_password ?? true,
+          id: adminData.id,
+          email: adminData.email,
+          name: adminData.name,
+          mustChangePassword: adminData.must_change_password ?? true,
         };
       }
 
@@ -180,14 +144,10 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      const { data, error } = await withTimeout(
-        supabase.auth.signInWithPassword({
-          email: email.toLowerCase().trim(),
-          password,
-        }),
-        15000,
-        'Tempo esgotado ao autenticar. Verifique sua conexão e tente novamente.'
-      );
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.toLowerCase().trim(),
+        password,
+      });
 
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
