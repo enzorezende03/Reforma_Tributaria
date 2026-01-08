@@ -5,6 +5,7 @@ interface Client {
   id: string;
   cnpj: string;
   company_name: string;
+  mustChangePassword?: boolean;
 }
 
 interface AuthContextType {
@@ -13,6 +14,7 @@ interface AuthContextType {
   login: (cnpj: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   isLoading: boolean;
+  setMustChangePassword: (value: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -63,15 +65,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // A função retorna um JSON com success e client ou error
-      const result = data as unknown as { success: boolean; error?: string; client?: Client };
+      const result = data as unknown as { 
+        success: boolean; 
+        error?: string; 
+        client?: { 
+          id: string; 
+          cnpj: string; 
+          company_name: string;
+          must_change_password?: boolean;
+        } 
+      };
 
       if (!result.success) {
         return { success: false, error: result.error };
       }
 
       if (result.client) {
-        setClient(result.client);
-        localStorage.setItem('client_session', JSON.stringify(result.client));
+        const clientData: Client = {
+          id: result.client.id,
+          cnpj: result.client.cnpj,
+          company_name: result.client.company_name,
+          mustChangePassword: result.client.must_change_password ?? false,
+        };
+        setClient(clientData);
+        localStorage.setItem('client_session', JSON.stringify(clientData));
         return { success: true };
       }
 
@@ -87,13 +104,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('client_session');
   };
 
+  const setMustChangePassword = (value: boolean) => {
+    if (client) {
+      const updatedClient = { ...client, mustChangePassword: value };
+      setClient(updatedClient);
+      localStorage.setItem('client_session', JSON.stringify(updatedClient));
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       client, 
       isAuthenticated: !!client, 
       login, 
       logout,
-      isLoading 
+      isLoading,
+      setMustChangePassword 
     }}>
       {children}
     </AuthContext.Provider>

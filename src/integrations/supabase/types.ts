@@ -81,6 +81,7 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          must_change_password: boolean
           password_hash: string
           updated_at: string
         }
@@ -90,6 +91,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          must_change_password?: boolean
           password_hash: string
           updated_at?: string
         }
@@ -99,6 +101,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          must_change_password?: boolean
           password_hash?: string
           updated_at?: string
         }
@@ -156,7 +159,19 @@ export type Database = {
       }
     }
     Functions: {
+      admin_reset_client_password: {
+        Args: { p_client_id: string; p_new_password: string }
+        Returns: Json
+      }
       can_register_admin: { Args: never; Returns: boolean }
+      change_client_password: {
+        Args: {
+          p_client_id: string
+          p_current_password: string
+          p_new_password: string
+        }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -164,6 +179,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      hash_password: { Args: { password: string }; Returns: string }
       use_admin_invite: { Args: { p_invite_id: string }; Returns: boolean }
       validate_admin_invite: {
         Args: { p_email: string; p_token: string }

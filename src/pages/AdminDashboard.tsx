@@ -22,11 +22,13 @@ import {
   Search,
   AlertCircle,
   CheckCircle,
-  UserPlus
+  UserPlus,
+  KeyRound
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ChangePasswordModal from '@/components/ChangePasswordModal';
 import AdminInviteModal from '@/components/AdminInviteModal';
+import ClientResetPasswordModal from '@/components/ClientResetPasswordModal';
 
 interface Client {
   id: string;
@@ -51,6 +53,7 @@ const AdminDashboard = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   
   // Form states
@@ -128,10 +131,22 @@ const AdminDashboard = () => {
 
     setIsSubmitting(true);
 
+    // Hash the password before storing
+    const { data: hashedPassword, error: hashError } = await supabase.rpc('hash_password', {
+      password: formPassword,
+    });
+
+    if (hashError || !hashedPassword) {
+      setFormError('Erro ao processar senha');
+      setIsSubmitting(false);
+      return;
+    }
+
     const { error } = await supabase.from('clients').insert({
       cnpj: cnpjNumbers,
       company_name: formCompanyName.trim(),
-      password_hash: formPassword,
+      password_hash: hashedPassword,
+      must_change_password: true,
     });
 
     if (error) {
@@ -143,7 +158,7 @@ const AdminDashboard = () => {
     } else {
       toast({
         title: 'Sucesso',
-        description: 'Cliente cadastrado com sucesso',
+        description: 'Cliente cadastrado com sucesso. Ele deverá alterar a senha no primeiro acesso.',
       });
       setIsAddModalOpen(false);
       resetForm();
@@ -164,12 +179,24 @@ const AdminDashboard = () => {
 
     setIsSubmitting(true);
 
-    const updateData: { company_name: string; password_hash?: string } = {
+    const updateData: { company_name: string; password_hash?: string; must_change_password?: boolean } = {
       company_name: formCompanyName.trim(),
     };
 
+    // If password is being changed, hash it
     if (formPassword.trim()) {
-      updateData.password_hash = formPassword;
+      const { data: hashedPassword, error: hashError } = await supabase.rpc('hash_password', {
+        password: formPassword,
+      });
+
+      if (hashError || !hashedPassword) {
+        setFormError('Erro ao processar senha');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      updateData.password_hash = hashedPassword;
+      updateData.must_change_password = true;
     }
 
     const { error } = await supabase
@@ -182,7 +209,9 @@ const AdminDashboard = () => {
     } else {
       toast({
         title: 'Sucesso',
-        description: 'Cliente atualizado com sucesso',
+        description: formPassword.trim() 
+          ? 'Cliente atualizado. Ele deverá alterar a senha no próximo acesso.' 
+          : 'Cliente atualizado com sucesso',
       });
       setIsEditModalOpen(false);
       resetForm();
@@ -249,6 +278,11 @@ const AdminDashboard = () => {
   const openDeleteModal = (client: Client) => {
     setSelectedClient(client);
     setIsDeleteModalOpen(true);
+  };
+
+  const openResetPasswordModal = (client: Client) => {
+    setSelectedClient(client);
+    setIsResetPasswordModalOpen(true);
   };
 
   const filteredClients = clients.filter(client => 
@@ -460,11 +494,21 @@ const AdminDashboard = () => {
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openResetPasswordModal(client)}
+                            title="Resetar Senha"
+                            className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                          >
+                            <KeyRound className="h-4 w-4" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => openEditModal(client)}
+                            title="Editar"
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -472,6 +516,7 @@ const AdminDashboard = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => openDeleteModal(client)}
+                            title="Excluir"
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -555,6 +600,16 @@ const AdminDashboard = () => {
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
         onInviteSent={() => {}}
+      />
+
+      {/* Client Reset Password Modal */}
+      <ClientResetPasswordModal
+        isOpen={isResetPasswordModalOpen}
+        onClose={() => {
+          setIsResetPasswordModalOpen(false);
+          setSelectedClient(null);
+        }}
+        client={selectedClient}
       />
     </div>
   );
