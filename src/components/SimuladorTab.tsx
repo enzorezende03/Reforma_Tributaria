@@ -240,8 +240,10 @@ export const SimuladorTab = () => {
       reader.onloadend = () => {
         const base64Logo = reader.result as string;
         
-        // Adicionar logo
-        doc.addImage(base64Logo, 'PNG', 14, 10, 40, 15);
+        // Adicionar logo (proporção original mantida)
+        const logoWidth = 35;
+        const logoHeight = 12;
+        doc.addImage(base64Logo, 'PNG', 14, 10, logoWidth, logoHeight);
         
         // Título
         doc.setFontSize(18);
