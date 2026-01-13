@@ -21,6 +21,12 @@ interface AdminInviteModalProps {
   onInviteSent: () => void;
 }
 
+interface CreateInviteResponse {
+  success: boolean;
+  error?: string;
+  token?: string;
+}
+
 const AdminInviteModal = ({ isOpen, onClose, onInviteSent }: AdminInviteModalProps) => {
   const { toast } = useToast();
   const [email, setEmail] = useState('');
@@ -46,52 +52,30 @@ const AdminInviteModal = ({ isOpen, onClose, onInviteSent }: AdminInviteModalPro
     setIsLoading(true);
 
     try {
-      // Verificar se já existe um convite pendente para este email
-      const { data: existingInvite } = await supabase
-        .from('admin_invites')
-        .select('id, used')
-        .eq('email', email.toLowerCase())
-        .eq('used', false)
-        .single();
+      // Usar função RPC segura para criar convite
+      // O token é gerado e processado server-side, não exposto no cliente
+      const { data, error: rpcError } = await supabase.rpc('create_admin_invite', {
+        p_email: email.trim()
+      });
 
-      if (existingInvite) {
-        setError('Já existe um convite pendente para este email');
-        setIsLoading(false);
-        return;
-      }
+      const response = data as unknown as CreateInviteResponse;
 
-      // Verificar se já é admin
-      const { data: existingAdmin } = await supabase
-        .from('admins')
-        .select('id')
-        .eq('email', email.toLowerCase())
-        .single();
-
-      if (existingAdmin) {
-        setError('Este email já pertence a um administrador');
-        setIsLoading(false);
-        return;
-      }
-
-      // Criar convite
-      const { data: invite, error: insertError } = await supabase
-        .from('admin_invites')
-        .insert({
-          email: email.toLowerCase().trim(),
-        })
-        .select('token')
-        .single();
-
-      if (insertError || !invite) {
-        console.error('Insert error:', insertError);
+      if (rpcError) {
+        console.error('RPC error:', rpcError);
         setError('Erro ao criar convite');
         setIsLoading(false);
         return;
       }
 
-      // Gerar link de convite
+      if (!response?.success) {
+        setError(response?.error || 'Erro ao criar convite');
+        setIsLoading(false);
+        return;
+      }
+
+      // Gerar link de convite com o token retornado pela função segura
       const baseUrl = window.location.origin;
-      const link = `${baseUrl}/admin/register?token=${invite.token}`;
+      const link = `${baseUrl}/admin/register?token=${response.token}`;
       setInviteLink(link);
 
       toast({
