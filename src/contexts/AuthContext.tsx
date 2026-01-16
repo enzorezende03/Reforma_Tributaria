@@ -43,6 +43,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [client, setClient] = useState<Client | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Função para renovar a sessão
+  const refreshSession = () => {
+    const savedSession = localStorage.getItem('client_session');
+    if (savedSession) {
+      try {
+        const session: ClientSession = JSON.parse(savedSession);
+        if (Date.now() < session.expiresAt) {
+          const refreshedSession: ClientSession = {
+            client: session.client,
+            expiresAt: Date.now() + SESSION_DURATION_MS
+          };
+          localStorage.setItem('client_session', JSON.stringify(refreshedSession));
+        }
+      } catch {
+        // Ignore parsing errors during refresh
+      }
+    }
+  };
+
   useEffect(() => {
     // Verificar se existe sessão salva e se ainda é válida
     const savedSession = localStorage.getItem('client_session');
@@ -53,11 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (Date.now() < session.expiresAt) {
           setClient(session.client);
           // Refresh session expiration on load
-          const refreshedSession: ClientSession = {
-            client: session.client,
-            expiresAt: Date.now() + SESSION_DURATION_MS
-          };
-          localStorage.setItem('client_session', JSON.stringify(refreshedSession));
+          refreshSession();
         } else {
           // Session expired - clean up
           localStorage.removeItem('client_session');
@@ -67,7 +82,48 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     }
     setIsLoading(false);
-  }, []);
+
+    // Renovar sessão quando a aba volta a ficar visível
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const savedSession = localStorage.getItem('client_session');
+        if (savedSession) {
+          try {
+            const session: ClientSession = JSON.parse(savedSession);
+            if (Date.now() < session.expiresAt) {
+              setClient(session.client);
+              refreshSession();
+            } else {
+              // Sessão expirou enquanto estava fora
+              setClient(null);
+              localStorage.removeItem('client_session');
+            }
+          } catch {
+            // Ignore
+          }
+        }
+      }
+    };
+
+    // Renovar sessão em qualquer interação do usuário
+    const handleUserActivity = () => {
+      if (client) {
+        refreshSession();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('click', handleUserActivity);
+    document.addEventListener('keydown', handleUserActivity);
+    document.addEventListener('scroll', handleUserActivity);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('click', handleUserActivity);
+      document.removeEventListener('keydown', handleUserActivity);
+      document.removeEventListener('scroll', handleUserActivity);
+    };
+  }, [client]);
 
   const login = async (cnpj: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
