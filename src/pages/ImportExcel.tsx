@@ -226,8 +226,33 @@ const ImportExcel = () => {
 
   // Palavras-chave PRIMÁRIAS - definem a categoria principal do produto
   const primaryKeywords: Record<string, { cClassTrib: string; weight: number }> = {
-    // === PRODUTOS PROCESSADOS/INDUSTRIALIZADOS - PRIORIDADE MÁXIMA (peso 150+) ===
-    // Estes produtos NÃO são frutas/hortícolas mesmo que contenham sabores de frutas
+    // === PRODUTOS INDUSTRIALIZADOS SEM BENEFÍCIO - TRIBUTAÇÃO INTEGRAL (000001) ===
+    // Estes produtos NÃO fazem parte da Cesta Básica e são tributados integralmente
+    'doce': { cClassTrib: '000001', weight: 160 },
+    'doces': { cClassTrib: '000001', weight: 160 },
+    'pate': { cClassTrib: '000001', weight: 160 },
+    'gelatina': { cClassTrib: '000001', weight: 160 },
+    'gelatinas': { cClassTrib: '000001', weight: 160 },
+    'panetone': { cClassTrib: '000001', weight: 160 },
+    'panetones': { cClassTrib: '000001', weight: 160 },
+    'chocotone': { cClassTrib: '000001', weight: 160 },
+    'bolo': { cClassTrib: '000001', weight: 160 },
+    'bolos': { cClassTrib: '000001', weight: 160 },
+    'passas': { cClassTrib: '000001', weight: 160 }, // Uva passa - produto processado
+    'passa': { cClassTrib: '000001', weight: 160 },
+    'geleia': { cClassTrib: '000001', weight: 160 },
+    'geleias': { cClassTrib: '000001', weight: 160 },
+    'compota': { cClassTrib: '000001', weight: 160 },
+    'sorvete': { cClassTrib: '000001', weight: 160 },
+    'sorvetes': { cClassTrib: '000001', weight: 160 },
+    'chocolate': { cClassTrib: '000001', weight: 160 },
+    'bombom': { cClassTrib: '000001', weight: 160 },
+    'bombons': { cClassTrib: '000001', weight: 160 },
+    'wafer': { cClassTrib: '000001', weight: 160 },
+    'torrone': { cClassTrib: '000001', weight: 160 },
+    
+    // === PRODUTOS PROCESSADOS - CESTA BÁSICA (200003) ===
+    // Produtos industrializados que FAZEM parte da Cesta Básica
     'extrato': { cClassTrib: '200003', weight: 150 },
     'suco': { cClassTrib: '200003', weight: 150 },
     'sucos': { cClassTrib: '200003', weight: 150 },
@@ -235,26 +260,12 @@ const ImportExcel = () => {
     'refresco': { cClassTrib: '200003', weight: 150 },
     'molho': { cClassTrib: '200003', weight: 150 },
     'molhos': { cClassTrib: '200003', weight: 150 },
-    'gelatina': { cClassTrib: '200003', weight: 150 },
-    'gelatinas': { cClassTrib: '200003', weight: 150 },
     'mistura': { cClassTrib: '200003', weight: 150 },
-    'panetone': { cClassTrib: '200003', weight: 150 },
-    'panetones': { cClassTrib: '200003', weight: 150 },
-    'chocotone': { cClassTrib: '200003', weight: 150 },
-    'bolo': { cClassTrib: '200003', weight: 150 },
-    'bolos': { cClassTrib: '200003', weight: 150 },
-    'passas': { cClassTrib: '200003', weight: 150 }, // Uva passa é produto processado
-    'passa': { cClassTrib: '200003', weight: 150 },
-    'geleia': { cClassTrib: '200003', weight: 150 },
-    'geleias': { cClassTrib: '200003', weight: 150 },
     'polpa': { cClassTrib: '200003', weight: 150 },
     'polpas': { cClassTrib: '200003', weight: 150 },
-    'doce': { cClassTrib: '200003', weight: 140 },
-    'doces': { cClassTrib: '200003', weight: 140 },
-    'compota': { cClassTrib: '200003', weight: 150 },
     'concentrado': { cClassTrib: '200003', weight: 150 },
     'preparado': { cClassTrib: '200003', weight: 140 },
-    'po': { cClassTrib: '200003', weight: 130 }, // Em pó - produto industrializado
+    'po': { cClassTrib: '200003', weight: 130 }, // Em pó - verificar contexto
     // Massas e derivados - Cesta Básica (200003)
     'macarrao': { cClassTrib: '200003', weight: 100 },
     'espaguete': { cClassTrib: '200003', weight: 100 },
@@ -379,7 +390,8 @@ const ImportExcel = () => {
     'bolo', 'bolos', 'passas', 'passa', 'geleia', 'geleias', 'polpa', 'polpas',
     'doce', 'doces', 'compota', 'concentrado', 'preparado', 'po', 'sabor',
     'iogurte', 'biscoito', 'bolacha', 'sorvete', 'torta', 'pudim', 'vitamina',
-    'sache', 'conserva', 'enlatado', 'processado', 'industrializado'
+    'sache', 'conserva', 'enlatado', 'processado', 'industrializado',
+    'pate', 'wafer', 'chocolate', 'bombom', 'torrone', 'leite' // leite em "doce de leite"
   ];
 
   // Palavras que são SEMPRE ingredientes/sabores quando aparecem depois da primeira palavra
