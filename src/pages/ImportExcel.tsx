@@ -226,6 +226,35 @@ const ImportExcel = () => {
 
   // Palavras-chave PRIMÁRIAS - definem a categoria principal do produto
   const primaryKeywords: Record<string, { cClassTrib: string; weight: number }> = {
+    // === PRODUTOS PROCESSADOS/INDUSTRIALIZADOS - PRIORIDADE MÁXIMA (peso 150+) ===
+    // Estes produtos NÃO são frutas/hortícolas mesmo que contenham sabores de frutas
+    'extrato': { cClassTrib: '200003', weight: 150 },
+    'suco': { cClassTrib: '200003', weight: 150 },
+    'sucos': { cClassTrib: '200003', weight: 150 },
+    'nectar': { cClassTrib: '200003', weight: 150 },
+    'refresco': { cClassTrib: '200003', weight: 150 },
+    'molho': { cClassTrib: '200003', weight: 150 },
+    'molhos': { cClassTrib: '200003', weight: 150 },
+    'gelatina': { cClassTrib: '200003', weight: 150 },
+    'gelatinas': { cClassTrib: '200003', weight: 150 },
+    'mistura': { cClassTrib: '200003', weight: 150 },
+    'panetone': { cClassTrib: '200003', weight: 150 },
+    'panetones': { cClassTrib: '200003', weight: 150 },
+    'chocotone': { cClassTrib: '200003', weight: 150 },
+    'bolo': { cClassTrib: '200003', weight: 150 },
+    'bolos': { cClassTrib: '200003', weight: 150 },
+    'passas': { cClassTrib: '200003', weight: 150 }, // Uva passa é produto processado
+    'passa': { cClassTrib: '200003', weight: 150 },
+    'geleia': { cClassTrib: '200003', weight: 150 },
+    'geleias': { cClassTrib: '200003', weight: 150 },
+    'polpa': { cClassTrib: '200003', weight: 150 },
+    'polpas': { cClassTrib: '200003', weight: 150 },
+    'doce': { cClassTrib: '200003', weight: 140 },
+    'doces': { cClassTrib: '200003', weight: 140 },
+    'compota': { cClassTrib: '200003', weight: 150 },
+    'concentrado': { cClassTrib: '200003', weight: 150 },
+    'preparado': { cClassTrib: '200003', weight: 140 },
+    'po': { cClassTrib: '200003', weight: 130 }, // Em pó - produto industrializado
     // Massas e derivados - Cesta Básica (200003)
     'macarrao': { cClassTrib: '200003', weight: 100 },
     'espaguete': { cClassTrib: '200003', weight: 100 },
@@ -290,24 +319,11 @@ const ImportExcel = () => {
     'atum': { cClassTrib: '200003', weight: 100 },
     'enlatado': { cClassTrib: '200003', weight: 90 },
     'conserva': { cClassTrib: '200003', weight: 90 },
-    // Hortícolas, frutas e ovos - (200015) - peso menor que alimentos processados
+    // Hortícolas, frutas e ovos - (200015) - APENAS para produtos in natura
+    // Peso reduzido para evitar conflito com produtos processados que têm sabor de frutas
     'ovo': { cClassTrib: '200015', weight: 70 },
     'ovos': { cClassTrib: '200015', weight: 70 },
-    'tomate': { cClassTrib: '200015', weight: 100 },
-    'batata': { cClassTrib: '200015', weight: 100 },
-    'cebola': { cClassTrib: '200015', weight: 100 },
-    'alface': { cClassTrib: '200015', weight: 100 },
-    'cenoura': { cClassTrib: '200015', weight: 100 },
-    'banana': { cClassTrib: '200015', weight: 100 },
-    'laranja': { cClassTrib: '200015', weight: 100 },
-    'maca': { cClassTrib: '200015', weight: 100 },
-    'uva': { cClassTrib: '200015', weight: 100 },
-    'morango': { cClassTrib: '200015', weight: 100 },
-    'melancia': { cClassTrib: '200015', weight: 100 },
-    'abacaxi': { cClassTrib: '200015', weight: 100 },
     'horticola': { cClassTrib: '200015', weight: 100 },
-    'fruta': { cClassTrib: '200015', weight: 100 },
-    'frutas': { cClassTrib: '200015', weight: 100 },
     'verdura': { cClassTrib: '200015', weight: 100 },
     'verduras': { cClassTrib: '200015', weight: 100 },
     'legume': { cClassTrib: '200015', weight: 100 },
@@ -320,10 +336,56 @@ const ImportExcel = () => {
     'farmaceutico': { cClassTrib: '200009', weight: 100 },
   };
 
+  // Palavras de FRUTAS/HORTÍCOLAS que podem ser produto OU sabor/ingrediente
+  // Só classificam como 200015 (hortícolas) se NÃO houver um produto processado no nome
+  const fruitKeywords: Record<string, { cClassTrib: string; weight: number }> = {
+    'tomate': { cClassTrib: '200015', weight: 80 },
+    'batata': { cClassTrib: '200015', weight: 80 },
+    'cebola': { cClassTrib: '200015', weight: 80 },
+    'alface': { cClassTrib: '200015', weight: 80 },
+    'cenoura': { cClassTrib: '200015', weight: 80 },
+    'banana': { cClassTrib: '200015', weight: 80 },
+    'laranja': { cClassTrib: '200015', weight: 80 },
+    'maca': { cClassTrib: '200015', weight: 80 },
+    'uva': { cClassTrib: '200015', weight: 80 },
+    'morango': { cClassTrib: '200015', weight: 80 },
+    'melancia': { cClassTrib: '200015', weight: 80 },
+    'abacaxi': { cClassTrib: '200015', weight: 80 },
+    'fruta': { cClassTrib: '200015', weight: 80 },
+    'frutas': { cClassTrib: '200015', weight: 80 },
+    'caju': { cClassTrib: '200015', weight: 80 },
+    'manga': { cClassTrib: '200015', weight: 80 },
+    'maracuja': { cClassTrib: '200015', weight: 80 },
+    'goiaba': { cClassTrib: '200015', weight: 80 },
+    'acerola': { cClassTrib: '200015', weight: 80 },
+    'pessego': { cClassTrib: '200015', weight: 80 },
+    'limao': { cClassTrib: '200015', weight: 80 },
+    'lima': { cClassTrib: '200015', weight: 80 },
+    'tangerina': { cClassTrib: '200015', weight: 80 },
+    'mamao': { cClassTrib: '200015', weight: 80 },
+    'melao': { cClassTrib: '200015', weight: 80 },
+    'pera': { cClassTrib: '200015', weight: 80 },
+    'ameixa': { cClassTrib: '200015', weight: 80 },
+    'kiwi': { cClassTrib: '200015', weight: 80 },
+    'abacate': { cClassTrib: '200015', weight: 80 },
+    'coco': { cClassTrib: '200015', weight: 80 },
+  };
+
+  // Palavras que indicam que o produto é PROCESSADO (não in natura)
+  // Se estas palavras estiverem presentes, frutas são tratadas como SABOR, não como categoria
+  const processedProductIndicators = [
+    'extrato', 'suco', 'sucos', 'nectar', 'refresco', 'molho', 'molhos',
+    'gelatina', 'gelatinas', 'mistura', 'panetone', 'panetones', 'chocotone',
+    'bolo', 'bolos', 'passas', 'passa', 'geleia', 'geleias', 'polpa', 'polpas',
+    'doce', 'doces', 'compota', 'concentrado', 'preparado', 'po', 'sabor',
+    'iogurte', 'biscoito', 'bolacha', 'sorvete', 'torta', 'pudim', 'vitamina',
+    'sache', 'conserva', 'enlatado', 'processado', 'industrializado'
+  ];
+
   // Palavras que são SEMPRE ingredientes/sabores quando aparecem depois da primeira palavra
   // Essas palavras NÃO definem a categoria do produto quando estão em posição secundária
   const alwaysSecondaryKeywords = [
-    'ovos', 'ovo', 'bacon', 'chocolate', 'baunilha', 'limao', 'alho',
+    'ovos', 'ovo', 'bacon', 'chocolate', 'baunilha', 'alho',
     'calabresa', 'mussarela', 'cheddar', 'integral', 'light', 'diet',
     'tradicional', 'caseiro', 'artesanal', 'premium', 'especial'
   ];
@@ -350,13 +412,32 @@ const ImportExcel = () => {
         }
       }
       
+      // Verificar se o produto é PROCESSADO (contém indicadores de industrialização)
+      const isProcessedProduct = processedProductIndicators.some(indicator => 
+        productDesc.includes(indicator)
+      );
+      
       // Calcular pontuação baseada nas palavras-chave
       // Palavras no INÍCIO da descrição têm peso maior (são o produto principal)
       const categoryScores: Record<string, number> = {};
       
       productWords.forEach((word, index) => {
         const normalizedWord = word.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        const keywordInfo = primaryKeywords[normalizedWord];
+        
+        // Primeiro verifica nas keywords primárias
+        let keywordInfo = primaryKeywords[normalizedWord];
+        
+        // Se não achou nas primárias, verifica nas frutas/hortícolas
+        // MAS só se o produto NÃO for processado
+        if (!keywordInfo && fruitKeywords[normalizedWord]) {
+          // Se é produto processado, frutas são tratadas como SABOR (peso muito baixo)
+          if (isProcessedProduct) {
+            // Não adiciona score de fruta para produtos processados
+            return;
+          } else {
+            keywordInfo = fruitKeywords[normalizedWord];
+          }
+        }
         
         if (keywordInfo) {
           // Multiplicador de posição: palavras no início são mais importantes
