@@ -128,77 +128,36 @@ export const TeamManagement = () => {
     setIsSubmitting(true);
 
     try {
-      // 1. Criar usuário no Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formEmail.toLowerCase().trim(),
-        password: formPassword,
-        options: {
-          emailRedirectTo: window.location.origin,
-          data: {
-            name: formName.trim(),
-          },
+      const email = formEmail.toLowerCase().trim();
+      const name = formName.trim();
+
+      const { data, error } = await supabase.functions.invoke('admin-create-team-member', {
+        body: {
+          email,
+          name,
+          password: formPassword,
+          permissions: formPermissions,
         },
       });
 
-      if (authError) {
-        if (authError.message.includes('already registered')) {
-          setFormError('Este email já está cadastrado');
-        } else {
-          setFormError(authError.message);
-        }
+      if (error) {
+        // Quando a function retorna 4xx, o supabase-js pode preencher error.message
+        setFormError(error.message || 'Erro ao cadastrar colaborador');
         setIsSubmitting(false);
         return;
       }
 
-      if (!authData.user) {
-        setFormError('Erro ao criar usuário');
+      const result = data as unknown as { success?: boolean; error?: string };
+
+      if (result?.success === false) {
+        setFormError(result.error || 'Erro ao cadastrar colaborador');
         setIsSubmitting(false);
         return;
-      }
-
-      // 2. Hash da senha para a tabela admins
-      const { data: hashedPassword, error: hashError } = await supabase.rpc('hash_password', {
-        password: formPassword,
-      });
-
-      if (hashError || !hashedPassword) {
-        setFormError('Erro ao processar senha');
-        setIsSubmitting(false);
-        return;
-      }
-
-      // 3. Criar registro na tabela admins
-      const { error: adminError } = await supabase.from('admins').insert({
-        email: formEmail.toLowerCase().trim(),
-        name: formName.trim(),
-        password_hash: hashedPassword,
-        permissions: formPermissions,
-        must_change_password: true,
-      });
-
-      if (adminError) {
-        if (adminError.code === '23505') {
-          setFormError('Este email já está cadastrado como colaborador');
-        } else {
-          setFormError('Erro ao cadastrar colaborador: ' + adminError.message);
-        }
-        setIsSubmitting(false);
-        return;
-      }
-
-      // 4. Adicionar role de admin
-      const { error: roleError } = await supabase.from('user_roles').insert({
-        user_id: authData.user.id,
-        role: 'admin',
-      });
-
-      if (roleError) {
-        console.error('Erro ao adicionar role:', roleError);
       }
 
       toast({
         title: 'Sucesso',
-        description: 'Colaborador cadastrado. Ele receberá um email para confirmar o cadastro.',
+        description: 'Colaborador cadastrado com sucesso. Ele já pode acessar o painel com este email e senha.',
       });
       setIsAddModalOpen(false);
       resetForm();
