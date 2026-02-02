@@ -29,7 +29,15 @@ const Index = () => {
   const [selectedAnexo, setSelectedAnexo] = useState<Anexo | null>(null);
   const [isAnexoModalOpen, setIsAnexoModalOpen] = useState(false);
   const [useSimilarSearch, setUseSimilarSearch] = useState(true);
-  const [activeTab, setActiveTab] = useState("consulta");
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem("activeTab") || "consulta";
+  });
+
+  // Persistir aba ativa no localStorage
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    localStorage.setItem("activeTab", value);
+  };
 
   const { filteredRecords, showingDefault, ncmMatch } = useMemo(() => {
     // Verificar se a busca é um NCM (apenas números, 4-8 dígitos)
@@ -113,7 +121,7 @@ const Index = () => {
       
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="-mt-16 relative z-10">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="-mt-16 relative z-10">
           <div className="flex justify-center mb-6">
             <TabsList className="bg-white shadow-lg">
               <TabsTrigger value="consulta" className="gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
