@@ -170,6 +170,41 @@ export type Database = {
         }
         Relationships: []
       }
+      password_reset_tokens: {
+        Row: {
+          client_id: string
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          used: boolean
+        }
+        Insert: {
+          client_id: string
+          code: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          used?: boolean
+        }
+        Update: {
+          client_id?: string
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          used?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "password_reset_tokens_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -265,8 +300,10 @@ export type Database = {
         }
         Returns: Json
       }
+      cleanup_expired_reset_tokens: { Args: never; Returns: undefined }
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
       create_admin_invite: { Args: { p_email: string }; Returns: Json }
+      create_password_reset_token: { Args: { p_cnpj: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -282,6 +319,10 @@ export type Database = {
       }
       verify_client_login: {
         Args: { p_cnpj: string; p_password: string }
+        Returns: Json
+      }
+      verify_reset_code_and_change_password: {
+        Args: { p_cnpj: string; p_code: string; p_new_password: string }
         Returns: Json
       }
     }

@@ -12,6 +12,7 @@ import AdminRegister from "./pages/AdminRegister";
 import AdminDashboard from "./pages/AdminDashboard";
 import ImportExcel from "./pages/ImportExcel";
 import NotFound from "./pages/NotFound";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const App = () => (
             <Routes>
               {/* Rotas de clientes */}
               <Route path="/login" element={<Login />} />
+              <Route path="/redefinir-senha" element={<ResetPassword />} />
               <Route path="/" element={
                 <ProtectedRoute>
                   <Index />
