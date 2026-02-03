@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -140,9 +140,17 @@ const Login = () => {
             </Button>
           </form>
           
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Não possui acesso? Entre em contato com seu contador.
-          </p>
+          <div className="text-center space-y-3 mt-6">
+            <Link 
+              to="/redefinir-senha" 
+              className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium"
+            >
+              Redefinição de Senha.
+            </Link>
+            <p className="text-sm text-gray-500">
+              Não possui acesso? Entre em contato com seu contador.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
