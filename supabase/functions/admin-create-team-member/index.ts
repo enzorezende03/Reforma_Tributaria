@@ -191,10 +191,11 @@ serve(async (req) => {
   }
 
   // 3) Grant access to the admin panel (role used by the current app gate)
-  const { error: roleError } = await adminClient.from("user_roles").insert({
-    user_id: userId,
-    role: "admin",
-  });
+  // Use upsert to handle cases where the role already exists
+  const { error: roleError } = await adminClient.from("user_roles").upsert(
+    { user_id: userId, role: "admin" },
+    { onConflict: "user_id,role" },
+  );
 
   if (roleError) {
     // best-effort cleanup
