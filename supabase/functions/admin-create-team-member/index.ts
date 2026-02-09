@@ -118,26 +118,58 @@ serve(async (req) => {
     return jsonResponse({ success: false, error: "Selecione pelo menos uma permissão" }, 400);
   }
 
-  // 1) Create auth user WITHOUT switching the current session
-  const { data: created, error: createUserError } = await adminClient.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: { name },
-  });
+  // 1) Check if auth user already exists
+  const { data: existingUsers } = await adminClient.auth.admin.listUsers();
+  const existingAuthUser = existingUsers?.users?.find(
+    (u) => u.email?.toLowerCase() === email,
+  );
 
-  if (createUserError || !created.user) {
-    const msg = createUserError?.message ?? "Erro ao criar usuário";
-    const already = msg.toLowerCase().includes("already") || msg.toLowerCase().includes("registered") || msg.toLowerCase().includes("exists");
-    return jsonResponse(
-      { success: false, error: already ? "Este email já está cadastrado" : msg },
-      400,
-    );
+  let userId: string;
+
+  if (existingAuthUser) {
+    // Check if this user already has an admins record
+    const { data: existingAdmin } = await adminClient
+      .from("admins")
+      .select("id")
+      .eq("id", existingAuthUser.id)
+      .maybeSingle();
+
+    if (existingAdmin) {
+      return jsonResponse(
+        { success: false, error: "Este email já está cadastrado como colaborador" },
+        400,
+      );
+    }
+
+    // Auth user exists but no admin record — reuse it
+    // Update password and metadata
+    await adminClient.auth.admin.updateUserById(existingAuthUser.id, {
+      password,
+      email_confirm: true,
+      user_metadata: { name },
+    });
+
+    userId = existingAuthUser.id;
+  } else {
+    // Create new auth user
+    const { data: created, error: createUserError } = await adminClient.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name },
+    });
+
+    if (createUserError || !created.user) {
+      const msg = createUserError?.message ?? "Erro ao criar usuário";
+      return jsonResponse({ success: false, error: msg }, 400);
+    }
+
+    userId = created.user.id;
   }
 
   // 2) Create / sync record in admins table (id = auth user id)
   const { error: insertAdminError } = await adminClient.from("admins").insert({
-    id: created.user.id,
+    id: userId,
     email,
     name,
     password_hash: "supabase_auth",
@@ -147,8 +179,10 @@ serve(async (req) => {
   });
 
   if (insertAdminError) {
-    // If we failed to write admins row, cleanup auth user to avoid "ghost" accounts
-    await adminClient.auth.admin.deleteUser(created.user.id);
+    // If we failed to write admins row, cleanup auth user only if we just created it
+    if (!existingAuthUser) {
+      await adminClient.auth.admin.deleteUser(userId);
+    }
     const isDup = insertAdminError.code === "23505";
     return jsonResponse(
       { success: false, error: isDup ? "Este email já está cadastrado como colaborador" : `Erro ao cadastrar colaborador: ${insertAdminError.message}` },
@@ -158,16 +192,18 @@ serve(async (req) => {
 
   // 3) Grant access to the admin panel (role used by the current app gate)
   const { error: roleError } = await adminClient.from("user_roles").insert({
-    user_id: created.user.id,
+    user_id: userId,
     role: "admin",
   });
 
   if (roleError) {
     // best-effort cleanup
-    await adminClient.from("admins").delete().eq("id", created.user.id);
-    await adminClient.auth.admin.deleteUser(created.user.id);
+    await adminClient.from("admins").delete().eq("id", userId);
+    if (!existingAuthUser) {
+      await adminClient.auth.admin.deleteUser(userId);
+    }
     return jsonResponse({ success: false, error: "Erro ao atribuir permissão de acesso ao painel" }, 400);
   }
 
-  return jsonResponse({ success: true, user_id: created.user.id });
+  return jsonResponse({ success: true, user_id: userId });
 });
