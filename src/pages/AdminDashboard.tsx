@@ -53,6 +53,13 @@ const AdminDashboard = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const defaultTab = hasPermission('view_clients') || hasPermission('manage_clients') ? 'clients' : 'news';
+  const [activeTab, setActiveTab] = useState(() => localStorage.getItem('admin-active-tab') || defaultTab);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    localStorage.setItem('admin-active-tab', value);
+  };
   
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -396,7 +403,11 @@ const AdminDashboard = () => {
         </div>
 
         {/* Tabs for Clients, News and Team */}
-        <Tabs defaultValue={hasPermission('view_clients') || hasPermission('manage_clients') ? 'clients' : 'news'} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="space-y-6"
+        >
           <TabsList>
             {(hasPermission('view_clients') || hasPermission('manage_clients')) && (
               <TabsTrigger value="clients" className="gap-2">
