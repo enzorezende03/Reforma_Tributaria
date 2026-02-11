@@ -365,8 +365,38 @@ export const TeamManagement = () => {
                 />
               </div>
               <div className="space-y-3">
-                <Label>Permissões *</Label>
+              <Label>Permissões *</Label>
                 <div className="space-y-2 border rounded-lg p-3">
+                  <div
+                    className={`flex items-start gap-3 p-2 rounded-md cursor-pointer transition-colors border-b pb-3 mb-1 ${
+                      formPermissions.length === PERMISSION_OPTIONS.length ? 'bg-blue-50' : 'hover:bg-muted'
+                    }`}
+                    onClick={() => {
+                      if (formPermissions.length === PERMISSION_OPTIONS.length) {
+                        setFormPermissions([]);
+                      } else {
+                        setFormPermissions(PERMISSION_OPTIONS.map(p => p.id));
+                      }
+                    }}
+                  >
+                    <Checkbox
+                      checked={formPermissions.length === PERMISSION_OPTIONS.length}
+                      onCheckedChange={() => {
+                        if (formPermissions.length === PERMISSION_OPTIONS.length) {
+                          setFormPermissions([]);
+                        } else {
+                          setFormPermissions(PERMISSION_OPTIONS.map(p => p.id));
+                        }
+                      }}
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-blue-600" />
+                        <span className="font-medium text-sm">Selecionar Todos</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">Marcar todas as permissões</p>
+                    </div>
+                  </div>
                   {PERMISSION_OPTIONS.map((perm) => (
                     <div
                       key={perm.id}
@@ -544,7 +574,37 @@ export const TeamManagement = () => {
             </div>
             <div className="space-y-3">
               <Label>Permissões *</Label>
-              <div className="space-y-2 border rounded-lg p-3">
+               <div className="space-y-2 border rounded-lg p-3">
+                <div
+                  className={`flex items-start gap-3 p-2 rounded-md cursor-pointer transition-colors border-b pb-3 mb-1 ${
+                    formPermissions.length === PERMISSION_OPTIONS.length ? 'bg-blue-50' : 'hover:bg-muted'
+                  }`}
+                  onClick={() => {
+                    if (formPermissions.length === PERMISSION_OPTIONS.length) {
+                      setFormPermissions([]);
+                    } else {
+                      setFormPermissions(PERMISSION_OPTIONS.map(p => p.id));
+                    }
+                  }}
+                >
+                  <Checkbox
+                    checked={formPermissions.length === PERMISSION_OPTIONS.length}
+                    onCheckedChange={() => {
+                      if (formPermissions.length === PERMISSION_OPTIONS.length) {
+                        setFormPermissions([]);
+                      } else {
+                        setFormPermissions(PERMISSION_OPTIONS.map(p => p.id));
+                      }
+                    }}
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium text-sm">Selecionar Todos</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">Marcar todas as permissões</p>
+                  </div>
+                </div>
                 {PERMISSION_OPTIONS.map((perm) => (
                   <div
                     key={perm.id}
