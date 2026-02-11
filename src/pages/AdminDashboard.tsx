@@ -26,7 +26,8 @@ import {
   KeyRound,
   Newspaper,
   Users2,
-  Eye
+  Eye,
+  FileSpreadsheet
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -35,6 +36,7 @@ import AdminInviteModal from '@/components/AdminInviteModal';
 import ClientResetPasswordModal from '@/components/ClientResetPasswordModal';
 import { NewsManagement } from '@/components/NewsManagement';
 import { TeamManagement } from '@/components/TeamManagement';
+import { ClientImportModal } from '@/components/ClientImportModal';
 
 interface Client {
   id: string;
@@ -67,6 +69,7 @@ const AdminDashboard = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   
   // Form states
@@ -438,13 +441,21 @@ const AdminDashboard = () => {
                   <CardTitle>Clientes Cadastrados</CardTitle>
                   <CardDescription>Gerencie os acessos dos seus clientes</CardDescription>
                 </div>
-                <Dialog open={isAddModalOpen} onOpenChange={(open) => { setIsAddModalOpen(open); if (!open) resetForm(); }}>
-                  <DialogTrigger asChild>
-                    <Button className="bg-blue-600 hover:bg-blue-700">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Novo Cliente
-                    </Button>
-                  </DialogTrigger>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsImportModalOpen(true)}
+                  >
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    Importar Excel
+                  </Button>
+                  <Dialog open={isAddModalOpen} onOpenChange={(open) => { setIsAddModalOpen(open); if (!open) resetForm(); }}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-blue-600 hover:bg-blue-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Novo Cliente
+                      </Button>
+                    </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Cadastrar Novo Cliente</DialogTitle>
@@ -492,6 +503,12 @@ const AdminDashboard = () => {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
+                </div>
+                <ClientImportModal
+                  isOpen={isImportModalOpen}
+                  onOpenChange={setIsImportModalOpen}
+                  onImportComplete={fetchClients}
+                />
               </CardHeader>
               <CardContent>
                 {/* Search */}
