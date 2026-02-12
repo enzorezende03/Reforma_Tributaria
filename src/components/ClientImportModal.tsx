@@ -145,7 +145,7 @@ export const ClientImportModal = ({ isOpen, onOpenChange, onImportComplete }: Cl
 
     let success = 0;
     let failed = 0;
-    const defaultPassword = '123456';
+    const defaultPassword = '2mCliente';
 
     for (let i = 0; i < validClients.length; i++) {
       const client = validClients[i];
@@ -194,7 +194,7 @@ export const ClientImportModal = ({ isOpen, onOpenChange, onImportComplete }: Cl
       onImportComplete();
       toast({
         title: 'Importação concluída',
-        description: `${success} cliente(s) importado(s) com sucesso.${failed > 0 ? ` ${failed} falharam.` : ''} Senha padrão: 123456`,
+        description: `${success} cliente(s) importado(s) com sucesso.${failed > 0 ? ` ${failed} falharam.` : ''} Senha padrão: 2mCliente`,
       });
     }
   };
@@ -211,7 +211,7 @@ export const ClientImportModal = ({ isOpen, onOpenChange, onImportComplete }: Cl
             Importar Clientes via Excel
           </DialogTitle>
           <DialogDescription>
-            Envie uma planilha (.xlsx ou .xls) com colunas "CNPJ" e "Razão Social" (ou "Empresa"/"Nome"). A senha padrão será <strong>123456</strong> e o cliente deverá alterá-la no primeiro acesso.
+            Envie uma planilha (.xlsx ou .xls) com colunas "CNPJ" e "Razão Social" (ou "Empresa"/"Nome"). A senha padrão será <strong>2mCliente</strong> e o cliente deverá alterá-la no primeiro acesso.
           </DialogDescription>
         </DialogHeader>
 
