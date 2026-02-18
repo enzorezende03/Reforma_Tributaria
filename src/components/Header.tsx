@@ -20,7 +20,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-16 px-6">
+    <header className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-10 sm:py-16 px-4 sm:px-6">
       {/* Decorative elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-white/20 blur-3xl" />
@@ -46,8 +46,8 @@ export const Header = () => {
       
       {/* User info and logout */}
       {client && !isAdminAuthenticated && (
-        <div className="absolute top-4 right-4 flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 backdrop-blur-sm">
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 sm:gap-3">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 backdrop-blur-sm">
             <Building2 className="h-4 w-4 text-white/80" />
             <span className="text-sm font-medium text-white/90 max-w-[200px] truncate">
               {client.company_name}
@@ -57,7 +57,7 @@ export const Header = () => {
             variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className="text-white/80 hover:text-white hover:bg-white/10"
+            className="text-white/80 hover:text-white hover:bg-white/10 text-xs sm:text-sm"
           >
             <LogOut className="h-4 w-4 mr-1" />
             Sair
@@ -85,11 +85,11 @@ export const Header = () => {
           </div>
         </div>
         
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+        <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4 tracking-tight px-2">
           Reforma Tributária - LC 214/2025
         </h1>
         
-        <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-sm sm:text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed px-2">
           Sistema integrado de consultas e ferramentas para o novo modelo tributário brasileiro
         </p>
         

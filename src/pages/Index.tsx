@@ -119,21 +119,21 @@ const Index = () => {
 
       <Header />
       
-      <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8 overflow-x-hidden">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="-mt-16 relative z-10">
           <div className="flex justify-center mb-6">
-            <TabsList className="bg-white shadow-lg">
-              <TabsTrigger value="consulta" className="gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-                <Search className="h-4 w-4" />
+            <TabsList className="bg-white shadow-lg flex flex-wrap h-auto gap-1">
+              <TabsTrigger value="consulta" className="gap-1.5 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Consulta CST
               </TabsTrigger>
-              <TabsTrigger value="simulador" className="gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-                <Calculator className="h-4 w-4" />
+              <TabsTrigger value="simulador" className="gap-1.5 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <Calculator className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Simulador
               </TabsTrigger>
-              <TabsTrigger value="noticias" className="gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-                <Newspaper className="h-4 w-4" />
+              <TabsTrigger value="noticias" className="gap-1.5 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                <Newspaper className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Notícias
               </TabsTrigger>
             </TabsList>

@@ -319,55 +319,55 @@ const AdminDashboard = () => {
         adminEmail={admin?.email ?? ''}
       />
       {/* Header */}
-      <header className="bg-gradient-to-r from-slate-800 to-slate-900 text-white py-4 px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <header className="bg-gradient-to-r from-slate-800 to-slate-900 text-white py-4 px-4 md:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <Shield className="h-8 w-8" />
+            <Shield className="h-7 w-7 sm:h-8 sm:w-8 shrink-0" />
             <div>
-              <h1 className="text-xl font-bold">Painel Administrativo</h1>
-              <p className="text-sm text-slate-300">Gerenciamento de Clientes</p>
+              <h1 className="text-lg sm:text-xl font-bold">Painel Administrativo</h1>
+              <p className="text-xs sm:text-sm text-slate-300">Gerenciamento de Clientes</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-300">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
+            <span className="text-xs sm:text-sm text-slate-300 hidden sm:inline">
               Olá, <span className="font-medium text-white">{admin?.name}</span>
             </span>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate('/')}
-              className="text-slate-300 hover:text-white hover:bg-slate-700"
+              className="text-slate-300 hover:text-white hover:bg-slate-700 text-xs sm:text-sm h-8 px-2 sm:px-3"
               title="Ver painel do cliente"
             >
-              <Eye className="h-4 w-4 mr-2" />
-              Ver como Cliente
+              <Eye className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Ver como Cliente</span>
             </Button>
             {hasPermission('manage_team') && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsInviteModalOpen(true)}
-                className="text-slate-300 hover:text-white hover:bg-slate-700"
+                className="text-slate-300 hover:text-white hover:bg-slate-700 text-xs sm:text-sm h-8 px-2 sm:px-3"
               >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Convidar Admin
+                <UserPlus className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Convidar Admin</span>
               </Button>
             )}
             <Button
               variant="ghost"
               size="sm"
               onClick={handleLogout}
-              className="text-slate-300 hover:text-white hover:bg-slate-700"
+              className="text-slate-300 hover:text-white hover:bg-slate-700 text-xs sm:text-sm h-8 px-2 sm:px-3"
             >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
+              <LogOut className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Sair</span>
             </Button>
           </div>
         </div>
       </header>
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto py-8 px-6">
+      <main className="max-w-7xl mx-auto py-6 md:py-8 px-4 md:px-6 overflow-x-hidden">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
@@ -411,21 +411,21 @@ const AdminDashboard = () => {
           onValueChange={handleTabChange}
           className="space-y-6"
         >
-          <TabsList>
+          <TabsList className="flex flex-wrap h-auto gap-1">
             {(hasPermission('view_clients') || hasPermission('manage_clients')) && (
-              <TabsTrigger value="clients" className="gap-2">
+              <TabsTrigger value="clients" className="gap-2 text-xs sm:text-sm">
                 <Users className="h-4 w-4" />
                 Clientes
               </TabsTrigger>
             )}
             {(hasPermission('view_news') || hasPermission('manage_news')) && (
-              <TabsTrigger value="news" className="gap-2">
+              <TabsTrigger value="news" className="gap-2 text-xs sm:text-sm">
                 <Newspaper className="h-4 w-4" />
                 Notícias
               </TabsTrigger>
             )}
             {hasPermission('manage_team') && (
-              <TabsTrigger value="team" className="gap-2">
+              <TabsTrigger value="team" className="gap-2 text-xs sm:text-sm">
                 <Users2 className="h-4 w-4" />
                 Equipe
               </TabsTrigger>
@@ -436,23 +436,24 @@ const AdminDashboard = () => {
           <TabsContent value="clients">
             {/* Clients Table */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <CardTitle>Clientes Cadastrados</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">Clientes Cadastrados</CardTitle>
                   <CardDescription>Gerencie os acessos dos seus clientes</CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Button
                     variant="outline"
                     onClick={() => setIsImportModalOpen(true)}
+                    className="text-xs sm:text-sm flex-1 sm:flex-none"
                   >
-                    <FileSpreadsheet className="h-4 w-4 mr-2" />
-                    Importar Excel
+                    <FileSpreadsheet className="h-4 w-4 mr-1 sm:mr-2" />
+                    Importar
                   </Button>
                   <Dialog open={isAddModalOpen} onOpenChange={(open) => { setIsAddModalOpen(open); if (!open) resetForm(); }}>
                     <DialogTrigger asChild>
-                      <Button className="bg-blue-600 hover:bg-blue-700">
-                        <Plus className="h-4 w-4 mr-2" />
+                      <Button className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm flex-1 sm:flex-none">
+                        <Plus className="h-4 w-4 mr-1 sm:mr-2" />
                         Novo Cliente
                       </Button>
                     </DialogTrigger>
@@ -532,11 +533,12 @@ const AdminDashboard = () => {
                     {searchTerm ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
                   </div>
                 ) : (
+                <div className="overflow-x-auto -mx-6 px-6">
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Empresa</TableHead>
-                        <TableHead>CNPJ</TableHead>
+                        <TableHead className="hidden sm:table-cell">CNPJ</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
@@ -550,7 +552,7 @@ const AdminDashboard = () => {
                               <span className="font-medium">{client.company_name}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="font-mono text-sm">
+                          <TableCell className="font-mono text-sm hidden sm:table-cell">
                             {formatCnpj(client.cnpj)}
                           </TableCell>
                           <TableCell>
@@ -598,6 +600,7 @@ const AdminDashboard = () => {
                       ))}
                     </TableBody>
                   </Table>
+                </div>
                 )}
               </CardContent>
             </Card>
