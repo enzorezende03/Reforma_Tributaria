@@ -39,20 +39,20 @@ export const StatsCards = ({ totalRecords, filteredRecords }: StatsCardsProps) =
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
       {stats.map((stat, index) => (
         <Card 
           key={stat.label} 
           className="border-0 shadow-sm animate-fade-in"
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className={`p-2.5 rounded-lg ${stat.bgColor}`}>
-              <stat.icon className={`h-5 w-5 ${stat.color}`} />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+            <div className={`p-2 sm:p-2.5 rounded-lg ${stat.bgColor} shrink-0`}>
+              <stat.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.color}`} />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold text-foreground truncate">{stat.value}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{stat.label}</p>
             </div>
           </CardContent>
         </Card>
