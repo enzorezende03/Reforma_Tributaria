@@ -46,8 +46,8 @@ export const Header = () => {
       
       {/* User info and logout */}
       {client && !isAdminAuthenticated && (
-        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 sm:gap-3">
-          <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 backdrop-blur-sm">
+        <div className="relative flex flex-col sm:flex-row items-center justify-center gap-2 sm:absolute sm:top-4 sm:right-4 sm:flex-row sm:gap-3 mb-4 sm:mb-0">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 backdrop-blur-sm">
             <Building2 className="h-4 w-4 text-white/80" />
             <span className="text-sm font-medium text-white/90 max-w-[200px] truncate">
               {client.company_name}
