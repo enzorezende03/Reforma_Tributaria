@@ -29,16 +29,18 @@ export const Header = () => {
       
       {/* Admin viewing as client banner */}
       {isAdminAuthenticated && (
-        <div className="absolute top-0 left-0 right-0 bg-amber-500 text-amber-900 py-2 px-4 text-center text-sm font-medium flex items-center justify-center gap-2">
-          <Shield className="h-4 w-4" />
-          Você está visualizando como cliente
+        <div className="absolute top-0 left-0 right-0 bg-amber-500 text-amber-900 py-2 px-3 sm:px-4 text-center text-xs sm:text-sm font-medium flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1.5">
+            <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <span>Você está visualizando como cliente</span>
+          </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleBackToAdmin}
-            className="ml-4 bg-amber-600 hover:bg-amber-700 text-white h-7 px-3"
+            className="sm:ml-4 bg-amber-600 hover:bg-amber-700 text-white h-7 px-3 text-xs"
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
+            <ArrowLeft className="h-3.5 w-3.5 mr-1" />
             Voltar ao Painel Admin
           </Button>
         </div>
