@@ -9,7 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { cstData, CSTRecord } from "@/data/cstData";
 import { fuzzyMatch } from "@/lib/fuzzySearch";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 interface ImportedProduct {
   originalRow: number;
@@ -56,10 +56,27 @@ const ImportExcel = () => {
     setIsProcessing(true);
     try {
       const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet) as Record<string, unknown>[];
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(data);
+      const worksheet = workbook.worksheets[0];
+      if (!worksheet) {
+        toast({ title: "Arquivo vazio", description: "O arquivo não contém planilhas.", variant: "destructive" });
+        setIsProcessing(false);
+        return;
+      }
+      const jsonData: Record<string, unknown>[] = [];
+      const headers: string[] = [];
+      worksheet.eachRow((row, rowNumber) => {
+        const values = row.values as (string | number | null)[];
+        const cells = values.slice(1); // 1-indexed
+        if (rowNumber === 1) {
+          cells.forEach(c => headers.push(String(c ?? '')));
+        } else {
+          const obj: Record<string, unknown> = {};
+          cells.forEach((c, i) => { obj[headers[i] || `col${i}`] = c; });
+          jsonData.push(obj);
+        }
+      });
 
       if (jsonData.length === 0) {
         toast({
@@ -552,7 +569,7 @@ const ImportExcel = () => {
     });
   };
 
-  const exportResults = () => {
+  const exportResults = async () => {
     const exportData = results.map(r => ({
       'Linha Original': r.product.originalRow,
       'Descrição do Produto': r.product.description,
@@ -564,24 +581,31 @@ const ImportExcel = () => {
       'Redução CBS (%)': r.bestMatch?.pRedCBS ?? '-',
     }));
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Resultados CST");
+    const workbook = new ExcelJS.Workbook();
+    const ws = workbook.addWorksheet("Resultados CST");
     
-    // Ajustar largura das colunas
-    const colWidths = [
-      { wch: 15 }, // Linha Original
-      { wch: 40 }, // Descrição
-      { wch: 12 }, // CST
-      { wch: 40 }, // Classificação
-      { wch: 50 }, // Descrição Classificação
-      { wch: 12 }, // Artigo
-      { wch: 15 }, // Red IBS
-      { wch: 15 }, // Red CBS
-    ];
-    ws['!cols'] = colWidths;
-
-    XLSX.writeFile(wb, `resultados_cst_${new Date().toISOString().slice(0,10)}.xlsx`);
+    // Headers
+    const headerKeys = Object.keys(exportData[0]);
+    ws.addRow(headerKeys);
+    
+    // Data rows
+    exportData.forEach(row => {
+      ws.addRow(headerKeys.map(k => (row as Record<string, unknown>)[k]));
+    });
+    
+    // Column widths
+    const colWidths = [15, 40, 12, 40, 50, 12, 15, 15];
+    ws.columns.forEach((col, i) => { col.width = colWidths[i] || 15; });
+    
+    // Download
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `resultados_cst_${new Date().toISOString().slice(0,10)}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
     
     toast({
       title: "Exportação concluída",

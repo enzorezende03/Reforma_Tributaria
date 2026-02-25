@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -73,11 +73,21 @@ export const ClientImportModal = ({ isOpen, onOpenChange, onImportComplete }: Cl
 
     const reader = new FileReader();
     reader.onload = (evt) => {
-      try {
-        const data = new Uint8Array(evt.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows: string[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+      (async () => { try {
+        const buffer = evt.target?.result as ArrayBuffer;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer);
+        const sheet = workbook.worksheets[0];
+        if (!sheet) {
+          setParseError('A planilha está vazia.');
+          return;
+        }
+        const rows: string[][] = [];
+        sheet.eachRow((row) => {
+          const values = row.values as (string | number | null)[];
+          // ExcelJS row.values is 1-indexed, skip index 0
+          rows.push(values.slice(1).map(v => String(v ?? '')));
+        });
 
         if (rows.length < 2) {
           setParseError('A planilha está vazia ou não possui dados além do cabeçalho.');
@@ -131,7 +141,7 @@ export const ClientImportModal = ({ isOpen, onOpenChange, onImportComplete }: Cl
         setParsedClients(clients);
       } catch {
         setParseError('Erro ao ler o arquivo. Verifique se é um arquivo Excel válido (.xlsx ou .xls).');
-      }
+      } })();
     };
     reader.readAsArrayBuffer(file);
   };

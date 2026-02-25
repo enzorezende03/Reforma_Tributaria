@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Calculator, TrendingUp, Info, DollarSign, Percent, MapPin, AlertTriangle, FileDown, FileSpreadsheet } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import logoImage from "@/assets/logo-2m.png";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -348,55 +348,57 @@ export const SimuladorTab = () => {
     }
   };
 
-  const exportarExcel = () => {
+  const exportarExcel = async () => {
     const dataAtual = new Date().toLocaleDateString('pt-BR');
     
-    // Dados da simulação
-    const infoSimulacao = [
-      ['Simulação da Reforma Tributária'],
-      [''],
-      ['Data', dataAtual],
-      ['Categoria', categoria === 'servicos' ? 'Serviços' : 'Produtos'],
-      ['Regime', regimeTributario === 'normal' ? 'Regime Normal' : 'Simples Nacional'],
-      ['Preço Base', parseFloat(preco) || 0],
-      ['CST', `${cstSelecionado} - ${REDUCOES_CST[cstSelecionado]?.descricao}`],
-    ];
+    const workbook = new ExcelJS.Workbook();
+    const ws = workbook.addWorksheet('Simulação');
+    
+    // Info rows
+    ws.addRow(['Simulação da Reforma Tributária']);
+    ws.addRow([]);
+    ws.addRow(['Data', dataAtual]);
+    ws.addRow(['Categoria', categoria === 'servicos' ? 'Serviços' : 'Produtos']);
+    ws.addRow(['Regime', regimeTributario === 'normal' ? 'Regime Normal' : 'Simples Nacional']);
+    ws.addRow(['Preço Base', parseFloat(preco) || 0]);
+    ws.addRow(['CST', `${cstSelecionado} - ${REDUCOES_CST[cstSelecionado]?.descricao}`]);
     
     if (regimeTributario === 'simples') {
-      infoSimulacao.push(['Anexo', anexoAtual.nome]);
-      infoSimulacao.push(['Faixa', faixaAtual.nome]);
+      ws.addRow(['Anexo', anexoAtual.nome]);
+      ws.addRow(['Faixa', faixaAtual.nome]);
     }
     
-    infoSimulacao.push(['']);
+    ws.addRow([]);
     
-    // Headers e dados da tabela
+    // Headers
     const headers = regimeTributario === 'simples'
       ? ['Ano', 'Simples (R$)', 'CBS (R$)', 'IBS (R$)', 'Total (R$)', 'Preço Final (R$)']
       : ['Ano', 'ISS (R$)', 'PIS (R$)', 'COFINS (R$)', 'CBS (R$)', 'IBS (R$)', 'Total (R$)', 'Preço Final (R$)'];
+    ws.addRow(headers);
     
-    const dadosTabela = resultados.map(r => 
-      regimeTributario === 'simples'
-        ? [r.ano, r.simples, r.cbs, r.ibs, r.total, r.precoFinal]
-        : [r.ano, r.iss, r.pis, r.cofins, r.cbs, r.ibs, r.total, r.precoFinal]
-    );
+    // Data
+    resultados.forEach(r => {
+      ws.addRow(
+        regimeTributario === 'simples'
+          ? [r.ano, r.simples, r.cbs, r.ibs, r.total, r.precoFinal]
+          : [r.ano, r.iss, r.pis, r.cofins, r.cbs, r.ibs, r.total, r.precoFinal]
+      );
+    });
     
-    // Criar worksheet
-    const ws = XLSX.utils.aoa_to_sheet([
-      ...infoSimulacao,
-      headers,
-      ...dadosTabela,
-      [''],
-      ['Comparativo 2025 vs 2033'],
-      ['Diferença', comparativo.diferenca],
-      ['Variação %', `${comparativo.percentual >= 0 ? '+' : ''}${comparativo.percentual.toFixed(1)}%`],
-    ]);
+    ws.addRow([]);
+    ws.addRow(['Comparativo 2025 vs 2033']);
+    ws.addRow(['Diferença', comparativo.diferenca]);
+    ws.addRow(['Variação %', `${comparativo.percentual >= 0 ? '+' : ''}${comparativo.percentual.toFixed(1)}%`]);
     
-    // Criar workbook
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Simulação');
-    
-    // Salvar
-    XLSX.writeFile(wb, `simulacao-tributaria-${dataAtual.replace(/\//g, '-')}.xlsx`);
+    // Download
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `simulacao-tributaria-${dataAtual.replace(/\//g, '-')}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
