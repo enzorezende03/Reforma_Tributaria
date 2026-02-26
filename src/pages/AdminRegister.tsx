@@ -36,7 +36,7 @@ const AdminRegister = () => {
     try {
       // Verificar se existem admins
       const { count } = await supabase
-        .from('admins')
+        .from('admins_safe')
         .select('*', { count: 'exact', head: true });
 
       if (count === 0) {
@@ -55,11 +55,8 @@ const AdminRegister = () => {
       }
 
       // Validar token de convite usando RPC seguro (server-side validation)
-      // Precisamos do email para validar, mas não temos ainda neste ponto
-      // Usamos a validação sem email primeiro, depois validamos com email no submit
-      const { data: validation, error: rpcError } = await supabase.rpc('validate_admin_invite', {
-        p_token: inviteToken,
-        p_email: '' // Email será validado no submit
+      const { data: validation, error: rpcError } = await supabase.rpc('check_admin_invite_token', {
+        p_token: inviteToken
       });
 
       const result = validation as unknown as { valid: boolean; error?: string; invite_id?: string; email?: string };
@@ -71,7 +68,8 @@ const AdminRegister = () => {
         return;
       }
 
-      // Convite válido - o RPC retorna o invite_id
+      // Convite válido
+      if (result.email) setEmail(result.email);
       setInviteId(result.invite_id || null);
       setCanRegister(true);
     } catch (err) {
