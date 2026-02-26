@@ -203,6 +203,13 @@ export type Database = {
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "password_reset_tokens_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -282,6 +289,36 @@ export type Database = {
           must_change_password?: boolean | null
           name?: string | null
           permissions?: string[] | null
+        }
+        Relationships: []
+      }
+      clients_safe: {
+        Row: {
+          cnpj: string | null
+          company_name: string | null
+          created_at: string | null
+          id: string | null
+          is_active: boolean | null
+          must_change_password: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          cnpj?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          must_change_password?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          cnpj?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          must_change_password?: boolean | null
+          updated_at?: string | null
         }
         Relationships: []
       }
