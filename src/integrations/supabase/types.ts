@@ -337,6 +337,7 @@ export type Database = {
         }
         Returns: Json
       }
+      check_admin_invite_token: { Args: { p_token: string }; Returns: Json }
       cleanup_expired_reset_tokens: { Args: never; Returns: undefined }
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
       create_admin_invite: { Args: { p_email: string }; Returns: Json }
