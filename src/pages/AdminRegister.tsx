@@ -54,32 +54,25 @@ const AdminRegister = () => {
         return;
       }
 
-      // Validar token de convite (não precisa de autenticação para validar)
-      // Usamos uma query direta já que precisamos validar antes do usuário estar autenticado
-      const { data: invite, error: inviteError } = await supabase
-        .from('admin_invites')
-        .select('id, email, expires_at, used')
-        .eq('token', inviteToken)
-        .eq('used', false)
-        .single();
+      // Validar token de convite usando RPC seguro (server-side validation)
+      // Precisamos do email para validar, mas não temos ainda neste ponto
+      // Usamos a validação sem email primeiro, depois validamos com email no submit
+      const { data: validation, error: rpcError } = await supabase.rpc('validate_admin_invite', {
+        p_token: inviteToken,
+        p_email: '' // Email será validado no submit
+      });
 
-      if (inviteError || !invite) {
-        setError('Convite inválido ou já utilizado');
+      const result = validation as unknown as { valid: boolean; error?: string; invite_id?: string; email?: string };
+
+      if (rpcError || !result?.valid) {
+        setError(result?.error || 'Convite inválido ou já utilizado');
         setCanRegister(false);
         setIsCheckingAccess(false);
         return;
       }
 
-      if (new Date(invite.expires_at) < new Date()) {
-        setError('Convite expirado');
-        setCanRegister(false);
-        setIsCheckingAccess(false);
-        return;
-      }
-
-      // Convite válido
-      setEmail(invite.email);
-      setInviteId(invite.id);
+      // Convite válido - o RPC retorna o invite_id
+      setInviteId(result.invite_id || null);
       setCanRegister(true);
     } catch (err) {
       console.error('Error checking access:', err);

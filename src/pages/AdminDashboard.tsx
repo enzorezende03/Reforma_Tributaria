@@ -42,9 +42,10 @@ interface Client {
   id: string;
   cnpj: string;
   company_name: string;
-  password_hash: string;
   is_active: boolean;
+  must_change_password: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 const AdminDashboard = () => {
@@ -82,7 +83,7 @@ const AdminDashboard = () => {
   const fetchClients = async () => {
     setIsLoading(true);
     const { data, error } = await supabase
-      .from('clients')
+      .from('clients_safe')
       .select('*')
       .order('company_name');
     
