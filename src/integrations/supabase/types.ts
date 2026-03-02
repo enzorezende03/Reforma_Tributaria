@@ -350,6 +350,10 @@ export type Database = {
         Returns: boolean
       }
       hash_password: { Args: { password: string }; Returns: string }
+      reset_client_password_by_cnpj: {
+        Args: { p_cnpj: string; p_new_password: string }
+        Returns: Json
+      }
       use_admin_invite: { Args: { p_invite_id: string }; Returns: boolean }
       validate_admin_invite: {
         Args: { p_email: string; p_token: string }
