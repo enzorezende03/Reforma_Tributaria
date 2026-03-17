@@ -120,12 +120,18 @@ const AdminLogin = () => {
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
 
-            <div className="text-center pt-2">
+            <div className="text-center space-y-2 pt-2">
               <Link 
                 to="/admin/register" 
-                className="text-sm text-slate-600 hover:text-slate-800 hover:underline"
+                className="text-sm text-slate-600 hover:text-slate-800 hover:underline block"
               >
                 Criar conta de administrador
+              </Link>
+              <Link 
+                to="/login" 
+                className="text-sm text-slate-500 hover:text-slate-700 hover:underline block"
+              >
+                Voltar ao login de cliente
               </Link>
             </div>
           </form>
