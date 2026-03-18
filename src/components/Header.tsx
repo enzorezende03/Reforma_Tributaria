@@ -20,7 +20,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-10 sm:py-16 px-4 sm:px-6">
+    <header className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-10 sm:py-16 pb-14 sm:pb-20 px-4 sm:px-6">
       {/* Decorative elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-white/20 blur-3xl" />
