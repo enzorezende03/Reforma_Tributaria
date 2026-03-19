@@ -121,9 +121,9 @@ const Index = () => {
       
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8 overflow-x-hidden">
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="-mt-16 relative z-10">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="-mt-10 sm:-mt-12 relative z-10">
           <div className="flex justify-center mb-6">
-            <TabsList className="bg-white shadow-lg flex flex-wrap h-auto gap-1">
+            <TabsList className="bg-white shadow-lg flex flex-wrap h-auto gap-1 p-1.5 rounded-xl">
               <TabsTrigger value="consulta" className="gap-1.5 sm:gap-2 text-xs sm:text-sm data-[state=active]:bg-blue-600 data-[state=active]:text-white">
                 <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Consulta CST
