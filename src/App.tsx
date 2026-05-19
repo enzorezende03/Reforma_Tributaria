@@ -58,7 +58,11 @@ const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const App = () => (
+const App = () => {
+  const [ssoReady, setSsoReady] = useState(false);
+  useEffect(() => { consumeSsoToken().finally(() => setSsoReady(true)); }, []);
+  if (!ssoReady) return null;
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
