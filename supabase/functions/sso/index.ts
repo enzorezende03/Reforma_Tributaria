@@ -33,6 +33,7 @@ async function verify(token: string) {
   const payload = JSON.parse(b64urlToString(payloadB64)) as {
     email: string;
     name?: string | null;
+    cnpj?: string | null;
     iat: number;
     exp: number;
   };
@@ -66,11 +67,12 @@ Deno.serve(async (req) => {
     // gera magic link apontando para a rota de callback do app
     const APP_URL = "https://ref-tributaria.lovable.app";
     const safeRedirect = redirect.startsWith("/") ? redirect : "/";
+    const cnpjParam = payload.cnpj ? `&cnpj=${encodeURIComponent(payload.cnpj)}` : "";
     const { data: link, error } = await admin.auth.admin.generateLink({
       type: "magiclink",
       email: payload.email,
       options: {
-        redirectTo: `${APP_URL}/auth/callback?redirect=${encodeURIComponent(safeRedirect)}`,
+        redirectTo: `${APP_URL}/auth/callback?redirect=${encodeURIComponent(safeRedirect)}${cnpjParam}`,
       },
     });
     if (error || !link?.properties?.action_link) {

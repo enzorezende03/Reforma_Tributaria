@@ -342,6 +342,7 @@ export type Database = {
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
       create_admin_invite: { Args: { p_email: string }; Returns: Json }
       create_password_reset_token: { Args: { p_cnpj: string }; Returns: Json }
+      get_client_by_cnpj_for_sso: { Args: { p_cnpj: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
