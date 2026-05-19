@@ -33,6 +33,7 @@ async function verify(token: string) {
   const payload = JSON.parse(b64urlToString(payloadB64)) as {
     email: string;
     name?: string | null;
+    cnpj?: string | null;
     iat: number;
     exp: number;
   };
