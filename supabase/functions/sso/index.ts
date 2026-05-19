@@ -63,12 +63,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    // gera magic link
-    const origin = url.origin.replace("functions.supabase.co", "lovable.app"); // ajuste se necessário
+    // gera magic link apontando de volta para o app
+    const APP_ORIGIN = "https://ref-tributaria.lovable.app";
     const { data: link, error } = await admin.auth.admin.generateLink({
       type: "magiclink",
       email: payload.email,
-      options: { redirectTo: `${url.protocol}//${req.headers.get("host")}${redirect}` },
+      options: { redirectTo: `${APP_ORIGIN}${redirect}` },
     });
     if (error || !link?.properties?.action_link) {
       return new Response(`erro: ${error?.message ?? "sem link"}`, { status: 500 });
