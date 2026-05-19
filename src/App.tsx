@@ -3,10 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
-import { consumeSsoToken } from "@/lib/sso-receiver";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
@@ -59,9 +57,6 @@ const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  const [ssoReady, setSsoReady] = useState(false);
-  useEffect(() => { consumeSsoToken().finally(() => setSsoReady(true)); }, []);
-  if (!ssoReady) return null;
   return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
