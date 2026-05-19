@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ImportExcel from "./pages/ImportExcel";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => {
               {/* Rotas de clientes */}
               <Route path="/login" element={<Login />} />
               <Route path="/redefinir-senha" element={<ResetPassword />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/" element={
                 <ProtectedRoute>
                   <Index />
