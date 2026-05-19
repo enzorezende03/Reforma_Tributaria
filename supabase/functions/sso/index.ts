@@ -63,12 +63,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    // gera magic link apontando de volta para o app
-    const APP_ORIGIN = "https://ref-tributaria.lovable.app";
+    // gera magic link apontando para a rota de callback do app
+    const APP_URL = "https://ref-tributaria.lovable.app";
+    const safeRedirect = redirect.startsWith("/") ? redirect : "/";
     const { data: link, error } = await admin.auth.admin.generateLink({
       type: "magiclink",
       email: payload.email,
-      options: { redirectTo: `${APP_ORIGIN}${redirect}` },
+      options: {
+        redirectTo: `${APP_URL}/auth/callback?redirect=${encodeURIComponent(safeRedirect)}`,
+      },
     });
     if (error || !link?.properties?.action_link) {
       return new Response(`erro: ${error?.message ?? "sem link"}`, { status: 500 });
