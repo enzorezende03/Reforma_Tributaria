@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ImportExcel from "./pages/ImportExcel";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
