@@ -6,17 +6,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Building2, Lock, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Building2, Lock, AlertCircle, Mail } from 'lucide-react';
 import logo2m from '@/assets/logo-2m.png';
 
+type Mode = 'email' | 'cnpj';
+
 const Login = () => {
+  const [mode, setMode] = useState<Mode>('email');
+  const [email, setEmail] = useState('');
   const [cnpj, setCnpj] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
-  const { login } = useAuth();
+
+  const { login, loginByEmail } = useAuth();
   const navigate = useNavigate();
 
   const formatCnpj = (value: string) => {
@@ -31,19 +35,9 @@ const Login = () => {
     return value;
   };
 
-  const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCnpj(formatCnpj(e.target.value));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    const cnpjNumbers = cnpj.replace(/\D/g, '');
-    if (cnpjNumbers.length !== 14) {
-      setError('CNPJ deve ter 14 dígitos');
-      return;
-    }
 
     if (!password.trim()) {
       setError('Digite sua senha');
@@ -51,15 +45,30 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    
-    const result = await login(cnpj, password);
-    
+
+    let result;
+    if (mode === 'email') {
+      if (!email.trim() || !email.includes('@')) {
+        setError('Email inválido');
+        setIsLoading(false);
+        return;
+      }
+      result = await loginByEmail(email, password);
+    } else {
+      const cnpjNumbers = cnpj.replace(/\D/g, '');
+      if (cnpjNumbers.length !== 14) {
+        setError('CNPJ deve ter 14 dígitos');
+        setIsLoading(false);
+        return;
+      }
+      result = await login(cnpj, password);
+    }
+
     if (result.success) {
       navigate('/');
     } else {
       setError(result.error || 'Erro ao fazer login');
     }
-    
     setIsLoading(false);
   };
 
@@ -79,7 +88,7 @@ const Login = () => {
             </CardDescription>
           </div>
         </CardHeader>
-        
+
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
@@ -88,25 +97,45 @@ const Login = () => {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
-            <div className="space-y-2">
-              <Label htmlFor="cnpj" className="text-gray-700 font-medium">
-                CNPJ da Empresa
-              </Label>
-              <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <Input
-                  id="cnpj"
-                  type="text"
-                  placeholder="00.000.000/0000-00"
-                  value={cnpj}
-                  onChange={handleCnpjChange}
-                  maxLength={18}
-                  className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
-                />
+
+            {mode === 'email' ? (
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-gray-700 font-medium">
+                  Email
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
+                  />
+                </div>
               </div>
-            </div>
-            
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="cnpj" className="text-gray-700 font-medium">
+                  CNPJ da Empresa
+                </Label>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="cnpj"
+                    type="text"
+                    placeholder="00.000.000/0000-00"
+                    value={cnpj}
+                    onChange={(e) => setCnpj(formatCnpj(e.target.value))}
+                    maxLength={18}
+                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="password" className="text-gray-700 font-medium">
                 Senha
@@ -116,6 +145,7 @@ const Login = () => {
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   placeholder="Digite sua senha"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -130,20 +160,27 @@ const Login = () => {
                 </button>
               </div>
             </div>
-            
-            <Button 
-              type="submit" 
+
+            <Button
+              type="submit"
               className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-lg hover:shadow-xl transition-all"
               disabled={isLoading}
             >
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-          
+
           <div className="text-center space-y-3 mt-6">
-            <Link 
-              to="/redefinir-senha" 
-              className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium"
+            <button
+              type="button"
+              onClick={() => { setMode(mode === 'email' ? 'cnpj' : 'email'); setError(''); }}
+              className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium block w-full"
+            >
+              {mode === 'email' ? 'Entrar com CNPJ' : 'Entrar com email'}
+            </button>
+            <Link
+              to="/redefinir-senha"
+              className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium block"
             >
               Redefinição de Senha.
             </Link>
@@ -151,8 +188,8 @@ const Login = () => {
               Não possui acesso? Entre em contato com seu contador.
             </p>
             <div className="pt-2 border-t border-gray-200 mt-4">
-              <Link 
-                to="/admin/login" 
+              <Link
+                to="/admin/login"
                 className="text-sm text-gray-500 hover:text-gray-700 hover:underline"
               >
                 Acesso Administrador
