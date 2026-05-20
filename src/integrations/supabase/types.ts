@@ -82,6 +82,7 @@ export type Database = {
           cnpj: string
           company_name: string
           created_at: string
+          email: string | null
           id: string
           is_active: boolean
           must_change_password: boolean
@@ -92,6 +93,7 @@ export type Database = {
           cnpj: string
           company_name: string
           created_at?: string
+          email?: string | null
           id?: string
           is_active?: boolean
           must_change_password?: boolean
@@ -102,6 +104,7 @@ export type Database = {
           cnpj?: string
           company_name?: string
           created_at?: string
+          email?: string | null
           id?: string
           is_active?: boolean
           must_change_password?: boolean
@@ -343,6 +346,7 @@ export type Database = {
       create_admin_invite: { Args: { p_email: string }; Returns: Json }
       create_password_reset_token: { Args: { p_cnpj: string }; Returns: Json }
       get_client_by_cnpj_for_sso: { Args: { p_cnpj: string }; Returns: Json }
+      get_client_by_email_for_sso: { Args: { p_email: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -355,6 +359,10 @@ export type Database = {
         Args: { p_cnpj: string; p_new_password: string }
         Returns: Json
       }
+      reset_client_password_by_email: {
+        Args: { p_email: string; p_new_password: string }
+        Returns: Json
+      }
       use_admin_invite: { Args: { p_invite_id: string }; Returns: boolean }
       validate_admin_invite: {
         Args: { p_email: string; p_token: string }
@@ -362,6 +370,10 @@ export type Database = {
       }
       verify_client_login: {
         Args: { p_cnpj: string; p_password: string }
+        Returns: Json
+      }
+      verify_client_login_by_email: {
+        Args: { p_email: string; p_password: string }
         Returns: Json
       }
       verify_reset_code_and_change_password: {
