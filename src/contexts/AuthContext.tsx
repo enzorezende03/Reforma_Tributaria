@@ -183,6 +183,56 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const loginByEmail = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { data, error } = await supabase.rpc('verify_client_login_by_email', {
+        p_email: email.trim().toLowerCase(),
+        p_password: password,
+      });
+
+      if (error) {
+        console.error('Login error:', error);
+        return { success: false, error: 'Erro ao fazer login. Tente novamente.' };
+      }
+
+      const result = data as unknown as {
+        success: boolean;
+        error?: string;
+        client?: {
+          id: string;
+          cnpj: string;
+          company_name: string;
+          email?: string | null;
+          must_change_password?: boolean;
+        };
+      };
+
+      if (!result.success) return { success: false, error: result.error };
+
+      if (result.client) {
+        const clientData: Client = {
+          id: result.client.id,
+          cnpj: result.client.cnpj,
+          company_name: result.client.company_name,
+          email: result.client.email,
+          mustChangePassword: result.client.must_change_password ?? false,
+        };
+        setClient(clientData);
+        const session: ClientSession = {
+          client: clientData,
+          expiresAt: Date.now() + SESSION_DURATION_MS,
+        };
+        localStorage.setItem('client_session', JSON.stringify(session));
+        return { success: true };
+      }
+
+      return { success: false, error: 'Erro ao fazer login' };
+    } catch (err) {
+      console.error('Login error:', err);
+      return { success: false, error: 'Erro ao fazer login. Tente novamente.' };
+    }
+  };
+
   const logout = () => {
     setClient(null);
     localStorage.removeItem('client_session');
@@ -192,7 +242,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (client) {
       const updatedClient = { ...client, mustChangePassword: value };
       setClient(updatedClient);
-      // Preserve session expiration when updating client data
       const session: ClientSession = {
         client: updatedClient,
         expiresAt: Date.now() + SESSION_DURATION_MS
@@ -205,7 +254,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     <AuthContext.Provider value={{ 
       client, 
       isAuthenticated: !!client, 
-      login, 
+      login,
+      loginByEmail,
       logout,
       isLoading,
       setMustChangePassword 
