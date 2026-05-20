@@ -5,12 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Building2, Lock, AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, Building2, Lock, AlertCircle, ArrowLeft, CheckCircle2, Mail } from 'lucide-react';
 import logo2m from '@/assets/logo-2m.png';
 import { supabase } from '@/integrations/supabase/client';
 
+type Mode = 'email' | 'cnpj';
+
 const ResetPassword = () => {
   const [step, setStep] = useState<'form' | 'success'>('form');
+  const [mode, setMode] = useState<Mode>('email');
+  const [email, setEmail] = useState('');
   const [cnpj, setCnpj] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -18,7 +22,7 @@ const ResetPassword = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const navigate = useNavigate();
 
   const formatCnpj = (value: string) => {
@@ -33,52 +37,53 @@ const ResetPassword = () => {
     return value;
   };
 
-  const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCnpj(formatCnpj(e.target.value));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    const cnpjNumbers = cnpj.replace(/\D/g, '');
-    if (cnpjNumbers.length !== 14) {
-      setError('CNPJ deve ter 14 dígitos');
-      return;
-    }
 
     if (newPassword.length < 6) {
       setError('A nova senha deve ter pelo menos 6 caracteres');
       return;
     }
-
     if (newPassword !== confirmPassword) {
       setError('As senhas não coincidem');
       return;
     }
 
     setIsLoading(true);
-    
     try {
-      const { data, error: rpcError } = await supabase.rpc('reset_client_password_by_cnpj', {
-        p_cnpj: cnpjNumbers,
-        p_new_password: newPassword
-      });
-
-      if (rpcError) throw rpcError;
-
-      const result = data as { success: boolean; error?: string };
-
-      if (!result.success) {
-        setError(result.error || 'Erro ao redefinir senha');
+      let rpcResult;
+      if (mode === 'email') {
+        if (!email.includes('@')) {
+          setError('Email inválido');
+          setIsLoading(false);
+          return;
+        }
+        rpcResult = await supabase.rpc('reset_client_password_by_email', {
+          p_email: email.trim().toLowerCase(),
+          p_new_password: newPassword,
+        });
       } else {
-        setStep('success');
+        const cnpjNumbers = cnpj.replace(/\D/g, '');
+        if (cnpjNumbers.length !== 14) {
+          setError('CNPJ deve ter 14 dígitos');
+          setIsLoading(false);
+          return;
+        }
+        rpcResult = await supabase.rpc('reset_client_password_by_cnpj', {
+          p_cnpj: cnpjNumbers,
+          p_new_password: newPassword,
+        });
       }
-    } catch (err: any) {
+
+      if (rpcResult.error) throw rpcResult.error;
+      const result = rpcResult.data as { success: boolean; error?: string };
+      if (!result.success) setError(result.error || 'Erro ao redefinir senha');
+      else setStep('success');
+    } catch (err) {
       console.error('Error resetting password:', err);
       setError('Erro ao redefinir senha. Tente novamente.');
     }
-    
     setIsLoading(false);
   };
 
@@ -95,12 +100,12 @@ const ResetPassword = () => {
             </CardTitle>
             {step === 'form' && (
               <CardDescription className="text-gray-600 mt-2">
-                Informe o CNPJ e defina sua nova senha
+                Informe seu {mode === 'email' ? 'email' : 'CNPJ'} e defina uma nova senha
               </CardDescription>
             )}
           </div>
         </CardHeader>
-        
+
         <CardContent className="pt-6">
           {step === 'form' ? (
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -110,29 +115,42 @@ const ResetPassword = () => {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-              
-              <div className="space-y-2">
-                <Label htmlFor="cnpj" className="text-gray-700 font-medium">
-                  CNPJ da Empresa
-                </Label>
-                <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input
-                    id="cnpj"
-                    type="text"
-                    placeholder="00.000.000/0000-00"
-                    value={cnpj}
-                    onChange={handleCnpjChange}
-                    maxLength={18}
-                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
-                  />
+
+              {mode === 'email' ? (
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
+                    />
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="cnpj" className="text-gray-700 font-medium">CNPJ da Empresa</Label>
+                  <div className="relative">
+                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      id="cnpj"
+                      type="text"
+                      placeholder="00.000.000/0000-00"
+                      value={cnpj}
+                      onChange={(e) => setCnpj(formatCnpj(e.target.value))}
+                      maxLength={18}
+                      className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
-                <Label htmlFor="newPassword" className="text-gray-700 font-medium">
-                  Nova Senha
-                </Label>
+                <Label htmlFor="newPassword" className="text-gray-700 font-medium">Nova Senha</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input
@@ -154,9 +172,7 @@ const ResetPassword = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">
-                  Confirmar Nova Senha
-                </Label>
+                <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">Confirmar Nova Senha</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input
@@ -176,14 +192,22 @@ const ResetPassword = () => {
                   </button>
                 </div>
               </div>
-              
-              <Button 
-                type="submit" 
+
+              <Button
+                type="submit"
                 className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-lg hover:shadow-xl transition-all"
                 disabled={isLoading}
               >
                 {isLoading ? 'Redefinindo...' : 'Redefinir Senha'}
               </Button>
+
+              <button
+                type="button"
+                onClick={() => { setMode(mode === 'email' ? 'cnpj' : 'email'); setError(''); }}
+                className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium block w-full text-center"
+              >
+                {mode === 'email' ? 'Redefinir por CNPJ' : 'Redefinir por email'}
+              </button>
             </form>
           ) : (
             <div className="text-center space-y-6">
@@ -191,14 +215,10 @@ const ResetPassword = () => {
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  Senha Redefinida com Sucesso!
-                </h3>
-                <p className="text-gray-600">
-                  Sua senha foi alterada. Agora você pode fazer login com a nova senha.
-                </p>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Senha Redefinida com Sucesso!</h3>
+                <p className="text-gray-600">Sua senha foi alterada. Agora você pode fazer login com a nova senha.</p>
               </div>
-              <Button 
+              <Button
                 onClick={() => navigate('/login')}
                 className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-lg hover:shadow-xl transition-all"
               >
@@ -206,13 +226,10 @@ const ResetPassword = () => {
               </Button>
             </div>
           )}
-          
+
           {step === 'form' && (
             <div className="mt-6 text-center">
-              <Link 
-                to="/login" 
-                className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-              >
+              <Link to="/login" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
                 <ArrowLeft className="h-4 w-4" />
                 Voltar para o login
               </Link>
