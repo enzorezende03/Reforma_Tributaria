@@ -4,48 +4,67 @@ import { supabase } from "@/integrations/supabase/client";
 
 const SESSION_DURATION_MS = 30 * 60 * 1000;
 
+type ClientPayload = {
+  id: string;
+  cnpj: string;
+  company_name: string;
+  email?: string | null;
+  must_change_password?: boolean;
+};
+
 export default function AuthCallback() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
     async function finishLogin() {
-      // Aguarda o Supabase processar o hash do magic link e gravar a sessão
+      // Espera o Supabase processar o hash do magic link e gravar a sessão
       await supabase.auth.getSession();
 
       const redirect = searchParams.get("redirect") || "/";
+      const email = searchParams.get("email");
       const cnpj = searchParams.get("cnpj");
 
-      // Se veio CNPJ no SSO, monta a sessão de cliente (CNPJ-based)
-      if (cnpj) {
-        try {
+      try {
+        let result:
+          | { success: boolean; error?: string; client?: ClientPayload }
+          | null = null;
+
+        if (email) {
+          const { data, error } = await supabase.rpc("get_client_by_email_for_sso", {
+            p_email: email,
+          });
+          if (error) console.error("[sso-callback] email lookup:", error);
+          result = data as typeof result;
+        }
+
+        if ((!result || !result.success) && cnpj) {
           const { data, error } = await supabase.rpc("get_client_by_cnpj_for_sso", {
             p_cnpj: cnpj,
           });
-
-          const result = data as { success: boolean; error?: string; client?: {
-            id: string; cnpj: string; company_name: string; must_change_password?: boolean;
-          } } | null;
-
-          if (!error && result?.success && result.client) {
-            const clientSession = {
-              client: {
-                id: result.client.id,
-                cnpj: result.client.cnpj,
-                company_name: result.client.company_name,
-                mustChangePassword: result.client.must_change_password ?? false,
-              },
-              expiresAt: Date.now() + SESSION_DURATION_MS,
-            };
-            localStorage.setItem("client_session", JSON.stringify(clientSession));
-          } else {
-            console.error("[sso-callback] Falha ao buscar cliente:", error || result?.error);
-          }
-        } catch (e) {
-          console.error("[sso-callback] Erro ao montar sessão de cliente:", e);
+          if (error) console.error("[sso-callback] cnpj lookup:", error);
+          result = data as typeof result;
         }
+
+        if (result?.success && result.client) {
+          const clientSession = {
+            client: {
+              id: result.client.id,
+              cnpj: result.client.cnpj,
+              company_name: result.client.company_name,
+              email: result.client.email,
+              mustChangePassword: result.client.must_change_password ?? false,
+            },
+            expiresAt: Date.now() + SESSION_DURATION_MS,
+          };
+          localStorage.setItem("client_session", JSON.stringify(clientSession));
+        } else if (email || cnpj) {
+          console.error("[sso-callback] cliente não encontrado:", result?.error);
+        }
+      } catch (e) {
+        console.error("[sso-callback] erro ao montar sessão de cliente:", e);
       }
 
-      // Full reload para o AuthProvider reler localStorage e o AdminAuthProvider revalidar a sessão
+      // Full reload pro AuthProvider reler localStorage e AdminAuthProvider revalidar
       window.location.replace(redirect);
     }
 
