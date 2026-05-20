@@ -5,6 +5,7 @@ interface Client {
   id: string;
   cnpj: string;
   company_name: string;
+  email?: string | null;
   mustChangePassword?: boolean;
 }
 
@@ -20,6 +21,7 @@ interface AuthContextType {
   client: Client | null;
   isAuthenticated: boolean;
   login: (cnpj: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  loginByEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   isLoading: boolean;
   setMustChangePassword: (value: boolean) => void;
