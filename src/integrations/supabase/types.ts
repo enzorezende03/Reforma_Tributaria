@@ -86,8 +86,9 @@ export type Database = {
           id: string
           is_active: boolean
           must_change_password: boolean
-          password_hash: string
+          password_hash: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           cnpj: string
@@ -97,8 +98,9 @@ export type Database = {
           id?: string
           is_active?: boolean
           must_change_password?: boolean
-          password_hash: string
+          password_hash?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           cnpj?: string
@@ -108,8 +110,9 @@ export type Database = {
           id?: string
           is_active?: boolean
           must_change_password?: boolean
-          password_hash?: string
+          password_hash?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -300,53 +303,43 @@ export type Database = {
           cnpj: string | null
           company_name: string | null
           created_at: string | null
+          email: string | null
           id: string | null
           is_active: boolean | null
           must_change_password: boolean | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           cnpj?: string | null
           company_name?: string | null
           created_at?: string | null
+          email?: string | null
           id?: string | null
           is_active?: boolean | null
           must_change_password?: boolean | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           cnpj?: string | null
           company_name?: string | null
           created_at?: string | null
+          email?: string | null
           id?: string | null
           is_active?: boolean | null
           must_change_password?: boolean | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
     }
     Functions: {
-      admin_reset_client_password: {
-        Args: { p_client_id: string; p_new_password: string }
-        Returns: Json
-      }
       can_register_admin: { Args: never; Returns: boolean }
-      change_client_password: {
-        Args: {
-          p_client_id: string
-          p_current_password: string
-          p_new_password: string
-        }
-        Returns: Json
-      }
       check_admin_invite_token: { Args: { p_token: string }; Returns: Json }
-      cleanup_expired_reset_tokens: { Args: never; Returns: undefined }
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
       create_admin_invite: { Args: { p_email: string }; Returns: Json }
-      create_password_reset_token: { Args: { p_cnpj: string }; Returns: Json }
-      get_client_by_cnpj_for_sso: { Args: { p_cnpj: string }; Returns: Json }
-      get_client_by_email_for_sso: { Args: { p_email: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -355,29 +348,9 @@ export type Database = {
         Returns: boolean
       }
       hash_password: { Args: { password: string }; Returns: string }
-      reset_client_password_by_cnpj: {
-        Args: { p_cnpj: string; p_new_password: string }
-        Returns: Json
-      }
-      reset_client_password_by_email: {
-        Args: { p_email: string; p_new_password: string }
-        Returns: Json
-      }
       use_admin_invite: { Args: { p_invite_id: string }; Returns: boolean }
       validate_admin_invite: {
         Args: { p_email: string; p_token: string }
-        Returns: Json
-      }
-      verify_client_login: {
-        Args: { p_cnpj: string; p_password: string }
-        Returns: Json
-      }
-      verify_client_login_by_email: {
-        Args: { p_email: string; p_password: string }
-        Returns: Json
-      }
-      verify_reset_code_and_change_password: {
-        Args: { p_cnpj: string; p_code: string; p_new_password: string }
         Returns: Json
       }
     }

@@ -10,8 +10,8 @@ export const Header = () => {
   const { admin, isAuthenticated: isAdminAuthenticated } = useAdminAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 

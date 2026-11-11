@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 interface ParsedClient {
   cnpj: string;
   company_name: string;
+  email: string;
   valid: boolean;
   error?: string;
 }
@@ -97,9 +98,15 @@ export const ClientImportModal = ({ isOpen, onOpenChange, onImportComplete }: Cl
         const headers = rows[0].map(h => String(h));
         const cnpjCol = findColumn(headers, ['cnpj']);
         const nameCol = findColumn(headers, ['razão social', 'razao social', 'empresa', 'nome', 'company', 'cliente']);
+        const emailCol = findColumn(headers, ['email', 'e-mail']);
 
         if (cnpjCol === -1) {
           setParseError('Coluna de CNPJ não encontrada. Certifique-se de que a planilha possui uma coluna com "CNPJ" no cabeçalho.');
+          return;
+        }
+
+        if (emailCol === -1) {
+          setParseError('Coluna de email não encontrada. A planilha precisa de uma coluna "Email".');
           return;
         }
 
@@ -113,8 +120,9 @@ export const ClientImportModal = ({ isOpen, onOpenChange, onImportComplete }: Cl
           const row = rows[i];
           const rawCnpj = String(row[cnpjCol] || '').trim();
           const rawName = String(row[nameCol] || '').trim();
+          const email = String(row[emailCol] || '').trim().toLowerCase();
 
-          if (!rawCnpj && !rawName) continue; // skip empty rows
+          if (!rawCnpj && !rawName && !email) continue; // skip empty rows
 
           const cnpj = cleanCnpj(rawCnpj);
           let valid = true;
@@ -130,7 +138,12 @@ export const ClientImportModal = ({ isOpen, onOpenChange, onImportComplete }: Cl
             error = (error ? error + '; ' : '') + 'Nome vazio';
           }
 
-          clients.push({ cnpj, company_name: rawName, valid, error });
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            valid = false;
+            error = (error ? error + '; ' : '') + 'Email inválido';
+          }
+
+          clients.push({ cnpj, company_name: rawName, email, valid, error });
         }
 
         if (clients.length === 0) {
@@ -155,36 +168,27 @@ export const ClientImportModal = ({ isOpen, onOpenChange, onImportComplete }: Cl
 
     let success = 0;
     let failed = 0;
-    const defaultPassword = '2mCliente';
 
     for (let i = 0; i < validClients.length; i++) {
       const client = validClients[i];
 
       try {
-        const { data: hashedPassword, error: hashError } = await supabase.rpc('hash_password', {
-          password: defaultPassword,
-        });
-
-        if (hashError || !hashedPassword) {
-          failed++;
-          parsedClients.find(c => c.cnpj === client.cnpj && c.valid)!.error = 'Erro ao processar senha';
-          parsedClients.find(c => c.cnpj === client.cnpj && c.valid)!.valid = false;
-          continue;
-        }
-
-        const { error } = await supabase.from('clients').insert({
+        const { data: inserted, error } = await supabase.from('clients').insert({
           cnpj: client.cnpj,
           company_name: client.company_name,
-          password_hash: hashedPassword,
-          must_change_password: true,
-        });
+          email: client.email,
+        }).select('id').single();
+
+        if (!error && inserted) {
+          await supabase.functions.invoke('admin-provision-client', { body: { client_id: inserted.id } });
+        }
 
         if (error) {
           failed++;
           const c = parsedClients.find(c => c.cnpj === client.cnpj && c.valid);
           if (c) {
             c.valid = false;
-            c.error = error.code === '23505' ? 'CNPJ já cadastrado' : 'Erro ao cadastrar';
+            c.error = error.code === '23505' ? 'CNPJ ou email já cadastrado' : 'Erro ao cadastrar';
           }
         } else {
           success++;
@@ -204,7 +208,7 @@ export const ClientImportModal = ({ isOpen, onOpenChange, onImportComplete }: Cl
       onImportComplete();
       toast({
         title: 'Importação concluída',
-        description: `${success} cliente(s) importado(s) com sucesso.${failed > 0 ? ` ${failed} falharam.` : ''} Senha padrão: 2mCliente`,
+        description: `${success} cliente(s) importado(s) com sucesso.${failed > 0 ? ` ${failed} falharam.` : ''}`,
       });
     }
   };
@@ -221,7 +225,7 @@ export const ClientImportModal = ({ isOpen, onOpenChange, onImportComplete }: Cl
             Importar Clientes via Excel
           </DialogTitle>
           <DialogDescription>
-            Envie uma planilha (.xlsx ou .xls) com colunas "CNPJ" e "Razão Social" (ou "Empresa"/"Nome"). A senha padrão será <strong>2mCliente</strong> e o cliente deverá alterá-la no primeiro acesso.
+            Envie uma planilha (.xlsx ou .xls) com colunas "CNPJ", "Razão Social" (ou "Empresa"/"Nome") e "Email". O cliente entra com um código enviado para esse email.
           </DialogDescription>
         </DialogHeader>
 
@@ -273,6 +277,7 @@ export const ClientImportModal = ({ isOpen, onOpenChange, onImportComplete }: Cl
                     <TableRow>
                       <TableHead>CNPJ</TableHead>
                       <TableHead>Empresa</TableHead>
+                      <TableHead>Email</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -283,6 +288,7 @@ export const ClientImportModal = ({ isOpen, onOpenChange, onImportComplete }: Cl
                           {client.cnpj.length === 14 ? formatCnpjDisplay(client.cnpj) : client.cnpj || '—'}
                         </TableCell>
                         <TableCell>{client.company_name || '—'}</TableCell>
+                        <TableCell className="text-sm">{client.email || '—'}</TableCell>
                         <TableCell>
                           {client.valid ? (
                             <Badge className="bg-green-600 text-xs">OK</Badge>

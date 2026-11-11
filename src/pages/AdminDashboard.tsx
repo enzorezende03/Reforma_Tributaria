@@ -23,7 +23,8 @@ import {
   AlertCircle,
   CheckCircle,
   UserPlus,
-  KeyRound,
+  Send,
+  MailX,
   Newspaper,
   Users2,
   Eye,
@@ -33,7 +34,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import ChangePasswordModal from '@/components/ChangePasswordModal';
 import AdminInviteModal from '@/components/AdminInviteModal';
-import ClientResetPasswordModal from '@/components/ClientResetPasswordModal';
 import { NewsManagement } from '@/components/NewsManagement';
 import { TeamManagement } from '@/components/TeamManagement';
 import { ClientImportModal } from '@/components/ClientImportModal';
@@ -43,7 +43,8 @@ interface Client {
   cnpj: string;
   company_name: string;
   is_active: boolean;
-  must_change_password: boolean;
+  email: string | null;
+  user_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -69,14 +70,15 @@ const AdminDashboard = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  const [onlyWithoutEmail, setOnlyWithoutEmail] = useState(false);
+  const [sendingId, setSendingId] = useState<string | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   
   // Form states
   const [formCnpj, setFormCnpj] = useState('');
   const [formCompanyName, setFormCompanyName] = useState('');
-  const [formPassword, setFormPassword] = useState('');
+  const [formEmail, setFormEmail] = useState('');
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -94,7 +96,7 @@ const AdminDashboard = () => {
         variant: 'destructive',
       });
     } else {
-      setClients(data || []);
+      setClients((data || []) as Client[]);
     }
     setIsLoading(false);
   };
@@ -123,7 +125,7 @@ const AdminDashboard = () => {
   const resetForm = () => {
     setFormCnpj('');
     setFormCompanyName('');
-    setFormPassword('');
+    setFormEmail('');
     setFormError('');
   };
 
@@ -141,41 +143,34 @@ const AdminDashboard = () => {
       return;
     }
     
-    if (!formPassword.trim()) {
-      setFormError('Digite uma senha');
+    const email = formEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setFormError('Digite um email válido');
       return;
     }
 
     setIsSubmitting(true);
 
-    // Hash the password before storing
-    const { data: hashedPassword, error: hashError } = await supabase.rpc('hash_password', {
-      password: formPassword,
-    });
-
-    if (hashError || !hashedPassword) {
-      setFormError('Erro ao processar senha');
-      setIsSubmitting(false);
-      return;
-    }
-
-    const { error } = await supabase.from('clients').insert({
+    const { data: inserted, error } = await supabase.from('clients').insert({
       cnpj: cnpjNumbers,
       company_name: formCompanyName.trim(),
-      password_hash: hashedPassword,
-      must_change_password: true,
-    });
+      email,
+    }).select('id').single();
+
+    if (!error && inserted) {
+      await supabase.functions.invoke('admin-provision-client', { body: { client_id: inserted.id } });
+    }
 
     if (error) {
       if (error.code === '23505') {
-        setFormError('Este CNPJ já está cadastrado');
+        setFormError('Este CNPJ ou email já está cadastrado');
       } else {
         setFormError('Erro ao cadastrar cliente');
       }
     } else {
       toast({
         title: 'Sucesso',
-        description: 'Cliente cadastrado com sucesso. Ele deverá alterar a senha no primeiro acesso.',
+        description: 'Cliente cadastrado. Use "Enviar acesso" para avisá-lo por email.',
       });
       setIsAddModalOpen(false);
       resetForm();
@@ -196,39 +191,34 @@ const AdminDashboard = () => {
 
     setIsSubmitting(true);
 
-    const updateData: { company_name: string; password_hash?: string; must_change_password?: boolean } = {
-      company_name: formCompanyName.trim(),
-    };
-
-    // If password is being changed, hash it
-    if (formPassword.trim()) {
-      const { data: hashedPassword, error: hashError } = await supabase.rpc('hash_password', {
-        password: formPassword,
-      });
-
-      if (hashError || !hashedPassword) {
-        setFormError('Erro ao processar senha');
-        setIsSubmitting(false);
-        return;
-      }
-      
-      updateData.password_hash = hashedPassword;
-      updateData.must_change_password = true;
+    const email = formEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setFormError('Digite um email válido');
+      setIsSubmitting(false);
+      return;
     }
+    const emailChanged = email !== (selectedClient.email || '').toLowerCase();
+    const updateData: { company_name: string; email: string; user_id?: null } = {
+      company_name: formCompanyName.trim(),
+      email,
+    };
+    if (emailChanged) updateData.user_id = null;
 
     const { error } = await supabase
       .from('clients')
       .update(updateData)
       .eq('id', selectedClient.id);
 
+    if (!error && emailChanged) {
+      await supabase.functions.invoke('admin-provision-client', { body: { client_id: selectedClient.id } });
+    }
+
     if (error) {
-      setFormError('Erro ao atualizar cliente');
+      setFormError(error.code === '23505' ? 'Este email já está cadastrado' : 'Erro ao atualizar cliente');
     } else {
       toast({
         title: 'Sucesso',
-        description: formPassword.trim() 
-          ? 'Cliente atualizado. Ele deverá alterar a senha no próximo acesso.' 
-          : 'Cliente atualizado com sucesso',
+        description: 'Cliente atualizado com sucesso',
       });
       setIsEditModalOpen(false);
       resetForm();
@@ -287,7 +277,7 @@ const AdminDashboard = () => {
     setSelectedClient(client);
     setFormCnpj(formatCnpj(client.cnpj));
     setFormCompanyName(client.company_name);
-    setFormPassword('');
+    setFormEmail(client.email || '');
     setFormError('');
     setIsEditModalOpen(true);
   };
@@ -297,14 +287,29 @@ const AdminDashboard = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const openResetPasswordModal = (client: Client) => {
-    setSelectedClient(client);
-    setIsResetPasswordModalOpen(true);
+  const handleSendAccess = async (client: Client) => {
+    setSendingId(client.id);
+    const { data, error } = await supabase.functions.invoke('admin-provision-client', {
+      body: { client_id: client.id, send: true },
+    });
+    setSendingId(null);
+    const msg = (data as { error?: string })?.error;
+    if (error || msg) {
+      toast({ title: 'Erro', description: msg || 'Não foi possível enviar o acesso', variant: 'destructive' });
+    } else {
+      toast({ title: 'Acesso enviado', description: `Email enviado para ${client.email}` });
+      fetchClients();
+    }
   };
 
-  const filteredClients = clients.filter(client => 
-    client.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.cnpj.includes(searchTerm.replace(/\D/g, ''))
+  const term = searchTerm.toLowerCase();
+  const digits = searchTerm.replace(/\D/g, '');
+  const filteredClients = clients.filter(client =>
+    (!onlyWithoutEmail || !client.email) && (
+      client.company_name.toLowerCase().includes(term) ||
+      (client.email || '').toLowerCase().includes(term) ||
+      (digits !== '' && client.cnpj.includes(digits))
+    )
   );
 
   const handlePasswordChanged = () => {
@@ -488,12 +493,12 @@ const AdminDashboard = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Senha</Label>
+                        <Label>Email de acesso</Label>
                         <Input
-                          type="password"
-                          placeholder="Senha de acesso"
-                          value={formPassword}
-                          onChange={(e) => setFormPassword(e.target.value)}
+                          type="email"
+                          placeholder="cliente@empresa.com.br"
+                          value={formEmail}
+                          onChange={(e) => setFormEmail(e.target.value)}
                         />
                       </div>
                     </div>
@@ -514,16 +519,24 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent>
                 {/* Search */}
-                <div className="mb-4">
-                  <div className="relative max-w-sm">
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                  <div className="relative max-w-sm flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                      placeholder="Buscar por nome ou CNPJ..."
+                      placeholder="Buscar por nome, email ou CNPJ..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10"
                     />
                   </div>
+                  <Button
+                    variant={onlyWithoutEmail ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setOnlyWithoutEmail(!onlyWithoutEmail)}
+                  >
+                    <MailX className="h-4 w-4 mr-2" />
+                    Sem email ({clients.filter(c => !c.email).length})
+                  </Button>
                 </div>
 
                 {/* Table */}
@@ -540,6 +553,7 @@ const AdminDashboard = () => {
                       <TableRow>
                         <TableHead>Empresa</TableHead>
                         <TableHead className="hidden sm:table-cell">CNPJ</TableHead>
+                        <TableHead className="hidden md:table-cell">Email</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
@@ -555,6 +569,9 @@ const AdminDashboard = () => {
                           </TableCell>
                           <TableCell className="font-mono text-sm hidden sm:table-cell">
                             {formatCnpj(client.cnpj)}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell text-sm">
+                            {client.email || <Badge variant="outline">Sem email</Badge>}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -572,11 +589,13 @@ const AdminDashboard = () => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => openResetPasswordModal(client)}
-                                title="Resetar Senha"
-                                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                                onClick={() => handleSendAccess(client)}
+                                disabled={!client.email || !client.is_active || sendingId === client.id}
+                                title={client.email ? 'Enviar acesso' : 'Cadastre um email primeiro'}
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                               >
-                                <KeyRound className="h-4 w-4" />
+                                <Send className="h-4 w-4 sm:mr-1" />
+                                <span className="hidden lg:inline">{sendingId === client.id ? 'Enviando...' : 'Enviar acesso'}</span>
                               </Button>
                               <Button
                                 variant="ghost"
@@ -649,12 +668,12 @@ const AdminDashboard = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Nova Senha (deixe em branco para manter)</Label>
+              <Label>Email de acesso</Label>
               <Input
-                type="password"
-                placeholder="Nova senha"
-                value={formPassword}
-                onChange={(e) => setFormPassword(e.target.value)}
+                type="email"
+                placeholder="cliente@empresa.com.br"
+                value={formEmail}
+                onChange={(e) => setFormEmail(e.target.value)}
               />
             </div>
           </div>
@@ -692,15 +711,6 @@ const AdminDashboard = () => {
         onInviteSent={() => {}}
       />
 
-      {/* Client Reset Password Modal */}
-      <ClientResetPasswordModal
-        isOpen={isResetPasswordModalOpen}
-        onClose={() => {
-          setIsResetPasswordModalOpen(false);
-          setSelectedClient(null);
-        }}
-        client={selectedClient}
-      />
     </div>
   );
 };

@@ -1,265 +1,97 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Session } from '@supabase/supabase-js';
 
 interface Client {
   id: string;
   cnpj: string;
   company_name: string;
   email?: string | null;
-  mustChangePassword?: boolean;
 }
 
-interface ClientSession {
-  client: Client;
-  expiresAt: number;
-}
-
-// Session expires after 30 minutes of inactivity
-const SESSION_DURATION_MS = 30 * 60 * 1000;
+// Clientes ficam conectados por no máximo 7 dias desde a entrada
+export const CLIENT_SESSION_MAX_MS = 7 * 24 * 60 * 60 * 1000;
 
 interface AuthContextType {
   client: Client | null;
   isAuthenticated: boolean;
-  login: (cnpj: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  loginByEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  requestCode: (email: string) => Promise<{ success: boolean; message?: string; error?: string }>;
+  verifyCode: (email: string, code: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
   isLoading: boolean;
-  setMustChangePassword: (value: boolean) => void;
+  hasSession: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
+export const isSessionTooOld = (lastSignInAt: string | undefined, now = Date.now()) =>
+  !!lastSignInAt && now - new Date(lastSignInAt).getTime() > CLIENT_SESSION_MAX_MS;
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [client, setClient] = useState<Client | null>(null);
+  const [hasSession, setHasSession] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Função para renovar a sessão
-  const refreshSession = () => {
-    const savedSession = localStorage.getItem('client_session');
-    if (savedSession) {
-      try {
-        const session: ClientSession = JSON.parse(savedSession);
-        if (Date.now() < session.expiresAt) {
-          const refreshedSession: ClientSession = {
-            client: session.client,
-            expiresAt: Date.now() + SESSION_DURATION_MS
-          };
-          localStorage.setItem('client_session', JSON.stringify(refreshedSession));
-        }
-      } catch {
-        // Ignore parsing errors during refresh
-      }
+  const loadClient = useCallback(async (session: Session | null) => {
+    if (!session?.user) {
+      setClient(null);
+      setHasSession(false);
+      setIsLoading(false);
+      return;
     }
-  };
+    if (isSessionTooOld(session.user.last_sign_in_at)) {
+      await supabase.auth.signOut();
+      return;
+    }
+    setHasSession(true);
+    const { data } = await supabase
+      .from('clients_safe')
+      .select('id, cnpj, company_name, email, is_active')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+    setClient(data && data.is_active ? { id: data.id!, cnpj: data.cnpj!, company_name: data.company_name!, email: data.email } : null);
+    setIsLoading(false);
+  }, []);
 
   useEffect(() => {
-    // Verificar se existe sessão salva e se ainda é válida
-    const savedSession = localStorage.getItem('client_session');
-    if (savedSession) {
-      try {
-        const session: ClientSession = JSON.parse(savedSession);
-        // Check if session has expired
-        if (Date.now() < session.expiresAt) {
-          setClient(session.client);
-          // Refresh session expiration on load
-          refreshSession();
-        } else {
-          // Session expired - clean up
-          localStorage.removeItem('client_session');
-        }
-      } catch {
-        localStorage.removeItem('client_session');
-      }
-    }
-    setIsLoading(false);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setTimeout(() => void loadClient(session), 0);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => loadClient(session));
+    return () => subscription.unsubscribe();
+  }, [loadClient]);
 
-    // Renovar sessão quando a aba volta a ficar visível
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        const savedSession = localStorage.getItem('client_session');
-        if (savedSession) {
-          try {
-            const session: ClientSession = JSON.parse(savedSession);
-            if (Date.now() < session.expiresAt) {
-              setClient(session.client);
-              refreshSession();
-            } else {
-              // Sessão expirou enquanto estava fora
-              setClient(null);
-              localStorage.removeItem('client_session');
-            }
-          } catch {
-            // Ignore
-          }
-        }
-      }
-    };
-
-    // Renovar sessão em qualquer interação do usuário
-    const handleUserActivity = () => {
-      if (client) {
-        refreshSession();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    document.addEventListener('click', handleUserActivity);
-    document.addEventListener('keydown', handleUserActivity);
-    document.addEventListener('scroll', handleUserActivity);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      document.removeEventListener('click', handleUserActivity);
-      document.removeEventListener('keydown', handleUserActivity);
-      document.removeEventListener('scroll', handleUserActivity);
-    };
-  }, [client]);
-
-  const login = async (cnpj: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      // Formatar CNPJ removendo caracteres especiais
-      const formattedCnpj = cnpj.replace(/\D/g, '');
-      
-      // Usar função segura de verificação de login
-      const { data, error } = await supabase.rpc('verify_client_login', {
-        p_cnpj: formattedCnpj,
-        p_password: password
-      });
-
-      if (error) {
-        console.error('Login error:', error);
-        return { success: false, error: 'Erro ao fazer login. Tente novamente.' };
-      }
-
-      // A função retorna um JSON com success e client ou error
-      const result = data as unknown as { 
-        success: boolean; 
-        error?: string; 
-        client?: { 
-          id: string; 
-          cnpj: string; 
-          company_name: string;
-          must_change_password?: boolean;
-        } 
-      };
-
-      if (!result.success) {
-        return { success: false, error: result.error };
-      }
-
-      if (result.client) {
-        const clientData: Client = {
-          id: result.client.id,
-          cnpj: result.client.cnpj,
-          company_name: result.client.company_name,
-          mustChangePassword: result.client.must_change_password ?? false,
-        };
-        setClient(clientData);
-        // Store session with expiration timestamp
-        const session: ClientSession = {
-          client: clientData,
-          expiresAt: Date.now() + SESSION_DURATION_MS
-        };
-        localStorage.setItem('client_session', JSON.stringify(session));
-        return { success: true };
-      }
-
-      return { success: false, error: 'Erro ao fazer login' };
-    } catch (err) {
-      console.error('Login error:', err);
-      return { success: false, error: 'Erro ao fazer login. Tente novamente.' };
-    }
+  const requestCode = async (email: string) => {
+    const { data, error } = await supabase.functions.invoke('request-login-code', {
+      body: { email: email.trim().toLowerCase() },
+    });
+    if (error) return { success: false, error: 'Não foi possível enviar o código. Tente novamente.' };
+    return { success: true, message: (data as { message?: string })?.message };
   };
 
-  const loginByEmail = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      const { data, error } = await supabase.rpc('verify_client_login_by_email', {
-        p_email: email.trim().toLowerCase(),
-        p_password: password,
-      });
-
-      if (error) {
-        console.error('Login error:', error);
-        return { success: false, error: 'Erro ao fazer login. Tente novamente.' };
-      }
-
-      const result = data as unknown as {
-        success: boolean;
-        error?: string;
-        client?: {
-          id: string;
-          cnpj: string;
-          company_name: string;
-          email?: string | null;
-          must_change_password?: boolean;
-        };
-      };
-
-      if (!result.success) return { success: false, error: result.error };
-
-      if (result.client) {
-        const clientData: Client = {
-          id: result.client.id,
-          cnpj: result.client.cnpj,
-          company_name: result.client.company_name,
-          email: result.client.email,
-          mustChangePassword: result.client.must_change_password ?? false,
-        };
-        setClient(clientData);
-        const session: ClientSession = {
-          client: clientData,
-          expiresAt: Date.now() + SESSION_DURATION_MS,
-        };
-        localStorage.setItem('client_session', JSON.stringify(session));
-        return { success: true };
-      }
-
-      return { success: false, error: 'Erro ao fazer login' };
-    } catch (err) {
-      console.error('Login error:', err);
-      return { success: false, error: 'Erro ao fazer login. Tente novamente.' };
-    }
+  const verifyCode = async (email: string, code: string) => {
+    const { error } = await supabase.auth.verifyOtp({
+      email: email.trim().toLowerCase(),
+      token: code.trim(),
+      type: 'email',
+    });
+    if (error) return { success: false, error: 'Código inválido ou expirado' };
+    return { success: true };
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setClient(null);
-    localStorage.removeItem('client_session');
-  };
-
-  const setMustChangePassword = (value: boolean) => {
-    if (client) {
-      const updatedClient = { ...client, mustChangePassword: value };
-      setClient(updatedClient);
-      const session: ClientSession = {
-        client: updatedClient,
-        expiresAt: Date.now() + SESSION_DURATION_MS
-      };
-      localStorage.setItem('client_session', JSON.stringify(session));
-    }
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      client, 
-      isAuthenticated: !!client, 
-      login,
-      loginByEmail,
-      logout,
-      isLoading,
-      setMustChangePassword 
-    }}>
+    <AuthContext.Provider value={{ client, isAuthenticated: !!client, requestCode, verifyCode, logout, isLoading, hasSession }}>
       {children}
     </AuthContext.Provider>
   );
