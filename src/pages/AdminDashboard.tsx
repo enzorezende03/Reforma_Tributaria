@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   LogOut, 
   Plus, 
@@ -72,6 +73,8 @@ const AdminDashboard = () => {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [onlyWithoutEmail, setOnlyWithoutEmail] = useState(false);
   const [sendingId, setSendingId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isBulkSending, setIsBulkSending] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   
@@ -300,6 +303,21 @@ const AdminDashboard = () => {
       toast({ title: 'Acesso enviado', description: `Email enviado para ${client.email}` });
       fetchClients();
     }
+  };
+
+  const handleBulkSend = async () => {
+    const targets = clients.filter(c => selectedIds.includes(c.id) && c.email && c.is_active);
+    if (targets.length === 0) return;
+    setIsBulkSending(true);
+    let ok = 0, fail = 0;
+    for (const c of targets) {
+      const { data, error } = await supabase.functions.invoke('admin-provision-client', { body: { client_id: c.id, send: true } });
+      if (error || (data as { error?: string })?.error) fail++; else ok++;
+    }
+    setIsBulkSending(false);
+    setSelectedIds([]);
+    toast({ title: 'Envio concluído', description: `${ok} acesso(s) enviado(s)${fail ? `, ${fail} falharam` : ''}.`, variant: fail && !ok ? 'destructive' : undefined });
+    fetchClients();
   };
 
   const term = searchTerm.toLowerCase();
@@ -537,6 +555,12 @@ const AdminDashboard = () => {
                     <MailX className="h-4 w-4 mr-2" />
                     Sem email ({clients.filter(c => !c.email).length})
                   </Button>
+                  {selectedIds.length > 0 && (
+                    <Button size="sm" onClick={handleBulkSend} disabled={isBulkSending}>
+                      <Send className="h-4 w-4 mr-2" />
+                      {isBulkSending ? 'Enviando...' : `Enviar acesso aos selecionados (${selectedIds.length})`}
+                    </Button>
+                  )}
                 </div>
 
                 {/* Table */}
@@ -551,6 +575,13 @@ const AdminDashboard = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead className="w-10">
+                          <Checkbox
+                            checked={filteredClients.length > 0 && filteredClients.filter(c => c.email && c.is_active).every(c => selectedIds.includes(c.id))}
+                            onCheckedChange={(v) => setSelectedIds(v ? filteredClients.filter(c => c.email && c.is_active).map(c => c.id) : [])}
+                            aria-label="Selecionar todos"
+                          />
+                        </TableHead>
                         <TableHead>Empresa</TableHead>
                         <TableHead className="hidden sm:table-cell">CNPJ</TableHead>
                         <TableHead className="hidden md:table-cell">Email</TableHead>
@@ -561,6 +592,14 @@ const AdminDashboard = () => {
                     <TableBody>
                       {filteredClients.map((client) => (
                         <TableRow key={client.id}>
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedIds.includes(client.id)}
+                              disabled={!client.email || !client.is_active}
+                              onCheckedChange={(v) => setSelectedIds(prev => v ? [...prev, client.id] : prev.filter(id => id !== client.id))}
+                              aria-label={`Selecionar ${client.company_name}`}
+                            />
+                          </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Building2 className="h-4 w-4 text-gray-400" />

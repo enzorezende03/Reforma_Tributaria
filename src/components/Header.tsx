@@ -1,4 +1,6 @@
-import { FileText, LogOut, Building2, Shield, ArrowLeft } from "lucide-react";
+import { FileText, LogOut, Building2, Shield, ArrowLeft, KeyRound } from "lucide-react";
+import { useState } from "react";
+import { ClientChangePasswordModal } from "@/components/ClientChangePasswordModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { Button } from "@/components/ui/button";
@@ -9,6 +11,7 @@ export const Header = () => {
   const { client, logout } = useAuth();
   const { admin, isAuthenticated: isAdminAuthenticated } = useAdminAuth();
   const navigate = useNavigate();
+  const [pwOpen, setPwOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -55,6 +58,16 @@ export const Header = () => {
               {client.company_name}
             </span>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setPwOpen(true)}
+            className="text-white/80 hover:text-white hover:bg-white/10 text-xs sm:text-sm"
+          >
+            <KeyRound className="h-4 w-4 mr-1" />
+            Alterar senha
+          </Button>
+          <ClientChangePasswordModal open={pwOpen} onOpenChange={setPwOpen} email={client.email || ''} />
           <Button
             variant="ghost"
             size="sm"

@@ -8,24 +8,28 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { AlertCircle, Mail, CheckCircle } from 'lucide-react';
+import { AlertCircle, Mail, CheckCircle, Lock } from 'lucide-react';
 import logo2m from '@/assets/logo-2m.png';
 
 const Login = () => {
+  const [mode, setMode] = useState<'password' | 'code'>('password');
   const [step, setStep] = useState<'email' | 'code'>('email');
+  const [password, setPassword] = useState('');
+  const [viaCode, setViaCode] = useState(false);
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { requestCode, verifyCode, isAuthenticated, hasSession, isLoading: authLoading } = useAuth();
+  const { requestCode, verifyCode, loginWithPassword, client, isAuthenticated, hasSession, isLoading: authLoading } = useAuth();
   const { isAuthenticated: isAdmin } = useAdminAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated || isAdmin) navigate('/');
-  }, [isAuthenticated, isAdmin, navigate]);
+    if (isAdmin) navigate('/');
+    else if (isAuthenticated) navigate(viaCode || client?.mustSetPassword ? '/criar-senha' : '/');
+  }, [isAuthenticated, isAdmin, client, viaCode, navigate]);
 
   const handleRequest = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -48,9 +52,20 @@ const Login = () => {
     setError('');
     if (code.length !== 6) return setError('Digite os 6 dígitos do código');
     setIsLoading(true);
+    setViaCode(true);
     const r = await verifyCode(email, code);
     setIsLoading(false);
-    if (!r.success) setError(r.error || 'Código inválido');
+    if (!r.success) { setViaCode(false); setError(r.error || 'Código inválido'); }
+  };
+
+  const handlePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (!email.trim() || !password) return setError('Preencha email e senha');
+    setIsLoading(true);
+    const r = await loginWithPassword(email, password);
+    setIsLoading(false);
+    if (!r.success) setError(r.error || 'Erro ao entrar');
   };
 
   const notReleased = !authLoading && hasSession && !isAuthenticated && !isAdmin;
@@ -63,7 +78,7 @@ const Login = () => {
           <div>
             <CardTitle className="text-2xl font-bold text-gray-800">Reforma Tributária</CardTitle>
             <CardDescription className="text-gray-600 mt-2">
-              {step === 'email' ? 'Digite seu email para receber um código de acesso' : `Digite o código enviado para ${email}`}
+              {mode === 'password' ? 'Entre com seu email e senha' : step === 'email' ? 'Primeiro acesso ou esqueceu a senha? Receba um código por email' : `Digite o código enviado para ${email}`}
             </CardDescription>
           </div>
         </CardHeader>
@@ -82,7 +97,35 @@ const Login = () => {
             </Alert>
           )}
 
-          {step === 'email' ? (
+          {mode === 'password' ? (
+            <form onSubmit={handlePassword} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input id="email" type="email" autoComplete="email" placeholder="seu@email.com"
+                    value={email} onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-gray-700 font-medium">Senha</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input id="password" type="password" autoComplete="current-password" placeholder="Digite sua senha"
+                    value={password} onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white" />
+                </div>
+              </div>
+              <Button type="submit" className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium" disabled={isLoading}>
+                {isLoading ? 'Entrando...' : 'Entrar'}
+              </Button>
+              <button type="button" className="text-sm text-blue-600 hover:underline font-medium w-full"
+                onClick={() => { setMode('code'); setStep('email'); setError(''); }}>
+                Primeiro acesso ou esqueci minha senha
+              </button>
+            </form>
+          ) : step === 'email' ? (
             <form onSubmit={handleRequest} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
@@ -96,6 +139,9 @@ const Login = () => {
               <Button type="submit" className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium" disabled={isLoading}>
                 {isLoading ? 'Enviando...' : 'Receber código'}
               </Button>
+              <button type="button" className="text-sm text-blue-600 hover:underline w-full" onClick={() => { setMode('password'); setError(''); }}>
+                Voltar para entrar com senha
+              </button>
             </form>
           ) : (
             <form onSubmit={handleVerify} className="space-y-5">

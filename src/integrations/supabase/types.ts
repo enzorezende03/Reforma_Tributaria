@@ -86,6 +86,7 @@ export type Database = {
           id: string
           is_active: boolean
           must_change_password: boolean
+          must_set_password: boolean
           password_hash: string | null
           updated_at: string
           user_id: string | null
@@ -98,6 +99,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           must_change_password?: boolean
+          must_set_password?: boolean
           password_hash?: string | null
           updated_at?: string
           user_id?: string | null
@@ -110,6 +112,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           must_change_password?: boolean
+          must_set_password?: boolean
           password_hash?: string | null
           updated_at?: string
           user_id?: string | null
@@ -307,6 +310,7 @@ export type Database = {
           id: string | null
           is_active: boolean | null
           must_change_password: boolean | null
+          must_set_password: boolean | null
           updated_at: string | null
           user_id: string | null
         }
@@ -318,6 +322,7 @@ export type Database = {
           id?: string | null
           is_active?: boolean | null
           must_change_password?: boolean | null
+          must_set_password?: boolean | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -329,6 +334,7 @@ export type Database = {
           id?: string | null
           is_active?: boolean | null
           must_change_password?: boolean | null
+          must_set_password?: boolean | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -348,6 +354,7 @@ export type Database = {
         Returns: boolean
       }
       hash_password: { Args: { password: string }; Returns: string }
+      mark_password_set: { Args: never; Returns: boolean }
       use_admin_invite: { Args: { p_invite_id: string }; Returns: boolean }
       validate_admin_invite: {
         Args: { p_email: string; p_token: string }

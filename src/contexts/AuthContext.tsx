@@ -7,6 +7,7 @@ interface Client {
   cnpj: string;
   company_name: string;
   email?: string | null;
+  mustSetPassword: boolean;
 }
 
 // Clientes ficam conectados por no máximo 7 dias desde a entrada
@@ -17,6 +18,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   requestCode: (email: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   verifyCode: (email: string, code: string) => Promise<{ success: boolean; error?: string }>;
+  loginWithPassword: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  markPasswordSet: () => void;
   logout: () => Promise<void>;
   isLoading: boolean;
   hasSession: boolean;
@@ -52,10 +55,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setHasSession(true);
     const { data } = await supabase
       .from('clients_safe')
-      .select('id, cnpj, company_name, email, is_active')
+      .select('id, cnpj, company_name, email, is_active, must_set_password')
       .eq('user_id', session.user.id)
       .maybeSingle();
-    setClient(data && data.is_active ? { id: data.id!, cnpj: data.cnpj!, company_name: data.company_name!, email: data.email } : null);
+    setClient(data && data.is_active ? { id: data.id!, cnpj: data.cnpj!, company_name: data.company_name!, email: data.email, mustSetPassword: data.must_set_password ?? true } : null);
     setIsLoading(false);
   }, []);
 
@@ -85,13 +88,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return { success: true };
   };
 
+  const loginWithPassword = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+    if (error) return { success: false, error: 'Email ou senha incorretos' };
+    return { success: true };
+  };
+
+  const markPasswordSet = () => setClient((c) => (c ? { ...c, mustSetPassword: false } : c));
+
   const logout = async () => {
     await supabase.auth.signOut();
     setClient(null);
   };
 
   return (
-    <AuthContext.Provider value={{ client, isAuthenticated: !!client, requestCode, verifyCode, logout, isLoading, hasSession }}>
+    <AuthContext.Provider value={{ client, isAuthenticated: !!client, requestCode, verifyCode, loginWithPassword, markPasswordSet, logout, isLoading, hasSession }}>
       {children}
     </AuthContext.Provider>
   );

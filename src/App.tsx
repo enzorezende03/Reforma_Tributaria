@@ -13,12 +13,13 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ImportExcel from "./pages/ImportExcel";
 import NotFound from "./pages/NotFound";
 import AuthCallback from "./pages/AuthCallback";
+import CreatePassword from "./pages/CreatePassword";
 
 const queryClient = new QueryClient();
 
 // Componente para proteger rotas de clientes (também permite acesso de admins)
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated: isClientAuthenticated, isLoading: isClientLoading } = useAuth();
+  const { isAuthenticated: isClientAuthenticated, isLoading: isClientLoading, client } = useAuth();
   const { isAuthenticated: isAdminAuthenticated, isLoading: isAdminLoading } = useAdminAuth();
   
   if (isClientLoading || isAdminLoading) {
@@ -32,6 +33,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   // Permite acesso se for cliente OU admin
   if (!isClientAuthenticated && !isAdminAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Cliente que entrou por código precisa criar a senha antes de usar o sistema
+  if (!isAdminAuthenticated && client?.mustSetPassword) {
+    return <Navigate to="/criar-senha" replace />;
   }
   
   return <>{children}</>;
@@ -69,6 +75,7 @@ const App = () => {
               {/* Rotas de clientes */}
               <Route path="/login" element={<Login />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/criar-senha" element={<CreatePassword />} />
               <Route path="/" element={
                 <ProtectedRoute>
                   <Index />

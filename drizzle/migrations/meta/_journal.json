@@ -8,6 +8,13 @@
       "when": 1794426685805,
       "tag": "0000_client_otp_login",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794427111354,
+      "tag": "0001_client_must_set_password",
+      "breakpoints": true
     }
   ]
 }
