@@ -27,7 +27,7 @@ interface ProductWithCST {
 const ImportExcel = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: { cstData } } = useTaxBase();
+  const { data: { cstData }, isLoading: isTaxBaseLoading } = useTaxBase();
   const [file, setFile] = useState<File | null>(null);
   const [importedProducts, setImportedProducts] = useState<ImportedProduct[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -672,6 +672,7 @@ const ImportExcel = () => {
                     type="file"
                     accept=".xlsx,.xls,.csv"
                     onChange={handleFileChange}
+                    disabled={isTaxBaseLoading}
                     className="hidden"
                   />
                 </label>

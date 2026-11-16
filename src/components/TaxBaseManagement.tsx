@@ -49,7 +49,6 @@ export const TaxBaseManagement = () => {
   const [requirementsText, setRequirementsText] = useState("[]");
   const [isSaving, setIsSaving] = useState(false);
   const [newVersion, setNewVersion] = useState({ versao: "", data_vigencia: "2026-01-01", fonte: "", observacao: "" });
-  const [imported, setImported] = useState<CSTRecord[]>([]);
   const [diffs, setDiffs] = useState<TaxRecordDiff[]>([]);
   const [importName, setImportName] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
@@ -95,7 +94,12 @@ export const TaxBaseManagement = () => {
 
   const invalidateRecords = () => queryClient.invalidateQueries({ queryKey: ["admin-tax-records", selectedVersionId] });
   const showError = (error: unknown, title = "Não foi possível concluir") => {
-    toast({ title, description: error instanceof Error ? error.message : "Tente novamente.", variant: "destructive" });
+    const description = error instanceof Error
+      ? error.message
+      : typeof error === "object" && error && "message" in error
+        ? String(error.message)
+        : "Tente novamente.";
+    toast({ title, description, variant: "destructive" });
   };
 
   const createDraft = async () => {
@@ -111,9 +115,9 @@ export const TaxBaseManagement = () => {
     setIsSaving(false);
     if (error) return showError(error, "Não foi possível criar a versão");
     setIsNewOpen(false);
-    setSelectedVersionId(data);
     setNewVersion({ versao: "", data_vigencia: "2026-01-01", fonte: "", observacao: "" });
     await queryClient.invalidateQueries({ queryKey: ["admin-tax-versions"] });
+    setSelectedVersionId(data);
     toast({ title: "Rascunho criado", description: "A versão publicada foi copiada e continua disponível aos clientes." });
   };
 
@@ -190,7 +194,6 @@ export const TaxBaseManagement = () => {
         const current = currentByCode.get(record.cClassTrib);
         return current ? { ...record, id: current.id, ncmCodes: current.ncmCodes, requisitosLegais: current.requisitosLegais } : record;
       });
-      setImported(merged);
       setDiffs(diffTaxRecords(records, merged));
       setImportName(file.name);
       setIsImportOpen(true);
