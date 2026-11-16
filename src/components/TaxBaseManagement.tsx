@@ -61,7 +61,7 @@ export const TaxBaseManagement = () => {
       return (data || []) as TaxBaseVersion[];
     },
   });
-  const versions = versionsQuery.data || [];
+  const versions = useMemo(() => versionsQuery.data || [], [versionsQuery.data]);
   const selectedVersion = versions.find((version) => version.id === selectedVersionId);
   const isDraft = selectedVersion?.status === "rascunho";
 
