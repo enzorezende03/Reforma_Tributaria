@@ -7,7 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { cstData, CSTRecord } from "@/data/cstData";
+import type { CSTRecord } from "@/lib/taxBase";
+import { useTaxBase } from "@/contexts/TaxBaseContext";
 import { fuzzyMatch } from "@/lib/fuzzySearch";
 import ExcelJS from "exceljs";
 
@@ -26,6 +27,7 @@ interface ProductWithCST {
 const ImportExcel = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { data: { cstData } } = useTaxBase();
   const [file, setFile] = useState<File | null>(null);
   const [importedProducts, setImportedProducts] = useState<ImportedProduct[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);

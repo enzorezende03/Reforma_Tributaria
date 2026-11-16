@@ -15,6 +15,13 @@
       "when": 1794427111354,
       "tag": "0001_client_must_set_password",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794856877019,
+      "tag": "0002_create_versioned_tax_base",
+      "breakpoints": true
     }
   ]
 }

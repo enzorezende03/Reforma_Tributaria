@@ -29,7 +29,8 @@ import {
   Newspaper,
   Users2,
   Eye,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Database
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -38,6 +39,7 @@ import AdminInviteModal from '@/components/AdminInviteModal';
 import { NewsManagement } from '@/components/NewsManagement';
 import { TeamManagement } from '@/components/TeamManagement';
 import { ClientImportModal } from '@/components/ClientImportModal';
+import { TaxBaseManagement } from '@/components/TaxBaseManagement';
 
 interface Client {
   id: string;
@@ -58,7 +60,11 @@ const AdminDashboard = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const defaultTab = hasPermission('view_clients') || hasPermission('manage_clients') ? 'clients' : 'news';
+  const defaultTab = hasPermission('view_clients') || hasPermission('manage_clients')
+    ? 'clients'
+    : hasPermission('view_news') || hasPermission('manage_news')
+      ? 'news'
+      : hasPermission('manage_tax_base') ? 'tax-base' : 'team';
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem('admin-active-tab') || defaultTab);
 
   const handleTabChange = (value: string) => {
@@ -448,6 +454,12 @@ const AdminDashboard = () => {
                 Notícias
               </TabsTrigger>
             )}
+            {hasPermission('manage_tax_base') && (
+              <TabsTrigger value="tax-base" className="gap-2 text-xs sm:text-sm">
+                <Database className="h-4 w-4" />
+                Base Tributária
+              </TabsTrigger>
+            )}
             {hasPermission('manage_team') && (
               <TabsTrigger value="team" className="gap-2 text-xs sm:text-sm">
                 <Users2 className="h-4 w-4" />
@@ -670,6 +682,12 @@ const AdminDashboard = () => {
           <TabsContent value="news">
             <NewsManagement />
           </TabsContent>
+          )}
+
+          {hasPermission('manage_tax_base') && (
+            <TabsContent value="tax-base">
+              <TaxBaseManagement />
+            </TabsContent>
           )}
 
           {hasPermission('manage_team') && (

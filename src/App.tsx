@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
+import { TaxBaseProvider } from "@/contexts/TaxBaseContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
@@ -71,6 +72,7 @@ const App = () => {
       <BrowserRouter>
         <AuthProvider>
           <AdminAuthProvider>
+            <TaxBaseProvider>
             <Routes>
               {/* Rotas de clientes */}
               <Route path="/login" element={<Login />} />
@@ -98,6 +100,7 @@ const App = () => {
               
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </TaxBaseProvider>
           </AdminAuthProvider>
         </AuthProvider>
       </BrowserRouter>

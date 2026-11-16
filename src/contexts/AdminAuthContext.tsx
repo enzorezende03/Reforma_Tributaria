@@ -90,7 +90,7 @@ export const AdminAuthProvider: React.FC<AdminAuthProviderProps> = ({ children }
         email: user.email || '',
         name: user.user_metadata?.name || 'Admin',
         mustChangePassword: true,
-        permissions: ['view_clients', 'manage_clients', 'view_news', 'manage_news', 'manage_team'],
+        permissions: ['view_clients', 'manage_clients', 'view_news', 'manage_news', 'manage_team', 'manage_tax_base'],
       };
     } catch (err) {
       console.error('[admin-auth] checkAdminRole erro:', err);

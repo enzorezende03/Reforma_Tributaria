@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { Anexo } from "@/data/anexosData";
+import type { Anexo } from "@/lib/taxBase";
 
 interface AnexoModalProps {
   anexo: Anexo | null;

@@ -221,6 +221,294 @@ export type Database = {
           },
         ]
       }
+      tax_anexo_items: {
+        Row: {
+          anexo_id: string
+          id: string
+          item: string
+          ncm: string
+          observacao: string | null
+          ordem: number
+          produto: string
+        }
+        Insert: {
+          anexo_id: string
+          id?: string
+          item: string
+          ncm?: string
+          observacao?: string | null
+          ordem?: number
+          produto: string
+        }
+        Update: {
+          anexo_id?: string
+          id?: string
+          item?: string
+          ncm?: string
+          observacao?: string | null
+          ordem?: number
+          produto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_anexo_items_anexo_id_fkey"
+            columns: ["anexo_id"]
+            isOneToOne: false
+            referencedRelation: "tax_anexos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_anexos: {
+        Row: {
+          anexo_key: string
+          artigo: string
+          descricao: string
+          id: string
+          numero: string
+          reducao: string
+          titulo: string
+          version_id: string
+        }
+        Insert: {
+          anexo_key: string
+          artigo?: string
+          descricao?: string
+          id?: string
+          numero: string
+          reducao?: string
+          titulo: string
+          version_id: string
+        }
+        Update: {
+          anexo_key?: string
+          artigo?: string
+          descricao?: string
+          id?: string
+          numero?: string
+          reducao?: string
+          titulo?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_anexos_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "tax_base_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_base_versions: {
+        Row: {
+          criado_em: string
+          data_vigencia: string
+          fonte: string
+          id: string
+          observacao: string | null
+          publicado_em: string | null
+          publicado_por: string | null
+          status: string
+          versao: string
+        }
+        Insert: {
+          criado_em?: string
+          data_vigencia: string
+          fonte: string
+          id?: string
+          observacao?: string | null
+          publicado_em?: string | null
+          publicado_por?: string | null
+          status?: string
+          versao: string
+        }
+        Update: {
+          criado_em?: string
+          data_vigencia?: string
+          fonte?: string
+          id?: string
+          observacao?: string | null
+          publicado_em?: string | null
+          publicado_por?: string | null
+          status?: string
+          versao?: string
+        }
+        Relationships: []
+      }
+      tax_cst_records: {
+        Row: {
+          aliquota_type: string
+          cclass_trib: string
+          cclass_trib_description: string
+          cclass_trib_name: string
+          created_at: string
+          cst_code: string
+          cst_description: string
+          d_ini_vig: string
+          id: string
+          lc_article: string
+          link: string
+          ncm_codes: string[]
+          p_red_cbs: number
+          p_red_ibs: number
+          requisitos_legais: Json
+          updated_at: string
+          version_id: string
+        }
+        Insert: {
+          aliquota_type?: string
+          cclass_trib: string
+          cclass_trib_description: string
+          cclass_trib_name: string
+          created_at?: string
+          cst_code: string
+          cst_description: string
+          d_ini_vig?: string
+          id?: string
+          lc_article?: string
+          link?: string
+          ncm_codes?: string[]
+          p_red_cbs?: number
+          p_red_ibs?: number
+          requisitos_legais?: Json
+          updated_at?: string
+          version_id: string
+        }
+        Update: {
+          aliquota_type?: string
+          cclass_trib?: string
+          cclass_trib_description?: string
+          cclass_trib_name?: string
+          created_at?: string
+          cst_code?: string
+          cst_description?: string
+          d_ini_vig?: string
+          id?: string
+          lc_article?: string
+          link?: string
+          ncm_codes?: string[]
+          p_red_cbs?: number
+          p_red_ibs?: number
+          requisitos_legais?: Json
+          updated_at?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_cst_records_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "tax_base_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_indop_records: {
+        Row: {
+          artigo: string
+          caracteristica_fornecimento: string
+          codigo: string
+          id: string
+          local_fornecimento_dfe: string
+          local_operacao: string
+          tipo_operacao: string
+          version_id: string
+        }
+        Insert: {
+          artigo?: string
+          caracteristica_fornecimento?: string
+          codigo: string
+          id?: string
+          local_fornecimento_dfe?: string
+          local_operacao?: string
+          tipo_operacao: string
+          version_id: string
+        }
+        Update: {
+          artigo?: string
+          caracteristica_fornecimento?: string
+          codigo?: string
+          id?: string
+          local_fornecimento_dfe?: string
+          local_operacao?: string
+          tipo_operacao?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_indop_records_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "tax_base_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_indop_service_mappings: {
+        Row: {
+          codigos: string[]
+          id: string
+          termo: string
+          version_id: string
+        }
+        Insert: {
+          codigos?: string[]
+          id?: string
+          termo: string
+          version_id: string
+        }
+        Update: {
+          codigos?: string[]
+          id?: string
+          termo?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_indop_service_mappings_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "tax_base_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_ncm_mappings: {
+        Row: {
+          anexo: string
+          cclass_trib: string
+          description: string
+          id: string
+          ncm: string
+          version_id: string
+        }
+        Insert: {
+          anexo?: string
+          cclass_trib: string
+          description: string
+          id?: string
+          ncm: string
+          version_id: string
+        }
+        Update: {
+          anexo?: string
+          cclass_trib?: string
+          description?: string
+          id?: string
+          ncm?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_ncm_mappings_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "tax_base_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -342,10 +630,21 @@ export type Database = {
       }
     }
     Functions: {
+      can_manage_tax_base: { Args: never; Returns: boolean }
+      can_read_tax_base: { Args: never; Returns: boolean }
       can_register_admin: { Args: never; Returns: boolean }
       check_admin_invite_token: { Args: { p_token: string }; Returns: Json }
       cleanup_old_login_attempts: { Args: never; Returns: undefined }
       create_admin_invite: { Args: { p_email: string }; Returns: Json }
+      create_tax_base_draft: {
+        Args: {
+          p_data_vigencia: string
+          p_fonte: string
+          p_observacao?: string
+          p_versao: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -355,6 +654,10 @@ export type Database = {
       }
       hash_password: { Args: { password: string }; Returns: string }
       mark_password_set: { Args: never; Returns: boolean }
+      publish_tax_base_version: {
+        Args: { p_version_id: string }
+        Returns: boolean
+      }
       use_admin_invite: { Args: { p_invite_id: string }; Returns: boolean }
       validate_admin_invite: {
         Args: { p_email: string; p_token: string }

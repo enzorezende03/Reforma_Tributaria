@@ -21,7 +21,8 @@ import {
   Eye,
   FileEdit,
   Newspaper,
-  UserCog
+  UserCog,
+  Database
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -40,6 +41,7 @@ const PERMISSION_OPTIONS = [
   { id: 'view_news', label: 'Visualizar Notícias', icon: Newspaper, description: 'Ver lista de notícias' },
   { id: 'manage_news', label: 'Gerenciar Notícias', icon: FileEdit, description: 'Criar, editar e excluir notícias' },
   { id: 'manage_team', label: 'Gerenciar Equipe', icon: UserCog, description: 'Cadastrar e gerenciar colaboradores' },
+  { id: 'manage_tax_base', label: 'Gerenciar Base Tributária', icon: Database, description: 'Editar, importar e publicar versões da base tributária' },
 ];
 
 export const TeamManagement = () => {
@@ -299,9 +301,10 @@ export const TeamManagement = () => {
   );
 
   const isFullAdmin = (permissions: string[]) => {
-    return permissions?.includes('manage_team') && 
-           permissions?.includes('manage_clients') && 
-           permissions?.includes('manage_news');
+    return permissions?.includes('manage_team') &&
+           permissions?.includes('manage_clients') &&
+           permissions?.includes('manage_news') &&
+           permissions?.includes('manage_tax_base');
   };
 
   const getPermissionLabel = (permId: string) => {

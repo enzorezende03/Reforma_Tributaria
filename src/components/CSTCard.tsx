@@ -4,9 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import type { CSTRecord } from "@/data/cstData";
-import { extractAnexoNumber } from "@/data/anexosData";
-import { isServicoRecord, findIndOpByServico, getIndOpDetails } from "@/data/indOpData";
+import type { CSTRecord } from "@/lib/taxBase";
+import { extractAnexoNumber, findIndOpCodes, isServicoRecord } from "@/lib/taxBase";
+import { useTaxBase } from "@/contexts/TaxBaseContext";
 import { useState } from "react";
 
 interface CSTCardProps {
@@ -24,13 +24,14 @@ const getReductionColor = (reduction: number) => {
 
 export const CSTCard = ({ record, index, onOpenAnexo }: CSTCardProps) => {
   const [isRequisitosOpen, setIsRequisitosOpen] = useState(false);
+  const { data: taxBase } = useTaxBase();
   
   // Detectar se há referência a anexo na descrição ou nome
   const anexoId = extractAnexoNumber(record.cClassTribName) || extractAnexoNumber(record.cClassTribDescription);
   
   // Verificar se é prestação de serviço e obter códigos indOp
   const isServico = isServicoRecord(record.cClassTribName, record.cClassTribDescription);
-  const indOpCodes = isServico ? findIndOpByServico(record.cClassTribName) : [];
+  const indOpCodes = isServico ? findIndOpCodes(taxBase.servicoToIndOp, record.cClassTribName) : [];
   
   // Verificar se há requisitos legais
   const hasRequisitos = record.requisitosLegais && record.requisitosLegais.length > 0;
@@ -105,7 +106,7 @@ export const CSTCard = ({ record, index, onOpenAnexo }: CSTCardProps) => {
             
             <div className="space-y-2">
               {indOpCodes.map((code) => {
-                const details = getIndOpDetails(code);
+                const details = taxBase.indOpData.find((item) => item.codigo === code);
                 if (!details) return null;
                 return (
                   <div 
